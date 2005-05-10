@@ -1,0 +1,10 @@
+This directory contains a lot of stuff in various
+stages of development or abandonment.  Classes
+inheriting from hdf5_handle, test, and dft are
+generally being developed.  There will probably
+be some significant pruning of the property list
+and datatype hierarchies.  Other stuff represents
+ideas which once seemed reasonable, but which have
+been ignored for some time.  I'm not yet ready to
+throw them out, but...
+

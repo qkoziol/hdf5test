@@ -1,0 +1,47 @@
+1)  Edit the Makefile.
+
+      You will probably have to define HDF5DIR
+      to point to your installation of HDF5.
+      The value assigned to HDF5DIR should be
+      the name of the directory containing the
+      directories bin, doc, include, and lib.
+
+2)  make
+
+      This should compile all the code and
+      produce several binaries.
+
+3)  make test
+
+      This should run some of the tests currently
+      supported.  Many are intended just to test
+      the test suite.
+
+4)  ./test_dft_io_perf
+
+      (Gotta think of a different name for this!)
+      test_dft_io_perf expects to find the name
+      of one or more hdf5 files on the command
+      line.  It does a depth first traversal of
+      each file starting at the root group, reads
+      every dataset it finds on the way, and reports
+      the bytes/second performance of that read.
+
+      Invoked as shown above, without any file
+      names, it prints a Usage: message.
+
+      For a trivial example, try
+      ./test_dft_io_perf test_basic_io_perf.h5
+
+      It works on all the .h5 files in the testfiles
+      and testfiles2 directories of the hdf5-1.6.4
+      distribution except testfiles/tfilters.h5.
+      This file contains some datasets that require
+      filters to read, and these filters may not be
+      present.
+
+5) make doc
+
+      Uses doxygen to generate documentation from the
+      source files.  The documentation is placed
+      in ../doc/html.
