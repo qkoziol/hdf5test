@@ -15,7 +15,8 @@ dft()
 
   // Body:
 
-  _start  = H5I_INVALID_HID;
+  _start     = H5I_INVALID_HID;
+  _attr_hack = H5I_INVALID_HID;
 
   // Postconditions:
 
@@ -94,6 +95,7 @@ is_node(hid_t xloc) const
     case H5I_DATASET:
     case H5I_DATATYPE:
     case H5I_GROUP:
+    case H5I_ATTR:
       result = true;
       break;
     default:
@@ -178,21 +180,6 @@ traverse(hid_t xloc)
 
   // Body:
 
-  const size_t max_name_len = 4096;
-
-  // ISSUE:
-  // This is a recursive routine.  We'll have depth-of-call-stack copies
-  // of this buffer in memory at a time.  The depth of the stack is
-  // roughly the size of the directed graph associated with the
-  // HDF5 file.
-  // Depth    mbytes
-  // O(10)     0.04
-  // O(1000)   4
-  // O(10000) 40
-  // Probably not a huge concern at the moment.
-
-  char name[max_name_len];
-
   // On the first call to this function, _start is undefined.
   // Define it, and, now that we know this is the start of the traversal,
   // do whatever reset() actions are defined in descendants.
@@ -221,75 +208,12 @@ traverse(hid_t xloc)
 
     if (H5Iget_type(xloc) == H5I_GROUP)
     {
-
-      hsize_t num_objs;
-
-      herr_t err = H5Gget_num_objs(xloc, &num_objs);
-
-      assert(err >= 0);
-
-      // Loop through all the links.  If the head of the link is a node
-      // start another depth first traversal from that point.
-
-      for (hsize_t link = 0; link < num_objs; ++link)
-      {
-	int head_type = H5Gget_objtype_by_idx(xloc, link);
-
-	// How big is the name of the head?
-	// ISSUE
-	// path::MAX_COMPONENT_SIZE may be smaller than this which
-	// results in silent truncation of the pathname and a subsequent
-	// inability to communicate to HDF5 a correct pathname.  Does the
-	// HDF5 API have a query that allows us to determine how big such
-	// a name might be?  In the absence of anything better, I've made
-	// path::MAX_COMPONENT_SIZE something fairly big.
-
-	ssize_t nchars = H5Gget_objname_by_idx(xloc, link, name, max_name_len);
-
-	hid_t head = H5I_INVALID_HID;
-
-	switch (head_type)
-	{
-	  case H5G_LINK:
-	    break;
-
-	  case H5G_GROUP:
-	    head = H5Gopen(xloc, name);
-	    assert(head >= 0);
-	    break;
-
-	  case H5G_DATASET:
-	    head = H5Dopen(xloc, name);
-	    assert(head >= 0);
-	    break;
-
-	  case H5G_TYPE:
-	    head = H5Topen(xloc, name);
-	    assert(head >= 0);
-	    break;
-	}
-
-	// We may have found a new node at the head of a link emanating from xloc.
-	// Start a new depth first search starting at this new node.
-
-	if (is_node(head))
-	{
-	  _path.push(name);
-
-	  // It's unusual to check the class invariant in the middle of a function,
-	  // but we're leaving the function (temporarily) and we always check
-	  // the invariant at function exits.
-
-	  assert(invariant());
-
-	  traverse(head);
-
-	  // We're done with "name".  Pop it off the stack.
-
-	  _path.pop();
-	}
-      }
+      follow_group_links(xloc);
     }
+
+    // Explore the attributes, if any, of this node.
+
+    traverse_attrs(xloc);
 
     // We encounter this node for the last time; do postorder operation here.
 
@@ -415,17 +339,46 @@ current() const
     case H5I_DATASET:
       ptr_to_result = new dataset();
       break;
-    case H5I_ATTR:
-      ptr_to_result = new attribute();
-      break;
     case H5I_GROUP:
       ptr_to_result = new group();
       break;
     case H5I_DATATYPE:
       ptr_to_result = new datatype();
       break;
+    case H5I_ATTR:
+      ptr_to_result = new attribute();
+      break;
   }
-  ptr_to_result->open(_start, _path.whole());
+
+  switch(H5Iget_type(id))
+  {
+    case H5I_DATASET:
+    case H5I_GROUP:
+    case H5I_DATATYPE:
+      ptr_to_result->open(_start, _path.whole());
+      break;
+    case H5I_ATTR:
+    {
+      // HACK
+      // A big hack.  H5Aopen_name() has different behavior
+      // from H5[DGT]open().  The latter accept any path name
+      // from any group and that group's id as valid arguments.
+      // The former accepts only the path name from the attribute's
+      // host object and that host object's id as valid arguments.
+      // The host object's id is just underneath the attribute's
+      // id on the stack.  We can't do the hack of popping the
+      // stack to look underneath, then pushing the former top
+      // back on, because this function is declared "const",
+      // and those stack manipulations alter the state of "this".
+      // So, instead, we keep a copy of the previous top and
+      // use that.  This whole construct ought to be accomplished
+      // automatically somehow without inspecting types and
+      // doing special operations for certain types.
+
+      ptr_to_result->open(_attr_hack, _path.top());
+    }
+    break;
+  }
 
   // Postconditions:
 
@@ -514,4 +467,173 @@ current_hid() const
   // Exit:
 
   return result;
+}
+
+void
+dft::
+follow_group_links(hid_t xloc)
+{
+  // Preconditions:
+
+  assert(H5Iget_type(xloc) == H5I_GROUP);
+
+  // Body:
+
+  const size_t max_name_len = path::MAX_COMPONENT_SIZE;
+
+  // ISSUE:
+  // This is a recursive routine.  We'll have depth-of-call-stack copies
+  // of this buffer in memory at a time.  The depth of the stack is
+  // roughly the size of the directed graph associated with the
+  // HDF5 file.
+  // Depth    mbytes (@4k/call)
+  // O(10)     0.04
+  // O(1000)   4
+  // O(10000) 40
+  // Probably not a huge concern at the moment.
+
+  char name[max_name_len];
+
+  hsize_t num_objs;
+
+  herr_t err = H5Gget_num_objs(xloc, &num_objs);
+
+  assert(err >= 0);
+
+  // Loop through all the links.  If the head of the link is a node
+  // start another depth first traversal from that point.
+
+  for (hsize_t link = 0; link < num_objs; ++link)
+  {
+    int head_type = H5Gget_objtype_by_idx(xloc, link);
+
+    // How big is the name of the head?
+    // ISSUE
+    // path::MAX_COMPONENT_SIZE may be smaller than this which
+    // results in silent truncation of the pathname and a subsequent
+    // inability to communicate to HDF5 a correct pathname.  Does the
+    // HDF5 API have a query that allows us to determine how big such
+    // a name might be?  In the absence of anything better, I've made
+    // path::MAX_COMPONENT_SIZE something fairly big.
+
+    ssize_t nchars = H5Gget_objname_by_idx(xloc, link, name, max_name_len);
+
+    hid_t head = H5I_INVALID_HID;
+
+    switch (head_type)
+    {
+      case H5G_LINK:
+	break;
+
+      case H5G_GROUP:
+	head = H5Gopen(xloc, name);
+	assert(head >= 0);
+	break;
+
+      case H5G_DATASET:
+	head = H5Dopen(xloc, name);
+	assert(head >= 0);
+	break;
+
+      case H5G_TYPE:
+	head = H5Topen(xloc, name);
+	assert(head >= 0);
+	break;
+    }
+
+    // We may have found a new node at the head of a link emanating from xloc.
+    // Start a new depth first search starting at this new node.
+
+    if (is_node(head))
+    {
+      _path.push(name);
+
+      // It's unusual to check the class invariant in the middle of a function,
+      // but we're leaving the function (temporarily) and we always check
+      // the invariant at function exits.
+
+      assert(invariant());
+
+      traverse(head);
+
+      // We're done with "name".  Pop it off the stack.
+
+      _path.pop();
+    }
+  }
+
+  // Postconditions:
+
+  // ISSUE
+  // The invariant check fails here, apparently because we're in the middle
+  // of a traversal.  That means that the invariant isn't written properly.
+  //assert(invariant());
+
+  // Exit:
+}
+
+void
+dft::
+traverse_attrs(hid_t xloc)
+{
+  // Preconditions:
+
+  assert(H5Iget_type(xloc) == H5I_GROUP || H5Iget_type(xloc) == H5I_DATASET || H5Iget_type(xloc) == H5I_DATATYPE);
+
+  // Body:
+
+  const size_t max_name_len = path::MAX_COMPONENT_SIZE;
+
+  // Unlike follow_group_links(), this is not a recursive routine, since
+  // attributes don't have any links emanating from them.  So there's
+  // no concern about having lots of large name buffers on a stack.
+
+  char name[max_name_len];
+
+  int num_objs = H5Aget_num_attrs(xloc);
+
+  _attr_hack = xloc;
+
+  // Visit the attributes one by one.
+
+  for (int link = 0; link < num_objs; ++link)
+  {
+
+    hid_t head = H5Aopen_idx(xloc, link);
+
+    // How big is the name of the head?
+    // ISSUE
+    // path::MAX_COMPONENT_SIZE may be smaller than this which
+    // results in silent truncation of the pathname and a subsequent
+    // inability to communicate to HDF5 a correct pathname.  Does the
+    // HDF5 API have a query that allows us to determine how big such
+    // a name might be?  In the absence of anything better, I've made
+    // path::MAX_COMPONENT_SIZE something fairly big.
+
+    ssize_t nchars = H5Aget_name(head, max_name_len, name);
+
+    // Start a new depth first search starting at the head.
+
+    _path.push(name);
+
+    _current.push(head);
+    preorder_action();
+    postorder_action();
+    _current.pop();
+
+    // We're done with "name".  Pop it off the stack.
+
+    _path.pop();
+  }
+
+  _attr_hack = H5I_INVALID_HID;
+
+  // Postconditions:
+
+  // ISSUE
+  // The invariant check fails here, apparently because we're in the middle
+  // of a traversal.  That means that the invariant isn't written properly.
+  //assert(invariant());
+
+  // Exit:
 }

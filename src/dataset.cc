@@ -367,3 +367,66 @@ create(const hdf5_file& xfile,
 
   return result;
 }
+
+
+bool
+dataset::
+is_readable() const
+{
+  bool result;
+
+  // Preconditions:
+
+  // Body:
+
+  if (is_attached())
+  {
+    // Only chunked datasets are filtered, so only chunked datasets
+    // may encounter the situation where a required filter is unregistered.
+
+    if (is_chunked())
+    {
+      hid_t plist = H5Dget_create_plist(_hid);
+
+      int n = H5Pget_nfilters(plist);
+
+      result = true;
+
+      for (int i = 0; i < n; ++i)
+      {
+	unsigned int flags;
+	size_t       cd_nelmts;
+	unsigned int cd_values;
+
+	H5Z_filter_t filter = H5Pget_filter(plist, i, &flags, 0, 0, 0, 0);
+
+	if (H5Zfilter_avail(filter) <= 0)
+	{
+	  result = false;
+	  break;
+	}
+      }
+      H5Pclose(plist);
+    }
+    else
+    {
+      // Not a chunked dataset.
+
+      result = true;
+    }
+  }
+  else
+  {
+    // Nothing to read: unattached.
+
+    result = false;
+  }
+
+  // Postconditions:
+
+  assert(is_attached() ? true : result == false);
+
+  // Exit:
+
+  return result;
+}

@@ -43,6 +43,15 @@ class container : public persistent
   /// Get the type stored in this container.
 
   virtual hid_t get_type() const = 0;
+
+
+  // Access interface:
+
+
+  /// True if this container can be read.
+
+  virtual bool is_readable() const = 0;
+
 };
 
 #endif

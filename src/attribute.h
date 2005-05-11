@@ -74,6 +74,14 @@ class attribute : public container
 
   bool open(hid_t xhost, const string& xname);
 
+
+  // Access interface:
+
+
+  /// True if this attribute can be read.
+
+  bool is_readable() const;
+
 };
 
 #endif

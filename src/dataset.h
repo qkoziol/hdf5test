@@ -124,6 +124,14 @@ class dataset : public container
 
   bool is_compact() const;
 
+
+  // Access interface:
+
+
+  /// True if this dataset can be read.
+
+  bool is_readable() const;
+
  protected:
 
 

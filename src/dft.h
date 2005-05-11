@@ -207,6 +207,14 @@ class dft
      objno(const H5G_stat_t& xstat);
   };
 
+  /// Recursively begins new traversals at the heads of the links emanating from xloc.
+
+  void follow_group_links(hid_t xloc);
+
+  /// Recursively begins new traversals at the heads of the links to attributes.
+
+  void traverse_attrs(hid_t xloc);
+
 
   // Data:
 
@@ -215,6 +223,7 @@ class dft
   stack<hid_t>  _current;           //< Top is current node being visited in traversal.
   path          _path;              //< Path name from _start to _current;
   set<objno>    _has_been_visited;  //< The set of nodes that has been visited during a traversal.
+  hid_t         _attr_hack;         //< One item under the top of _current.  Sometimes. See HACK comment in current() implementation.
 };
 
 #endif

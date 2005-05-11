@@ -94,4 +94,4 @@ endif
 
 clean:
 	rm -f *~ *.d *.o $(BIN) *.hdf *.h5 *.a \#* core .\#*
-	rm -rf ../doc
+	rm -rf ../doc/html ../doc/latex

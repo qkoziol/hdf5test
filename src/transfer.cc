@@ -75,7 +75,6 @@ transfer(const container& xfrom, memory& xto, hid_t xprop_list)
 
   // Preconditions:
 
-  assert(xfrom.is_attached());
   assert(unexecutable(xfrom and xto selections are compatible));
 
   // Body:
@@ -83,31 +82,40 @@ transfer(const container& xfrom, memory& xto, hid_t xprop_list)
   // ISSUE:
   // See above.
 
-  if(H5Iget_type(xfrom.hid()) == H5I_DATASET)
+  if (xfrom.is_readable())
   {
-    herr_t rtn = H5Dread(xfrom.hid(),
-			 xto.get_type(),
-			 xto.get_space().hid(),
-			 xfrom.get_space().hid(),
-			 xprop_list,
-			 xto.mem());
-    if (rtn >= 0)
-      result = true;
+    if(H5Iget_type(xfrom.hid()) == H5I_DATASET)
+    {
+      herr_t rtn = H5Dread(xfrom.hid(),
+			   xto.get_type(),
+			   xto.get_space().hid(),
+			   xfrom.get_space().hid(),
+			   xprop_list,
+			   xto.mem());
+      if (rtn >= 0)
+	result = true;
+      else
+	result = false;
+    }
     else
-      result = false;
+    {
+      herr_t rtn = H5Aread(xfrom.hid(),
+			   xto.get_type(),
+			   // xfrom.get_space().hid(),
+			   // xto.get_space().hid(),
+			   // xprop_list,
+			   xto.mem());
+      if (rtn >= 0)
+	result = true;
+      else
+	result = false;
+    }
   }
   else
   {
-    herr_t rtn = H5Aread(xfrom.hid(),
-			 xto.get_type(),
-			 // xfrom.get_space().hid(),
-			 // xto.get_space().hid(),
-			 // xprop_list,
-			 xto.mem());
-    if (rtn >= 0)
-      result = true;
-    else
-      result = false;
+    // Not readable.
+
+    result = false;
   }
 
   // Postconditions:
