@@ -1,11 +1,12 @@
 #ifndef HDF5_HANDLE_H
 #define HDF5_HANDLE_H
 
+#include "handle.h"
 #include "hdf5.h"
 
 
 /*! @class hdf5_handle
-    @brief An abstract handle to some HDF5 object with an hid.
+    @brief A handle to an HDF5 library object with an hid.
 
     The handle can be in one of 2 states:
     <ol>
@@ -61,7 +62,7 @@
 */
 
 
-class hdf5_handle
+class hdf5_handle : public handle
 {
  public:
 
@@ -106,7 +107,12 @@ class hdf5_handle
   /// Decrement the reference count to hid().  The HDF5 library will close
   /// the object when it determines that the reference count is zero.
 
-  void close();
+  void detach();
+
+  /// Attach to xhid.  Stores xhid internally and increments the reference count
+  /// to it, so client is still responsible for disposing of xhid.
+
+  void attach(hid_t xhid);
 
  protected:
 

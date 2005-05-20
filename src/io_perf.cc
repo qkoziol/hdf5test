@@ -1,8 +1,8 @@
 #include "io_perf.h"
 #include "contract.h"
 
-#include "container.h"
 #include "memory.h"
+#include "pcontainer.h"
 #include "transfer.h"
 
 io_perf::
@@ -65,7 +65,7 @@ operator=(const io_perf& xother)
 
 void
 io_perf::
-run_test(const container& xcon, memory& xmem)
+run_test(const pcontainer& xcon, memory& xmem)
 {
   // Preconditions:
 
@@ -110,7 +110,7 @@ run_test(const container& xcon, memory& xmem)
 
 void
 io_perf::
-run_test(const memory& xmem, container& xcon)
+run_test(const memory& xmem, pcontainer& xcon)
 {
   // Preconditions:
 

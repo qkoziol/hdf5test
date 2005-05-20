@@ -1,19 +1,14 @@
 #ifndef DFT_H
 #define DFT_H
 
-#include "hdf5.h"
-#include "path.h"
-class persistent;
-#include "std_iostream.h"
-#include "std_set.h"
 #include "std_stack.h"
-#include "std_string.h"
+#include "traverser.h"
 
 /*! @class dft
     @brief A depth first traverser of the (possibly cyclic) directed graph structure of
-          an HDF5 file.  This is an astract class - concrete descendants must define
-          what to do during traversal by supplying preorder_action() and postorder_action()
-          functions.
+           an HDF5 file.  This is an abstract class - concrete descendants must define
+           what to do during traversal by supplying preorder_action() and postorder_action()
+           functions.
 */
 
 /*
@@ -101,7 +96,7 @@ class persistent;
   to the current object on demand.
  */
 
-class dft
+class dft : public traverser
 {
  public:
 
@@ -134,9 +129,10 @@ class dft
 
 
   /// Does a depth first traversal of graph starting at xstart, which may be a group,
-  /// dataset, named datatype, or soft link.
+  /// dataset, named datatype, or soft link.  The traversal can be filtered.  If
+  /// (xfilter & DATASET), for example, then datasets will not be visited.
 
-  void traverse(hid_t xstart);
+  void traverse(hid_t xstart, int xfilter = 0);
 
   /// What to do when a node is encountered for the first time in a depth first
   /// traversal.
@@ -148,37 +144,26 @@ class dft
 
   virtual void postorder_action() = 0;
 
-  /// Sets initial state of traverser when traverse() is called.
-
-  virtual void reset() = 0;
-
 
  protected:
 
+  /// Does a depth first traversal of graph starting at xstart, which may be a group,
+  /// dataset, named datatype, or soft link.  The traversal can be filtered.  If
+  /// (xfilter & DATASET), for example, then datasets will not be visited.
+
+  void traverse(const node& xstart, int xfilter);
 
   /// The current object, visible during the traversal.
 
-  const persistent& current() const;
+ const persistent& current() const;
 
   /// The hid of the current object, visible during the traversal.
 
   const hid_t current_hid() const;
 
-  /// Pathname of current object.
+  /// Name of current object.  Pathname if xpath is true.
 
-  const char* pathname() const;
-
-  /// The hid of the starting object.
-
-  const hid_t start() const;
-
-  /// Has this node been visited before?
-
-  bool has_been_visited(hid_t xnode) const;
-
-  /// Is this location a graph node?
-
-  bool is_node(hid_t xloc) const;
+  const char* name(bool xpath = false);
 
   /// The depth of search below start.
 
@@ -188,42 +173,18 @@ class dft
  private:
 
 
-  /// Mark current node as having been visited.
+  /// Recursively begins new traversals at the heads of the links emanating from xnode.
 
-  void mark_visited(hid_t xnode);
-
-  /// HDF5 objects within the same file are uniquely identified by a pair
-  /// of unsigned longs.  See H5Gget_objinfo() for details.  Traversing
-  /// a directed graph requires having a unique identity for the objects
-  /// encountered.  This will serve as the id.
-
-  class objno
-  {
-   public:
-     unsigned long a;
-     unsigned long b;
-     bool operator<(const objno& xother) const;
-     objno& operator=(const objno& xother);
-     objno(const H5G_stat_t& xstat);
-  };
-
-  /// Recursively begins new traversals at the heads of the links emanating from xloc.
-
-  void follow_group_links(hid_t xloc);
+  void follow_group_links(const node& xnode, int xfilter);
 
   /// Recursively begins new traversals at the heads of the links to attributes.
 
-  void traverse_attrs(hid_t xloc);
+  void traverse_attrs(const node& xnode, int xfilter);
 
 
   // Data:
 
-
-  hid_t         _start;             //< Starting point of traversal.
-  stack<hid_t>  _current;           //< Top is current node being visited in traversal.
-  path          _path;              //< Path name from _start to _current;
-  set<objno>    _has_been_visited;  //< The set of nodes that has been visited during a traversal.
-  hid_t         _attr_hack;         //< One item under the top of _current.  Sometimes. See HACK comment in current() implementation.
+  stack<node>  _current;  //< Top is current node being visited in traversal.
 };
 
 #endif

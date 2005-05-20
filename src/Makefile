@@ -16,8 +16,9 @@ CXXFLAGS=-g -pipe
 CFLAGS=$(CXXFLAGS)
 
 lib_sources =	attribute.cc \
+		bft.cc \
+		bft_ls.cc \
 		col_itr.cc \
-		container.cc \
 		contract.cc \
 		dataset.cc \
 		dataspace.cc \
@@ -34,7 +35,9 @@ lib_sources =	attribute.cc \
 		itr.cc \
 		matrix.cc \
 		memory.cc \
-		path.cc \
+		node.cc \
+		objno.cc \
+		pcontainer.cc \
 		persistent.cc \
 		property_list.cc \
 		scalar.cc \
@@ -42,15 +45,17 @@ lib_sources =	attribute.cc \
 		test.cc \
 		timer.cc \
 		transfer.cc \
+		traverser.cc \
 		tuple.cc
 
 test_sources =	matrix_t.cc \
 		test_access_patterns.cc \
+		test_attr.cc \
 		test_basic_io_perf.cc \
+		test_bft_ls.cc \
 		test_dft_io_perf.cc \
 		test_dft_ls.cc \
-		test_iterated_io.cc \
-		test_path.cc
+		test_iterated_io.cc
 
 OBJ = $(lib_sources:.cc=.o)
 BIN = $(test_sources:.cc=)

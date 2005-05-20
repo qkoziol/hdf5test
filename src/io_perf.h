@@ -1,8 +1,8 @@
 #ifndef IO_PERF_H
 #define IO_PERF_H
 
-class container;
 class memory;
+class pcontainer;
 #include "std_iostream.h"
 #include "test.h"
 
@@ -56,11 +56,11 @@ class io_perf : public test
 
   /// Test data transfer from xmem to xcon.
 
-  void run_test(const memory& xmem, container& xcon);
+  void run_test(const memory& xmem, pcontainer& xcon);
 
   /// Test data transfer from xcon to xmem.
 
-  void run_test(const container& xcon, memory& xmem);
+  void run_test(const pcontainer& xcon, memory& xmem);
 
   // Execute run_io_perf_test() and measure the performance in bytes/second.
 

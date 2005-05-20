@@ -27,7 +27,7 @@ test_name()
 }
 
 void
-do_read_write_tests(io_perf& xio_t, container& xcon)
+do_read_write_tests(io_perf& xio_t, pcontainer& xcon)
 {
   // Make a memory buffer for i/o operations.
 
@@ -75,7 +75,7 @@ make_test_objects()
 
     assert(cg.create(f, root.hid(), "contiguous", H5T_NATIVE_INT, s.hid()));
 
-    cg.close();
+    cg.detach();
   }
 
   // Create a compact dataset in f.
@@ -92,7 +92,7 @@ make_test_objects()
 
     H5Pclose(plist);
 
-    c.close();
+    c.detach();
   }
 
   // Create an external dataset "in" f.
@@ -111,11 +111,11 @@ make_test_objects()
 
     H5Pclose(plist);
 
-    e.close();
+    e.detach();
   }
 
-  root.close();
-  f.close();
+  root.detach();
+  f.detach();
 }
 
 int
@@ -149,7 +149,7 @@ main()
     cout << "Contiguous dataset test:\n";
     do_read_write_tests(io_t, cg);
 
-    cg.close();
+    cg.detach();
   }
 
   // Test a chunked dataset.
@@ -179,7 +179,7 @@ main()
     cout << "Chunked dataset test:\n";
     do_read_write_tests(io_t, ch);
 
-    ch.close();
+    ch.detach();
   }
 
   // Test a compact dataset.
@@ -196,7 +196,7 @@ main()
     cout << "Compact dataset test:\n";
     do_read_write_tests(io_t, c);
 
-    c.close();
+    c.detach();
   }
 
   // Test an external dataset.
@@ -213,7 +213,7 @@ main()
     cout << "External dataset test:\n";
     do_read_write_tests(io_t, e);
 
-    e.close();
+    e.detach();
   }
 
   // Test attributes.

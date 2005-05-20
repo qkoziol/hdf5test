@@ -1,11 +1,10 @@
 #ifndef DATASET_H
 #define DATASET_H
 
-#include "container.h"
 class dataset_creation;
-class dataspace;
 class group;
 class hdf5_file;
+#include "pcontainer.h"
 #include "std_string.h"
 class tuple;
 
@@ -25,7 +24,7 @@ class tuple;
     </p>
 */
 
-class dataset : public container
+class dataset : public pcontainer
 {
  public:
 
@@ -132,8 +131,15 @@ class dataset : public container
 
   bool is_readable() const;
 
+
+  /// Type of container is "dataset".
+
+  const string& type() const;
+
+
  protected:
 
 
+ static const string _type; //< "dataset".
 };
 #endif

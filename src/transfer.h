@@ -1,9 +1,9 @@
 #ifndef TRANSFER_H
 #define TRANSFER_H
 
-class container;
 #include "hdf5.h"
 class memory;
+class pcontainer;
 
 /*
   One can view HDF5 as a library for persistent storage and
@@ -48,12 +48,12 @@ class memory;
   // Attempt to transfer the current selection from memory to
   // container.  Return true if sucessful, false otherwise.
 
-bool transfer(const memory& xfrom, container& xto, hid_t xprop_list);
+bool transfer(const memory& xfrom, pcontainer& xto, hid_t xprop_list);
 
   // Attempt to transfer the current selection from container
   // to memory.  Return true if sucessful, false otherwise.
 
-bool transfer(const container& xfrom, memory& xto, hid_t xprop_list);
+bool transfer(const pcontainer& xfrom, memory& xto, hid_t xprop_list);
 
 
 #endif

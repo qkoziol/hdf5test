@@ -1,8 +1,8 @@
-#include "container.h"
+#include "pcontainer.h"
 #include "contract.h"
 
-container::
-container()
+pcontainer::
+pcontainer()
 {
   // Preconditions:
 
@@ -10,20 +10,14 @@ container()
 
   // Postconditions:
 
-  assert(! is_attached());
   assert(invariant());
+  assert(! is_attached());
 
   // Exit:
 }
 
-container::
-container(const container& xother)
-{
-  not_implemented;
-}
-
-container::
-~container()
+pcontainer::
+~pcontainer()
 {
   // Preconditions:
 
@@ -33,17 +27,9 @@ container::
 
   // Exit:
 }
-
-container&
-container::
-operator=(const container& xother)
-{
-  not_implemented;
-}
-
 
 bool
-container::
+pcontainer::
 invariant() const
 {
   bool result;
@@ -59,4 +45,17 @@ invariant() const
   // Exit:
 
   return result;
+}
+
+pcontainer::
+pcontainer(const pcontainer& xother)
+{
+  not_implemented;
+}
+
+pcontainer&
+pcontainer::
+operator=(const pcontainer& xother)
+{
+  not_implemented;
 }

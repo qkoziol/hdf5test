@@ -5,6 +5,10 @@
 #include "hdf5_file.h"
 #include "std_string.h"
 
+const string
+dataset::
+_type = "dataset";
+
 dataset::
 dataset()
 {
@@ -42,7 +46,7 @@ invariant() const
 
   // Body:
 
-  result = container::invariant();
+  result = persistent::invariant();
 
   // Postconditions:
 
@@ -429,4 +433,11 @@ is_readable() const
   // Exit:
 
   return result;
+}
+
+const string&
+dataset::
+type() const
+{
+  return _type;
 }

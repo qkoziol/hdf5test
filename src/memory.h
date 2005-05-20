@@ -1,12 +1,11 @@
 #ifndef MEMORY_H
 #define MEMORY_H
 
-class container;
-class dataspace;
-#include "hdf5.h"
+#include "handle.h"
+#include "pcontainer.h"
 #include "std_cstdlib.h"
 
-class memory
+class memory : public container, public handle
 {
  public:
 
@@ -38,7 +37,7 @@ class memory
   // contain contents of current selection
   // of xcon.
 
-  void reserve(const container& xcon);
+  void reserve(const pcontainer& xcon);
 
   // Capacity of memory in bytes.
 
@@ -48,6 +47,18 @@ class memory
 
   void* mem();
   const void* mem() const;
+
+
+  // Handle interface:
+
+
+  /// Is this handle attached to some real memory?
+
+  bool is_attached() const;
+
+  /// Disconnect from and recycle underlying memory.
+
+  void detach();
 
 
   // Container interface:
@@ -60,6 +71,14 @@ class memory
   // Get the type stored in memory.
 
   hid_t get_type() const;
+
+
+  // Access interface:
+
+
+  /// True if this holder can be read.
+
+  bool is_readable() const;
 
  private:
 

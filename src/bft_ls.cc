@@ -1,11 +1,11 @@
-#include "dft_ls.h"
+#include "bft_ls.h"
 #include "contract.h"
 
 #include "attribute.h"
 #include "pcontainer.h"
 
-dft_ls::
-dft_ls()
+bft_ls::
+bft_ls()
 {
   // Preconditions:
 
@@ -19,8 +19,8 @@ dft_ls()
 
 }
 
-dft_ls::
-~dft_ls()
+bft_ls::
+~bft_ls()
 {
   // Preconditions:
 
@@ -32,7 +32,7 @@ dft_ls::
 }
 
 bool
-dft_ls::
+bft_ls::
 invariant() const
 {
   bool result;
@@ -41,7 +41,7 @@ invariant() const
 
   // Body:
 
-  result = dft::invariant();
+  result = bft::invariant();
 
   // Postconditions:
 
@@ -50,22 +50,22 @@ invariant() const
   return result;
 }
 
-dft_ls::
-dft_ls(const dft_ls& xother)
+bft_ls::
+bft_ls(const bft_ls& xother)
 {
   not_implemented;
 }
 
-dft_ls&
-dft_ls::
-operator=(const dft_ls& xother)
+bft_ls&
+bft_ls::
+operator=(const bft_ls& xother)
 {
   not_implemented;
 }
 
 void
-dft_ls::
-preorder_action()
+bft_ls::
+visit_action()
 {
   // Preconditions:
 
@@ -103,22 +103,7 @@ preorder_action()
 }
 
 void
-dft_ls::
-postorder_action()
-{
-  // Preconditions:
-
-  // Body:
-
-  // Postconditions:
-
-  assert(invariant());
-
-  // Exit:
-}
-
-void
-dft_ls::
+bft_ls::
 reset()
 {
   // Preconditions:

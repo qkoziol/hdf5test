@@ -1,12 +1,21 @@
 #include "transfer.h"
 #include "contract.h"
 
-#include "container.h"
 #include "hdf5.h"
 #include "memory.h"
+#include "pcontainer.h"
+
+// ISSUE:
+// We don't have sufficient preconditions to ensure that a
+// transfer will succeed.  It may be impossible to ensure
+// success with preconditions, but we're not even covering
+// the obvious conditions, like:
+// 1) The HDF5 file was opened RDWR if we want to write to it.
+// 2) The file underlying an external dataset actually exists
+//    and is appropriately readable/writable.
 
 bool
-transfer(const memory& xfrom, container& xto, hid_t xprop_list)
+transfer(const memory& xfrom, pcontainer& xto, hid_t xprop_list)
 {
   bool result;
 
@@ -69,7 +78,7 @@ transfer(const memory& xfrom, container& xto, hid_t xprop_list)
 }
 
 bool
-transfer(const container& xfrom, memory& xto, hid_t xprop_list)
+transfer(const pcontainer& xfrom, memory& xto, hid_t xprop_list)
 {
   bool result;
 

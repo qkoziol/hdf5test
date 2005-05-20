@@ -46,6 +46,9 @@ invariant() const
 
   // Body:
 
+  // Normally we'd call the ancestor's invariant,
+  // handle::invariant(), but that doesn't exist.
+
   result = (_hid >= 0 == is_attached());
 
   // Postconditions:
@@ -93,7 +96,7 @@ is_attached() const
 
 void
 hdf5_handle::
-close()
+detach()
 {
   // Preconditions:
 
@@ -128,6 +131,28 @@ close()
 
 
   // Postconditions:
+
+  // Exit:
+}
+
+void
+hdf5_handle::
+attach(hid_t xhid)
+{
+  // Preconditions:
+
+  assert(H5Iget_type(xhid) != H5I_BADID);
+
+  // Body:
+
+  _hid = xhid;
+  H5Iinc_ref(xhid);
+
+  // Postconditions:
+
+  assert(invariant());
+  assert(is_attached());
+  assert(hid() == xhid);
 
   // Exit:
 }

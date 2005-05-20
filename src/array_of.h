@@ -322,7 +322,7 @@ reserve(size_t xub)
   // Postconditions:
 
   assert(invariant());
-  assert(ub() == xub);
+  assert(ub() >= xub);
   assert(unexecutable(contents of array are unchanged up to the lesser of xub and old ub()));
 
   // Exit:

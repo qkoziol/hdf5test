@@ -1,8 +1,8 @@
 #include "dft_io_perf.h"
 #include "contract.h"
 
-#include "container.h"
 #include "memory.h"
+#include "pcontainer.h"
 
 dft_io_perf::
 dft_io_perf()
@@ -78,8 +78,8 @@ preorder_action()
 
   if (type == H5I_DATASET || type == H5I_ATTR)
   {
-    const container& src(dynamic_cast<const container&>(current()));
-    memory           dest;
+    const pcontainer& src(dynamic_cast<const pcontainer&>(current()));
+    memory            dest;
 
     dest.reserve(src);
 
@@ -90,8 +90,10 @@ preorder_action()
     else
       ++_failure_ct;
 
-    cout << "\ti/o performance report for container `"
-	 << pathname()
+    cout << "\ti/o performance report for "
+	 << src.type()
+	 << " `"
+	 << name(true)
 	 << "': "
 	 << _tester;
 

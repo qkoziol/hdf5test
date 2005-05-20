@@ -1,8 +1,8 @@
 #include "memory.h"
 #include "contract.h"
 
-#include "container.h"
 #include "hdf5.h"
+#include "pcontainer.h"
 #include "std_iostream.h"
 
 memory::
@@ -86,7 +86,7 @@ invariant() const
 
 void
 memory::
-reserve(const container& xcon)
+reserve(const pcontainer& xcon)
 {
   // Preconditions:
 
@@ -110,10 +110,12 @@ reserve(const container& xcon)
 
   size_t size = H5Tget_size(xcon.get_type());
 
-  _ub   = npts*size;
-  _mem  = new char[_ub];
-  _space  = H5Scopy(xcon.get_space().hid());
-  _type = H5Tcopy(xcon.get_type());
+  _ub    = npts*size;
+  _mem   = new char[_ub];
+  _space = xcon.get_space().hid();
+  H5Iinc_ref(_space);
+  _type  = xcon.get_type();
+  H5Iinc_ref(_type);
 
   // Postconditions:
 
@@ -220,4 +222,82 @@ get_space() const
   // Exit:
 
   return *ptr_to_result;
+}
+
+bool
+memory::
+is_readable() const
+{
+  bool result;
+
+  // Preconditions:
+
+  // Body:
+
+  if (is_attached())
+  {
+    result = true;
+  }
+  else
+  {
+    // Nothing to read: unattached.
+
+    result = false;
+  }
+
+  // Postconditions:
+
+  assert(is_attached() ? true : result == false);
+
+  // Exit:
+
+  return result;
+}
+
+bool
+memory::
+is_attached() const
+{
+  bool result;
+
+  // Preconditions:
+
+  // Body:
+
+  result = (_mem != 0);
+
+  // Postconditions:
+
+  assert(result = (mem() != 0));
+
+  // Exit:
+
+  return result;
+}
+
+void
+memory::
+detach()
+{
+  // Preconditions:
+
+  // Body:
+
+  if (_mem != 0)
+  {
+    H5Idec_ref(_space);
+    H5Idec_ref(_type);
+    delete [] _mem;
+
+    _space = H5I_INVALID_HID;
+    _type  = H5I_INVALID_HID;
+    _mem   = 0;
+  }
+
+  // Postconditions:
+
+  assert(invariant());
+  assert(! is_attached());
+
+  // Exit:
 }
