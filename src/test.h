@@ -14,14 +14,14 @@
 
 class test
 {
-  // This is for reporting test results.
+  // Write test results to xos.
 
   friend ostream& operator<<(ostream& xos, const test& xtest);
 
  public:
 
 
-  // Stadard features:
+  // Standard features:
 
 
   /// Default constructor.

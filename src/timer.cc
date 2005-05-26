@@ -10,9 +10,9 @@ timer(mode xmode)
 
   // Body:
 
-  _start = timer::now();
+  _start   = now();
   _elapsed = 0;
-  _mode = xmode;
+  _mode    = xmode;
 
   // Postconditions:
 
@@ -80,11 +80,13 @@ invariant() const
 
   // Body:
 
-  result = timer::now() >= _start;
-  result = result && _start >= 0;
-  result = result && _elapsed >= 0;
+  result = (now() >= _start);
+  result = result && (_start >= 0);
+  result = result && (_elapsed >= 0);
 
   // Postconditions:
+
+  // Exit:
 
   return result;
 }
@@ -168,7 +170,7 @@ start()
 
   // Body:
 
-  _start = timer::now();
+  _start = now();
   if (_mode == RESET)
     _elapsed = 0;
 
@@ -190,11 +192,11 @@ stop()
 
   if (_mode == RESET)
   {
-    _elapsed = timer::now()-_start;
+    _elapsed = now()-_start;
   }
   else
   {
-    _elapsed += timer::now()-_start;
+    _elapsed += now()-_start;
   }
 
   // Postconditions:

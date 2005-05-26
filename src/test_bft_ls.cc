@@ -36,7 +36,7 @@ main(int argc, char** argv)
 	    }
 	  else
 	    {
-	      cout << "Objects encountered in a depth first traversal of `"
+	      cout << "Objects encountered in a breadth first traversal of `"
 		   << argv[i]
 		   << "':\n";
 

@@ -26,8 +26,7 @@
       The only way to push the notion of permissions down to where i/o
       actually happens is to build it into this C++ test suite.  And to do
       that comprehensively requires wrapping the entire C HDF5 API with
-      C++.  And that is both too big a task and takes me too
-      far afield.
+      C++.  And that is both too big a task and takes me too far afield.
     </p>
 */
 
