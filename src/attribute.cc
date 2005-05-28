@@ -62,6 +62,7 @@ attribute::
 operator=(const attribute& xother)
 {
   not_implemented;
+  return *this;  // keeps the pgi compiler happy until this is implemented.
 }
 
 dataspace&

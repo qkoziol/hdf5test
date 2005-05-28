@@ -55,6 +55,7 @@ memory::
 operator=(const memory& xother)
 {
   not_implemented;
+  return *this;
 }
 
 

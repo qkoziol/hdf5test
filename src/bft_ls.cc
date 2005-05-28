@@ -61,6 +61,7 @@ bft_ls::
 operator=(const bft_ls& xother)
 {
   not_implemented;
+  return *this;  // keeps the pgi compiler happy until this is implemented.
 }
 
 void

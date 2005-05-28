@@ -19,7 +19,7 @@ class memory : public container, public handle
 
   // Destructor.
 
-  ~memory();
+  virtual ~memory();
 
   // Class invariant.
 

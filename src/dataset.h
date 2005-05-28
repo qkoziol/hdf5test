@@ -38,7 +38,7 @@ class dataset : public pcontainer
 
   /// Destructor.
 
-  ~dataset();
+  virtual ~dataset();
 
   // Class invariant.  Should always be true.
 

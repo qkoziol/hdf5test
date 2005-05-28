@@ -58,7 +58,7 @@ invariant() const
   return result;
 }
 
-const hid_t
+hid_t
 hdf5_handle::
 hid() const
 {

@@ -1,8 +1,26 @@
+# On lotus (my development machine at home - John Blinka)
+#
 # parallel:
+#
 #HDF5DIR=/usr/local/hdf5/parallel
 #CC=$(HDF5DIR)/bin/h5pcc
+#
 # serial:
+#
 HDF5DIR=/usr/local/hdf5/serial
+#
+# On sleipnir, gcc-3.3.5:
+#
+#HDF5DIR=/mnt/sdt/jblinka/sleipnir/hdf5-1.6.4-gcc-3.3.5
+#
+# On heping, pgi compiler
+#
+#HDF5DIR=/afs/ncsa/packages/hdf5/5-1.6.4-linux-pgi
+#
+# On heping, gcc-3.3.5:
+#
+#HDF5DIR=/mnt/sdt/jblinka/heping/hdf5-1.6.4-gcc-3.3.5
+#
 CC=$(HDF5DIR)/bin/h5cc
 CXX=$(HDF5DIR)/bin/h5c++
 #
@@ -12,7 +30,7 @@ CXX=$(HDF5DIR)/bin/h5c++
 # debugger confusing.  So, you may have to edit h5cc and
 # h5c++ to get what you want.
 #
-CXXFLAGS=-g -pipe
+CXXFLAGS=-Wall -O2 -g -pipe
 CFLAGS=$(CXXFLAGS)
 
 lib_sources =	attribute.cc \
@@ -93,10 +111,12 @@ libperf.a: $(OBJ)
 	ar r libperf.a $(OBJ)
 
 ifneq ($(MAKECMDGOALS),clean)
+ifneq ($(MAKECMDGOALS),doc)
 include $(lib_sources:.cc=.d)
 include $(test_sources:.cc=.d)
 endif
+endif
 
 clean:
-	rm -f *~ *.d *.o $(BIN) *.hdf *.h5 *.a \#* core .\#*
+	rm -f *~ *.d *.o $(BIN) *.hdf *.h5 *.a \#* core.* .\#*
 	rm -rf ../doc/html ../doc/latex

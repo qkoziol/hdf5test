@@ -40,6 +40,7 @@ col_itr::
 is_done() const
 {
   not_implemented;
+  return true;  // keeps the pgi compiler happy until this is implemented.
 }
 
 ostream&

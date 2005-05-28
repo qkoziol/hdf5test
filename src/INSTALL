@@ -9,7 +9,8 @@
 2)  make
 
       This should compile all the code and
-      produce several binaries.
+      produce several binaries.  Only Gnu make
+      has been used in development and testing.
 
 3)  make test
 
@@ -17,7 +18,7 @@
       supported.  Many are intended just to test
       the test suite.
 
-4)  ./test_dft_io_perf
+4)  ./test_dft_io_perf hdf5_file [hdf5_file ...]
 
       (Gotta think of a different name for this!)
       test_dft_io_perf expects to find the name
@@ -30,8 +31,12 @@
       Invoked as shown above, without any file
       names, it prints a Usage: message.
 
-      For a trivial example, try
+      For a trivial example, try:
+
       ./test_dft_io_perf test_basic_io_perf.h5
+
+      To generate the file `test_basic_io_perf.h5'
+      run ./test_basic_io_perf.
 
       It works on all the .h5 files in the testfiles
       and testfiles2 directories of the hdf5-1.6.4
@@ -45,3 +50,11 @@
       Uses doxygen to generate documentation from the
       source files.  The documentation is placed
       in ../doc/html.
+
+Things that could go wrong:
+
+The most likely difficulty is that the c++ compiler can't
+find the standard c++ include files like <iostream>,
+<cstdlib>. <cassert>, <list>, <queue>, <set>, and
+<stack>.  Edit the std_XXXX.h files to #include the
+proper header file for your system and compiler.

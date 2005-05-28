@@ -66,6 +66,7 @@ dft::
 operator=(const dft& xother)
 {
   not_implemented;
+  return *this;
 }
 
 void
@@ -171,7 +172,7 @@ const persistent&
 dft::
 current() const
 {
-  persistent* ptr_to_result;
+  persistent* ptr_to_result = 0;
 
   // Preconditions:
 
@@ -197,6 +198,10 @@ current() const
       break;
     case H5I_ATTR:
       ptr_to_result = new attribute();
+      break;
+    default:
+      bool is_a_node = false;
+      assert(is_a_node);
       break;
   }
 
@@ -233,7 +238,7 @@ depth() const
   return result;
 }
 
-const hid_t
+hid_t
 dft::
 current_hid() const
 {

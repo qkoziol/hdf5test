@@ -64,6 +64,7 @@ dft_io_perf::
 operator=(const dft_io_perf& xother)
 {
   not_implemented;
+  return *this;  // keeps pgi compiler happy until this is implemented.
 }
 
 void

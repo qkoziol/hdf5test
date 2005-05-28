@@ -28,7 +28,7 @@ class io_perf : public test
 
   /// Destructor.
 
-  ~io_perf();
+  virtual ~io_perf();
 
   /// Class invariant.  Should alwats be true.
 

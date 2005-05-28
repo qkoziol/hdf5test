@@ -38,4 +38,5 @@ slice_itr::
 is_done() const
 {
   not_implemented;
+  return true; // keeps pgi compiler happy until this is actually implemented.
 }

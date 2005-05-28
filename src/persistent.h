@@ -27,7 +27,7 @@ class persistent : public hdf5_handle
 
   /// Destructor.
 
-  ~persistent();
+  virtual ~persistent();
 
   /// Class invariant.  Should always be true.
 

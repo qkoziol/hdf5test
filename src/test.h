@@ -30,7 +30,7 @@ class test
 
   /// Destructor.
 
-  ~test();
+  virtual ~test();
 
   /// Class invariant.  Should always return true.
 

@@ -67,6 +67,7 @@ bft::
 operator=(const bft& xother)
 {
   not_implemented;
+  return *this;  // keeps the pgi compiler happy until this is implemented.
 }
 
 void
@@ -168,7 +169,7 @@ const persistent&
 bft::
 current() const
 {
-  persistent* ptr_to_result;
+  persistent* ptr_to_result = 0;
 
   // Preconditions:
 
@@ -194,6 +195,10 @@ current() const
     case H5I_ATTR:
       ptr_to_result = new attribute();
       break;
+    default:
+      bool is_a_node = false;
+      assert(is_a_node);
+      break;
   }
 
   ptr_to_result->attach(_current.self);
@@ -207,7 +212,7 @@ current() const
   return *ptr_to_result;
 };
 
-const hid_t
+hid_t
 bft::
 current_hid() const
 {

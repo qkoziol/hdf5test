@@ -76,7 +76,7 @@ class hdf5_handle : public handle
 
   /// Destructor.  If appropriate, recycles HDF5 library resources associated with hid().
 
-  ~hdf5_handle();
+  virtual ~hdf5_handle();
 
   /// Class invariant.  Should always be true.
 
@@ -98,7 +98,7 @@ class hdf5_handle : public handle
   /// return value hints that clients should not call H5Xclose() or H5Idec_ref()
   /// on the return value.
 
-  const hid_t hid() const;
+  hid_t hid() const;
 
   /// Is this handle associated with a valid HDF5 library maintained object?
 

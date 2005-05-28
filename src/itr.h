@@ -20,7 +20,7 @@ class itr
 
   // Destructor.
 
-  ~itr();
+  virtual ~itr();
 
   // Class invariant.
 
@@ -35,7 +35,7 @@ class itr
   itr& operator=(const itr& xother);
 
 
-  // Abstract teration interface:
+  // Abstract iteration interface:
 
 
   // Start the iteration.

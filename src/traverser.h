@@ -29,7 +29,7 @@ class traverser
 
   /// Destructor.
 
-  ~traverser();
+  virtual ~traverser();
 
   /// Class invariant.  Should always be true.
 
@@ -74,7 +74,7 @@ class traverser
 
   /// The hid of the current object, visible during the traversal.
 
-  virtual const hid_t current_hid() const = 0;
+  virtual hid_t current_hid() const = 0;
 
   /// Name of xnode.  Pathname if xpath is true.
 

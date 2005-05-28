@@ -66,6 +66,7 @@ dataset::
 operator=(const dataset& xother)
 {
   not_implemented;
+  return *this;  // keeps the pgi compiler happy until this is implemented.
 }
 
 bool
@@ -302,8 +303,6 @@ create(const hdf5_file& xfile,
        hid_t            xspace,
        hid_t            xcreate_plist)
 {
-  bool result;
-
   // Preconditions:
 
   assert(!xfile.is_write_protected());
@@ -314,6 +313,12 @@ create(const hdf5_file& xfile,
   // Body:
 
   not_implemented;
+
+  // Postconditions:
+
+  // Exit:
+
+  return false; // keeps the pgi compiler happy until this is implemented.
 }
 
 bool
@@ -399,8 +404,6 @@ is_readable() const
       for (int i = 0; i < n; ++i)
       {
 	unsigned int flags;
-	size_t       cd_nelmts;
-	unsigned int cd_values;
 
 	H5Z_filter_t filter = H5Pget_filter(plist, i, &flags, 0, 0, 0, 0);
 

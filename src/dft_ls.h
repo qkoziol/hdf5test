@@ -22,7 +22,7 @@ class dft_ls : public dft
 
   /// Destructor.
 
-  ~dft_ls();
+  virtual ~dft_ls();
 
   /// Class invariant.  Should always be true.
 

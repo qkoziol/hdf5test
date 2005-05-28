@@ -30,7 +30,7 @@ class pcontainer : public persistent, public container
 
   /// Destructor.
 
-  ~pcontainer();
+  virtual ~pcontainer();
 
   /// Class invariant.  Should always be true.
 

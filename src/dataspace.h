@@ -34,7 +34,7 @@ class dataspace : public hdf5_handle
 
   /// Destructor.
 
-  ~dataspace();
+  virtual ~dataspace();
 
   /// Class invariant.  Should always be true.
 

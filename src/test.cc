@@ -61,6 +61,7 @@ test::
 operator=(const test& xother)
 {
   not_implemented;
+  return *this; // keeps pgi compiler happy until this is implemented.
 }
 
 double

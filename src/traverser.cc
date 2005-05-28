@@ -65,6 +65,7 @@ traverser::
 operator=(const traverser& xother)
 {
   not_implemented;
+  return *this;  // keeps pgi compiler happy until this is implemented.
 }
 
 
@@ -206,6 +207,10 @@ obj(hid_t xhid) const
     case H5I_ATTR:
       ptr_to_result = new attribute();
       break;
+    default:
+      bool is_a_node = false;
+      assert(is_a_node);
+      break;
   }
 
   ptr_to_result->attach(xhid);
@@ -229,8 +234,11 @@ name(const node& xnode, bool xpath)
 
   // Body:
 
-  ssize_t size;
-  ssize_t used;
+  ssize_t size;  // size of parent's pathname, not including trailing '\0'.
+  ssize_t used;  // number of chars used to represent parent's pathname plus
+                 // trailing '/' and '\0'.  Note that used is not necessarily
+                 // size+2, since the parent's pathname might be just '/' and
+                 // we don't append an extra '/' to that.
 
   if (xpath)
   {
@@ -243,10 +251,23 @@ name(const node& xnode, bool xpath)
       _name.reserve(size+2);
 
       H5Iget_name(xnode.parent, &_name[0], size+1);
-
-      _name[size] = '/';
-
-      used = size+1;
+      /*
+      cout << "inside traverser::name, size = "
+	   << size
+	   << " name is `"
+	   << &_name[0]
+	   << "'.  Gonna add a / to it."
+	   << endl;
+      */
+      if (_name[size-1] == '/')
+      {
+	used = size;
+      }
+      else
+      {
+	_name[size] = '/';
+	used = size+1;
+      }
     }
     else
     {

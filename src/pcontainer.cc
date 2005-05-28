@@ -58,4 +58,5 @@ pcontainer::
 operator=(const pcontainer& xother)
 {
   not_implemented;
+  return *this;
 }

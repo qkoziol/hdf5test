@@ -55,6 +55,8 @@ bool
 hdf5_file::
 open(const string& xname, access xacc)
 {
+  bool result;
+
   // Preconditions:
 
   assert(is_hdf5(xname));
@@ -85,6 +87,15 @@ open(const string& xname, access xacc)
   }
   H5E_END_TRY;
 
+  if (_hid >= 0)
+  {
+    result = true;
+  }
+  else
+  {
+    result = false;
+  }
+
   // Postconditions:
 
   assert(invariant());
@@ -92,6 +103,8 @@ open(const string& xname, access xacc)
   assert(xacc == RDONLY ? is_write_protected() : !is_write_protected());
 
   // Exit:
+
+  return result;
 }
 
 bool

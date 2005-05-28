@@ -110,7 +110,7 @@ class dft : public traverser
 
   /// Destructor.
 
-  ~dft();
+  virtual ~dft();
 
   /// Class invariant.  Should always be true.
 
@@ -159,7 +159,7 @@ class dft : public traverser
 
   /// The hid of the current object, visible during the traversal.
 
-  const hid_t current_hid() const;
+  hid_t current_hid() const;
 
   /// Name of current object.  Pathname if xpath is true.
 

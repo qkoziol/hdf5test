@@ -75,6 +75,7 @@ hyperslab::
 d() const
 {
   not_implemented;
+  return -1;  // keeps pgi compiler happy until this is implemented.
 }
 
 tuple&
@@ -82,10 +83,15 @@ hyperslab::
 ct()
 {
   not_implemented;
+  // the following keeps the pgi compiler happy until
+  // this is implemented.
+  tuple* junk = new tuple;
+  return *junk;
 }
 
 bool
 hyperslab::invariant() const
 {
   not_implemented;
+  return false;  // keeps pgi compiler happy until this is implemented.
 }

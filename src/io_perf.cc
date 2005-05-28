@@ -61,6 +61,7 @@ io_perf::
 operator=(const io_perf& xother)
 {
   not_implemented;
+  return *this;
 }
 
 void
