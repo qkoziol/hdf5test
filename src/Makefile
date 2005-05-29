@@ -73,7 +73,8 @@ test_sources =	matrix_t.cc \
 		test_bft_ls.cc \
 		test_dft_io_perf.cc \
 		test_dft_ls.cc \
-		test_iterated_io.cc
+		test_iterated_io.cc \
+		test_timer.cc
 
 OBJ = $(lib_sources:.cc=.o)
 BIN = $(test_sources:.cc=)
