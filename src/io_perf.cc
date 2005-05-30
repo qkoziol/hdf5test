@@ -12,6 +12,9 @@ io_perf()
 
   // Body:
 
+  _bytes   = 0;
+  _elapsed = 0;
+
   // Postconditions:
 
   assert(invariant());
@@ -95,7 +98,11 @@ run_test(const pcontainer& xcon, memory& xmem)
     // transferred.  This should be the number of points in
     // the selection * the number of bytes in a datatype
     // divided by the elapsed time.
-    _performance = xcon.get_space().get_extent().npoints()/_timer.elapsed();
+    _bytes = xcon.get_space().get_extent().npoints();
+    _elapsed = _timer.elapsed();
+
+    _performance = _bytes/_elapsed;
+
     _status = SUCCESS;
   }
   else
@@ -140,7 +147,12 @@ run_test(const memory& xmem, pcontainer& xcon)
     // transferred.  This should be the number of points in
     // the selection * the number of bytes in a datatype
     // divided by the elapsed time.
-    _performance = xcon.get_space().get_extent().npoints()/_timer.elapsed();
+
+    _bytes = xcon.get_space().get_extent().npoints();
+    _elapsed = _timer.elapsed();
+
+    _performance = _bytes/_elapsed;
+
     _status = SUCCESS;
   }
   else
@@ -173,7 +185,11 @@ operator<<(ostream& xos, const io_perf& xiot)
 
   if (xiot.status() == test::SUCCESS)
   {
-    xos << "succeeded.  performance = "
+    xos << "succeeded.  bytes transferred = "
+	<< xiot._bytes
+	<< " in "
+	<< xiot._elapsed
+	<< " seconds.  rate = "
 	<< xiot.performance();
   }
   else if (xiot.status() == test::FAILURE)

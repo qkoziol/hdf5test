@@ -120,6 +120,21 @@ main()
 
   cout << "Elapsed time in \"ACCUMULATE\" mode after a 1 sec sleep: "
        << t.elapsed()
-       << " seconds.  Should be about 1 seconds.\n";
+       << " seconds.  Should be about 1 second.\n";
 
+  timer::cron c;
+
+  c.tv_sec = 0;
+
+  for (long usec = -100000; usec <= 100000; usec += 10000)
+  {
+    c.tv_usec = usec;
+
+    double d = c;
+
+    cout << c
+	 << " =? "
+	 << d
+	 << '\n';
+  }
 }

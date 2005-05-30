@@ -9,6 +9,24 @@
 #
 HDF5DIR=/usr/local/hdf5/serial
 #
+# On copper
+#
+#HDF5DIR=/u/ncsa/jblinka
+#
+# On shanti
+#
+#HDF5DIR=/afs/ncsa/packages/hdf5/5-1.6.4-solaris
+#
+# On mir, gcc-3.3.5
+#
+# some negative and zero elapsed times.
+#HDF5DIR=/mnt/sdt/jblinka/mir/hdf5-1.6.4-gcc-3.3.5
+#
+# On mir, pgi compiler
+#
+# doesn't compile
+#HDF5DIR=/afs/ncsa/packages/hdf5/5-1.6.4-amd-pgi
+#
 # On sleipnir, gcc-3.3.5:
 #
 #HDF5DIR=/mnt/sdt/jblinka/sleipnir/hdf5-1.6.4-gcc-3.3.5
@@ -30,7 +48,7 @@ CXX=$(HDF5DIR)/bin/h5c++
 # debugger confusing.  So, you may have to edit h5cc and
 # h5c++ to get what you want.
 #
-CXXFLAGS=-Wall -O2 -g -pipe
+CXXFLAGS=-Wall -g -pipe
 CFLAGS=$(CXXFLAGS)
 
 lib_sources =	attribute.cc \
@@ -119,5 +137,5 @@ endif
 endif
 
 clean:
-	rm -f *~ *.d *.o $(BIN) *.hdf *.h5 *.a \#* core.* .\#*
+	rm -f *~ *.d *.o $(BIN) *.hdf *.h5 *.a \#* core.* .\#* *.u
 	rm -rf ../doc/html ../doc/latex

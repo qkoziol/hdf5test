@@ -6,19 +6,25 @@
       the name of the directory containing the
       directories bin, doc, include, and lib.
 
-2)  make
+2)  Edit config.h.
+
+      Define the max and min values for the type
+      suseconds_t found in gettimeofday().
+
+3)  make
 
       This should compile all the code and
       produce several binaries.  Only Gnu make
       has been used in development and testing.
+      It is probably required.
 
-3)  make test
+4)  make test
 
       This should run some of the tests currently
       supported.  Many are intended just to test
       the test suite.
 
-4)  ./test_dft_io_perf hdf5_file [hdf5_file ...]
+5)  ./test_dft_io_perf hdf5_file [hdf5_file ...]
 
       (Gotta think of a different name for this!)
       test_dft_io_perf expects to find the name
@@ -45,7 +51,7 @@
       filters to read, and these filters may not be
       present.
 
-5) make doc
+6) make doc
 
       Uses doxygen to generate documentation from the
       source files.  The documentation is placed

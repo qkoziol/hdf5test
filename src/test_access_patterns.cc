@@ -13,7 +13,6 @@
 #include "dataspace.h"
 #include "extent.h"
 #include "hyperslab.h"
-#include "simple.h"
 
 int
 main()

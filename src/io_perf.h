@@ -45,14 +45,6 @@ class io_perf : public test
 
   // Testing interface:
 
-  /*
-    ISSUE:
-    Why is this here?  Doesn't it duplicate run_test()?
-
-  /// Do an io operation and report the number of bytes transferred.
-
-  double run_io_perf_test();
-  */
 
   /// Test data transfer from xmem to xcon.
 
@@ -65,6 +57,12 @@ class io_perf : public test
   // Execute run_io_perf_test() and measure the performance in bytes/second.
 
   virtual void run_test();
+
+ protected:
+
+  size_t _bytes;    //< Bytes transferred.
+
+  double _elapsed;  //< Seconds elapsed during i/o operation.
 };
 
 #endif

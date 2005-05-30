@@ -91,7 +91,7 @@ preorder_action()
     else
       ++_failure_ct;
 
-    cout << "\ti/o performance report for "
+    cout << "\treading "
 	 << src.type()
 	 << " `"
 	 << name(true)

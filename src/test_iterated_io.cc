@@ -4,7 +4,6 @@
 
 #include "dataset.h"
 #include "hyperslab.h"
-#include "simple.h"
 
 int
 main()
