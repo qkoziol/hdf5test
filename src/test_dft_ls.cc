@@ -47,6 +47,9 @@ main(int argc, char** argv)
 	      dft_ls lister;
 
 	      lister.traverse(root);
+
+              H5Gclose(root);
+              H5Fclose(file);
 	    }
 	}
     }

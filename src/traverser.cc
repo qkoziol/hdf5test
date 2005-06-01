@@ -208,6 +208,7 @@ obj(hid_t xhid) const
       ptr_to_result = new attribute();
       break;
     default:
+      ptr_to_result = 0;
       bool is_a_node = false;
       assert(is_a_node);
       break;

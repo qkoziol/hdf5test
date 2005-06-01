@@ -185,11 +185,11 @@ operator<<(ostream& xos, const io_perf& xiot)
 
   if (xiot.status() == test::SUCCESS)
   {
-    xos << "succeeded.  bytes transferred = "
+    xos << "succeeded.  "
 	<< xiot._bytes
-	<< " in "
+        << " bytes transferred in "
 	<< xiot._elapsed
-	<< " seconds.  rate = "
+	<< " seconds = "
 	<< xiot.performance();
   }
   else if (xiot.status() == test::FAILURE)

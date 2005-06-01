@@ -92,4 +92,7 @@ main()
   dft visitor;
 
   visitor.traverse(root);
+
+  H5Gclose(root);
+  H5Fclose(file);
 }

@@ -1,55 +1,88 @@
-# On lotus (my development machine at home - John Blinka)
+# Note on editing this file:
 #
-# parallel:
+# You should provide a definition for HDFDIR, a
+# directory containing the bin/, doc/, include/,
+# and lib/ directories into which your version
+# of HDF5 is installed.  I've provided a number
+# of such definitions for various NCSA machines
+# and compilers, although most of them are my own
+# personal builds of hdf5 and not available to
+# others.  Make sure that there's only one definition
+# of HDF5DIR!
+#
+# This makefile uses the hdfc++ compiler wrapper
+# $(HDF5DIR)/bin/h5c++.  You can append compiler
+# options to those contained in h5c++ by defining
+# CXXFLAGS.  There is a mandatory CXXFLAG option for
+# aix's xlC compiler.  See the example for "copper"
+# below.
+#
+# Note on compiler options:
+#
+# h5cc and h5c++ will append CFLAGS and CXXFLAGS
+# to the options they already impose.  So you may
+# have to edit h5cc and h5c++ to delete options
+# that you may not want.  For example, I delete
+# the -O2 in h5c++ on my home machine because it's
+# way too confusing trying to follow optimized code
+# with gdb.
+#
+# On lotus (my x86 linux development machine at home - John Blinka)
+#
+# parallel, gcc-3.3.5, mpich 1.2.5.2:
 #
 #HDF5DIR=/usr/local/hdf5/parallel
 #CC=$(HDF5DIR)/bin/h5pcc
 #
-# serial:
+# On lotus (my x86 linux development machine at home - John Blinka)
+#
+# serial, gcc-3.3.5:
 #
 HDF5DIR=/usr/local/hdf5/serial
+# the following flags are optional:
+#CXXFLAGS=-g -pipe -Wall
 #
-# On copper
+# On copper, aix, xlC
 #
 #HDF5DIR=/u/ncsa/jblinka
+# the following flag is mandatory (or can substitute rtti=all)
+#CXXFLAGS=-q rtti=dyna
 #
-# On shanti
+# On shanti, solaris,
 #
-#HDF5DIR=/afs/ncsa/packages/hdf5/5-1.6.4-solaris
+#HDF5DIR=/mnt/sdt/jblinka/shanti/hdf5-1.6.4-SUNWspro
 #
-# On mir, gcc-3.3.5
+# On mir, 64 bit amd linux, gcc-3.3.5
 #
-# some negative and zero elapsed times.
 #HDF5DIR=/mnt/sdt/jblinka/mir/hdf5-1.6.4-gcc-3.3.5
+# the following flags are optional:
+#CXXFLAGS=-g -pipe -Wall
 #
-# On mir, pgi compiler
+# On mir, 64 bit amd linux, pgi compiler
 #
-# doesn't compile
+# doesn't compile, some confusion by assembler
+# about redefined symbols associated with
+# ostream operator<< definitions.
 #HDF5DIR=/afs/ncsa/packages/hdf5/5-1.6.4-amd-pgi
 #
-# On sleipnir, gcc-3.3.5:
+# On sleipnir, x86 FreeBSD, gcc-3.3.5:
 #
 #HDF5DIR=/mnt/sdt/jblinka/sleipnir/hdf5-1.6.4-gcc-3.3.5
+# the following flags are optional:
+#CXXFLAGS=-g -pipe -Wall
 #
-# On heping, pgi compiler
+# On heping, smp x86 linux, pgi compiler
 #
 #HDF5DIR=/afs/ncsa/packages/hdf5/5-1.6.4-linux-pgi
 #
-# On heping, gcc-3.3.5:
+# On heping, smp x86 linux, gcc-3.3.5:
 #
 #HDF5DIR=/mnt/sdt/jblinka/heping/hdf5-1.6.4-gcc-3.3.5
+# the following flags are optional:
+#CXXFLAGS=-g -pipe -Wall
 #
 CC=$(HDF5DIR)/bin/h5cc
 CXX=$(HDF5DIR)/bin/h5c++
-#
-# Note that h5cc and h5c++ will append CFLAGS and CXXFLAGS
-# to the options they already impose.  In particular, h5cc
-# and h5c++ define -O2 by default, which makes using a
-# debugger confusing.  So, you may have to edit h5cc and
-# h5c++ to get what you want.
-#
-CXXFLAGS=-Wall -g -pipe
-CFLAGS=$(CXXFLAGS)
 
 lib_sources =	attribute.cc \
 		bft.cc \
@@ -97,6 +130,7 @@ test_sources =	matrix_t.cc \
 OBJ = $(lib_sources:.cc=.o)
 BIN = $(test_sources:.cc=)
 
+# The following doesn't work on copper.
 %.d: %.cc
 	$(CXX) -M $(CPPFLAGS) $< > $@.$$$$; \
 	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
@@ -129,13 +163,24 @@ $(BIN): libperf.a
 libperf.a: $(OBJ)
 	ar r libperf.a $(OBJ)
 
+#
+# ISSUE:
+# The dependencies are useful in development to ensure that necessary files
+# are recompiled whenever changes are made.  They're probably not useful
+# in "production" and they present porting problems.  Aix's xlC, for example,
+# behaves somewhat differently from gcc wrt -M, and the %.d: %.cc rule
+# produces all kinds of errors on aix.  So, I only generate the dependencies
+# on my development machine, lotus.
+#
+ifeq ($(HOSTNAME),lotus)
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(MAKECMDGOALS),doc)
 include $(lib_sources:.cc=.d)
 include $(test_sources:.cc=.d)
 endif
 endif
+endif
 
 clean:
-	rm -f *~ *.d *.o $(BIN) *.hdf *.h5 *.a \#* core.* .\#* *.u
+	rm -f *~ *.d *.o $(BIN) *.hdf *.h5 *.a \#* core.* .\#* *.u *.s
 	rm -rf ../doc/html ../doc/latex

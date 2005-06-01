@@ -64,6 +64,9 @@ main(int argc, char** argv)
 	           << " tests succeeded and "
 		   << tester.failure_ct()
 		   << " tests failed.\n\n";
+
+              H5Gclose(root);
+              H5Fclose(file);
 	    }
 	}
     }
