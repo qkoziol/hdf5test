@@ -40,7 +40,7 @@
 #
 HDF5DIR=/usr/local/hdf5/serial
 # the following flags are optional:
-#CXXFLAGS=-g -pipe -Wall
+CXXFLAGS=-g -pipe -Wall
 #
 # On copper, aix, xlC
 #
@@ -60,10 +60,10 @@ HDF5DIR=/usr/local/hdf5/serial
 #
 # On mir, 64 bit amd linux, pgi compiler
 #
-# doesn't compile, some confusion by assembler
-# about redefined symbols associated with
-# ostream operator<< definitions.
-#HDF5DIR=/afs/ncsa/packages/hdf5/5-1.6.4-amd-pgi
+# make sure you don't inadvertently use the compiler
+# option instantiate=local.  It might be hidden in
+# h5c++.
+#HDF5DIR=/mnt/sdt/jblinka/mir/hdf5-1.6.4-pgi
 #
 # On sleipnir, x86 FreeBSD, gcc-3.3.5:
 #
@@ -73,6 +73,9 @@ HDF5DIR=/usr/local/hdf5/serial
 #
 # On heping, smp x86 linux, pgi compiler
 #
+# make sure you don't inadvertently use the compiler
+# option instantiate=local.  It might be hidden in
+# h5c++.
 #HDF5DIR=/afs/ncsa/packages/hdf5/5-1.6.4-linux-pgi
 #
 # On heping, smp x86 linux, gcc-3.3.5:
