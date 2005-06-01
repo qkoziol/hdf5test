@@ -98,7 +98,11 @@ run_test(const pcontainer& xcon, memory& xmem)
     // transferred.  This should be the number of points in
     // the selection * the number of bytes in a datatype
     // divided by the elapsed time.
-    _bytes = xcon.get_space().get_extent().npoints();
+
+    size_t type_size = H5Tget_size(xcon.get_type());
+
+    _bytes = xcon.get_space().get_extent().npoints()*type_size;
+
     _elapsed = _timer.elapsed();
 
     _performance = _bytes/_elapsed;
@@ -148,7 +152,10 @@ run_test(const memory& xmem, pcontainer& xcon)
     // the selection * the number of bytes in a datatype
     // divided by the elapsed time.
 
-    _bytes = xcon.get_space().get_extent().npoints();
+    size_t type_size = H5Tget_size(xcon.get_type());
+
+    _bytes = xcon.get_space().get_extent().npoints()*type_size;
+
     _elapsed = _timer.elapsed();
 
     _performance = _bytes/_elapsed;
