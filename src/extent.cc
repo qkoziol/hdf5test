@@ -4,21 +4,40 @@
 extent::
 extent()
 {
-  not_implemented;
+  // Preconditions:
+
+  // Body:
+
+  // Postconditions:
+
+  assert(invariant());
+  assert(d() == 0);
+
+  // Exit:
 }
 
 extent::
 extent(const extent& xother)
 {
-  not_implemented;
+  // Preconditions:
+
+  // Body:
+
+  _max_size = xother._max_size;
+  _size = xother._size;
+
+  // Postconditions:
+
+  assert(invariant());
+  assert(*this == xother);
+
+  // Exit:
 }
 
 extent::
-extent(int xdim)
+extent(unsigned xdim)
 {
   // Preconditions:
-
-  assert(xdim >= 0);
 
   // Body:
 
@@ -69,11 +88,11 @@ invariant() const
   return result;
 }
 
-int
+unsigned
 extent::
 d() const
 {
-  int result;
+  unsigned result;
 
   // Preconditions:
 
@@ -83,8 +102,6 @@ d() const
 
   // Postconditions:
 
-  assert(result >= 0);
-
   // Exit:
 
   return result;
@@ -92,11 +109,10 @@ d() const
 
 hsize_t
 extent::
-size(int xindex) const
+size(unsigned xindex) const
 {
   // Preconditions:
 
-  assert(xindex >= 0);
   assert(xindex < d());
 
   // Body:
@@ -112,13 +128,12 @@ size(int xindex) const
 
 hsize_t
 extent::
-max_size(int xindex) const
+max_size(unsigned xindex) const
 {
   hsize_t result;
 
   // Preconditions:
 
-  assert(xindex >= 0);
   assert(xindex < d());
 
   // Body:
@@ -234,4 +249,62 @@ npoints() const
   // Exit:
 
   return result;
+}
+
+void
+extent::
+reserve(unsigned xdim)
+{
+  // Preconditions:
+
+  // Body:
+
+  _size.reserve(xdim);
+  _max_size.reserve(xdim);
+
+  // Postconditions:
+
+  assert(invariant());
+
+  // Exit:
+}
+
+bool
+extent::
+operator==(const extent& xother) const
+{
+  bool result;
+
+  // Preconditions:
+
+  // Body:
+
+  result = (_size == xother._size) && (_max_size == xother._max_size);
+ 
+  // Postconditions:
+
+  // Exit:
+
+  return result;
+}
+
+ostream&
+operator<<(ostream& xos, const extent& xextent)
+{
+  // Preconditions:
+
+  assert(xos.good());
+
+  // Body:
+
+  xos << "size = "
+      << xextent._size
+      << "max_size = "
+      << xextent._max_size;
+
+  // Postconditions:
+
+  // Exit:
+
+  return xos;
 }

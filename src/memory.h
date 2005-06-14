@@ -5,6 +5,10 @@
 #include "pcontainer.h"
 #include "std_cstdlib.h"
 
+/*! @class memory
+    @brief A non-persistent container whose members are stored in memory, not on disk.
+*/
+
 class memory : public container, public handle
 {
  public:

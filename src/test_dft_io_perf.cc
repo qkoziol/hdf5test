@@ -19,7 +19,7 @@ main(int argc, char** argv)
 
   if (argc < 2)
     {
-      cerr << "Usage: test_dft_io_perf HDF5_file [HDF5_file...]\n";
+      cerr << "\tUsage: test_dft_io_perf HDF5_file [HDF5_file...]\n";
       result = 1;
     }
   else

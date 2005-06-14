@@ -5,6 +5,10 @@
 #include <cstddef>
 #include <ostream>
 
+/*! @class array_of
+    @brief A contiguous resizable array of any C++ type.
+*/
+
 template <class t>
 class array_of
 {

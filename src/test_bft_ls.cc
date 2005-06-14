@@ -13,7 +13,7 @@ main(int argc, char** argv)
 {
   if (argc < 2)
     {
-      cerr << "Usage: test_bft_ls HDF5_file [HDF5_file...]\n";
+      cerr << "\tUsage: test_bft_ls HDF5_file [HDF5_file...]\n";
       exit(1);
     }
   else

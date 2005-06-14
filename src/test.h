@@ -66,6 +66,9 @@ class test
 
   double performance() const;
 
+  /// Makes a name consisting of
+  static string& make_test_name();
+
  protected:
 
   double _performance; // a measure of the performance of this test.

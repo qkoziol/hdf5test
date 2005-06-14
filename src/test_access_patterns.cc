@@ -18,7 +18,7 @@ int
 main()
 {
   {
-    cerr << "`test_access_patterns' is currently broken." << endl;
+    cerr << "\t`test_access_patterns' is currently broken." << endl;
     exit(0);
   }
 
@@ -93,8 +93,8 @@ main()
 
     c.get_space().select(h);
 
-    c.get_space().select(dataspace::ALL);
+    c.get_space().select_all();
 
-    c.get_space().select(dataspace::NONE);
+    c.get_space().select_none();
   }
 }

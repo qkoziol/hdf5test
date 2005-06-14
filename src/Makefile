@@ -90,7 +90,6 @@ CXX=$(HDF5DIR)/bin/h5c++
 lib_sources =	attribute.cc \
 		bft.cc \
 		bft_ls.cc \
-		col_itr.cc \
 		contract.cc \
 		dataset.cc \
 		dataspace.cc \
@@ -104,30 +103,33 @@ lib_sources =	attribute.cc \
 		hdf5_handle.cc \
 		hyperslab.cc \
 		io_perf.cc \
-		itr.cc \
 		matrix.cc \
+		matrix_writer.cc \
 		memory.cc \
 		node.cc \
 		objno.cc \
+		partial.cc \
 		pcontainer.cc \
 		persistent.cc \
 		property_list.cc \
 		scalar.cc \
-		slice_itr.cc \
+		temp_file.cc \
 		test.cc \
 		timer.cc \
 		transfer.cc \
 		traverser.cc \
 		tuple.cc
 
-test_sources =	matrix_t.cc \
-		test_access_patterns.cc \
+test_sources =	test_access_patterns.cc \
 		test_attr.cc \
 		test_basic_io_perf.cc \
 		test_bft_ls.cc \
+		test_dataspace.cc \
 		test_dft_io_perf.cc \
 		test_dft_ls.cc \
 		test_iterated_io.cc \
+		test_matrix.cc \
+		test_matrix_writer.cc \
 		test_timer.cc
 
 OBJ = $(lib_sources:.cc=.o)
@@ -145,6 +147,8 @@ BIN = $(test_sources:.cc=)
 % : %.cc
 	$(CXX) -o $@ $(CXXFLAGS) -prefix=$(HDF5DIR) $< -g $(OBJ)
 
+obj: $(OBJ)
+
 bin: $(BIN)
 
 test: $(BIN)
@@ -159,7 +163,7 @@ test: $(BIN)
 doc:
 	doxygen Doxyfile
 
-all: bin doc test
+all: obj bin doc test
 
 $(BIN): libperf.a
 

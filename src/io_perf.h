@@ -6,9 +6,8 @@ class pcontainer;
 #include "std_iostream.h"
 #include "test.h"
 
-/*
-  A test in which the operation tested is just a single
-  read or write.
+/*! @class io_perf
+    @brief A test in which the operation tested is just a single read or write.
 */
 
 class io_perf : public test

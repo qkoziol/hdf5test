@@ -6,33 +6,32 @@ hyperslab()
 {
   // Preconditions:
 
-  not_implemented;
-
   // Body:
-
-  not_implemented;
 
   // Postconditions:
 
-  not_implemented;
+  assert(invariant());
+  assert(d() == 0);
 
   // Exit:
 }
 
 hyperslab::
-hyperslab(int xdim)
+hyperslab(unsigned xdim)
 {
   // Preconditions:
 
-  not_implemented;
-
   // Body:
 
-  not_implemented;
+  _block_size.reserve(xdim);
+  _origin.reserve(xdim);
+  _stride.reserve(xdim);
+  _ct.reserve(xdim);
 
   // Postconditions:
 
-  not_implemented;
+  assert(invariant());
+  assert(d() == xdim);
 
   // Exit:
 }
@@ -57,41 +56,210 @@ hyperslab::
 {
   // Preconditions:
 
-  not_implemented;
-
   // Body:
 
-  not_implemented;
-
   // Postconditions:
-
-  not_implemented;
 
   // Exit:
 }
 
-int
+unsigned
 hyperslab::
 d() const
 {
-  not_implemented;
-  return -1;  // keeps pgi compiler happy until this is implemented.
+  unsigned result;
+
+  // Preconditions:
+
+  // Body:
+
+  result = _block_size.d();
+
+  // Postconditions:
+
+  // Exit:
+
+  return result;
+}
+
+bool
+hyperslab::
+invariant() const
+{
+  bool result;
+
+  // Preconditions:
+
+  // Body:
+
+  result = (_block_size.d() == _origin.d());
+  result = result && (_origin.d() == _stride.d());
+  result = result && (_stride.d() == _ct.d());
+
+  // Postconditions:
+
+  // Exit:
+
+  return result;
+}
+
+ostream&
+operator<<(ostream& xos, const hyperslab& xhyperslab)
+{
+  // Preconditions:
+
+  assert(xos.good());
+
+  // Body:
+
+  xos << "block size: "
+      << xhyperslab._block_size
+      << " origin: "
+      << xhyperslab._origin
+      << " stride: "
+      << xhyperslab._stride
+      << " ct: "
+      << xhyperslab._ct;
+
+  // Postconditions:
+
+  // Exit:
+
+  return xos;
+}
+
+const tuple&
+hyperslab::
+block_size() const
+{
+  // Preconditions:
+
+  // Body:
+
+  // Postconditions:
+
+  assert(invariant());
+
+  // Exit:
+
+  return _block_size;
+}
+
+tuple&
+hyperslab::
+block_size()
+{
+  // Preconditions:
+
+  // Body:
+
+  // Postconditions:
+
+  assert(invariant());
+
+  // Exit:
+
+  return _block_size;
+}
+
+tuple&
+hyperslab::
+origin()
+{
+  // Preconditions:
+
+  // Body:
+
+  // Postconditions:
+
+  assert(invariant());
+
+  // Exit:
+
+  return _origin;
+}
+
+const tuple&
+hyperslab::
+origin() const
+{
+  // Preconditions:
+
+  // Body:
+
+  // Postconditions:
+
+  assert(invariant());
+
+  // Exit:
+
+  return _origin;
 }
 
 tuple&
 hyperslab::
 ct()
 {
-  not_implemented;
-  // the following keeps the pgi compiler happy until
-  // this is implemented.
-  tuple* junk = new tuple;
-  return *junk;
+  // Preconditions:
+
+  // Body:
+
+  // Postconditions:
+
+  assert(invariant());
+
+  // Exit:
+
+  return _ct;
 }
 
-bool
-hyperslab::invariant() const
+const tuple&
+hyperslab::
+ct() const
 {
-  not_implemented;
-  return false;  // keeps pgi compiler happy until this is implemented.
+  // Preconditions:
+
+  // Body:
+
+  // Postconditions:
+
+  assert(invariant());
+
+  // Exit:
+
+  return _ct;
+}
+
+tuple&
+hyperslab::
+stride()
+{
+  // Preconditions:
+
+  // Body:
+
+  // Postconditions:
+
+  assert(invariant());
+
+  // Exit:
+
+  return _stride;
+}
+
+const tuple&
+hyperslab::
+stride() const
+{
+  // Preconditions:
+
+  // Body:
+
+  // Postconditions:
+
+  assert(invariant());
+
+  // Exit:
+
+  return _stride;
 }

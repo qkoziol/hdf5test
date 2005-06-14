@@ -5,7 +5,9 @@
 #include <sys/time.h>
 #endif
 
-//  A stopwatch.  Reports elapsed time in seconds.
+/*!  @class timer
+     @brief A stopwatch.  Reports elapsed time in seconds.
+*/
 
 class timer
 {
@@ -80,8 +82,10 @@ class timer
 
 #ifndef H5_HAVE_PARALLEL
 
-  // An interface on struct timeval for defining various
-  // conveniences.
+  /*! @class timer::cron
+      @brief An interface on struct timeval providing comparison, arithmetic, and initialization
+             operators.
+  */
 
   class cron : public timeval
   {

@@ -62,7 +62,7 @@ tuple(const tuple& xother)
 
   _d = xother._d;
   _mem = new hsize_t[_d];
-  for (int i = 0; i < _d; ++i)
+  for (unsigned i = 0; i < _d; ++i)
     _mem[i] = xother._mem[i];
 
   // Postconditions:
@@ -73,12 +73,39 @@ tuple(const tuple& xother)
 
   // Exit:
 }
+
+tuple&
 tuple::
-tuple(int xdim)
+operator=(const tuple& xother)
 {
   // Preconditions:
 
-  assert(xdim >= 0);
+  // Body:
+
+  _d = xother._d;
+
+  delete [] _mem;
+
+  _mem = new hsize_t[_d];
+
+  for (unsigned i = 0; i < _d; ++i)
+    _mem[i] = xother._mem[i];
+
+  // Postconditions:
+
+  assert(invariant());
+  assert(d() == xother.d());
+  assert(unexecutable(foreach 0 <= i < d(); this->[i] == xother[i]));
+
+  // Exit:
+
+  return *this;
+}
+
+tuple::
+tuple(unsigned xdim)
+{
+  // Preconditions:
 
   // Body:
 
@@ -95,13 +122,12 @@ tuple(int xdim)
 
 hsize_t&
 tuple::
-operator[](int xindex)
+operator[](unsigned xindex)
 {
   hsize_t* ptr_to_result;
 
   // Preconditions:
 
-  assert(xindex >= 0);
   assert(xindex < d());
 
   // Body:
@@ -119,13 +145,12 @@ operator[](int xindex)
 
 const hsize_t&
 tuple::
-operator[](int xindex) const
+operator[](unsigned xindex) const
 {
   const hsize_t* ptr_to_result;
 
   // Preconditions:
 
-  assert(xindex >= 0);
   assert(xindex < d());
 
   // Body:
@@ -139,11 +164,11 @@ operator[](int xindex) const
   return *ptr_to_result;
 }
 
-int
+unsigned
 tuple::
 d() const
 {
-  int result;
+  unsigned result;
 
   // Preconditions:
 
@@ -160,7 +185,7 @@ d() const
 
 void
 tuple::
-reserve(int xdim)
+reserve(unsigned xdim)
 {
   // Preconditions:
 
@@ -196,7 +221,7 @@ is_positive() const
   // Body:
 
   result = true;
-  for (int i = 0; i < _d; ++i)
+  for (unsigned i = 0; i < _d; ++i)
   {
     if (_mem[i] <= 0)
     {
@@ -224,7 +249,7 @@ operator=(const hsize_t& xval)
 
   ptr_to_result = this;
 
-  for (int i = 0; i < _d; ++i)
+  for (unsigned i = 0; i < _d; ++i)
     _mem[i] = xval;
 
   // Postconditions:
@@ -248,7 +273,7 @@ operator>=(const tuple& xother) const
 
   result = true;
 
-  for (int i = 0; result && i < _d; ++i)
+  for (unsigned i = 0; result && i < _d; ++i)
   {
     if (_mem[i] < xother._mem[i])
     {
@@ -278,7 +303,7 @@ operator==(const tuple& xother) const
 
   result = true;
 
-  for (int i = 0; result && i < _d; ++i)
+  for (unsigned i = 0; result && i < _d; ++i)
   {
     if (_mem[i] != xother._mem[i])
     {
@@ -308,7 +333,7 @@ operator>(const tuple& xother) const
 
   result = true;
 
-  for (int i = 0; result && i < _d; ++i)
+  for (unsigned i = 0; result && i < _d; ++i)
   {
     if (_mem[i] <= xother._mem[i])
     {
@@ -338,7 +363,7 @@ operator<=(const tuple& xother) const
 
   result = true;
 
-  for (int i = 0; result && i < _d; ++i)
+  for (unsigned i = 0; result && i < _d; ++i)
   {
     if (_mem[i] > xother._mem[i])
     {
@@ -368,7 +393,7 @@ operator<(const tuple& xother) const
 
   result = true;
 
-  for (int i = 0; result && i < _d; ++i)
+  for (unsigned i = 0; result && i < _d; ++i)
   {
     if (_mem[i] >= xother._mem[i])
     {
@@ -385,3 +410,24 @@ operator<(const tuple& xother) const
 
   return result;
 }
+
+ostream&
+operator<<(ostream& xos, const tuple& xtuple)
+{
+  // Preconditions:
+
+  // Body:
+
+  for (unsigned i = 0; i < xtuple._d; ++i)
+  {
+    xos << *(xtuple._mem+i)
+	<< ' ';
+  }
+
+  // Postconditions:
+
+  // Exit:
+
+  return xos;
+}
+

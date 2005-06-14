@@ -1,6 +1,8 @@
 #include "dataspace.h"
 #include "contract.h"
 
+#include "hyperslab.h"
+
 dataspace::
 dataspace()
 {
@@ -33,6 +35,7 @@ dataspace(const tuple& xsize, const tuple& xmax_size)
   // Body:
 
   _hid = H5Screate_simple(xsize.d(), &xsize[0], &xmax_size[0]);
+  set_extent();
 
   // Postconditions:
 
@@ -69,6 +72,7 @@ invariant() const
   if (result && is_attached())
   {
     result = (d() >= 0);
+    result = result && (_ext.d() == d());
   }
 
   // Postconditions:
@@ -78,51 +82,36 @@ invariant() const
   return result;
 }
 
-extent&
+const extent&
 dataspace::
 get_extent() const
 {
-  extent* ptr_to_result;
-
   // Preconditions:
 
   assert(is_attached());
 
   // Body:
-
-  int dim = H5Sget_simple_extent_ndims(_hid);
-
-  ptr_to_result = new extent(dim);
-
-  if (dim > 0)
-  {
-    H5Sget_simple_extent_dims(_hid, &ptr_to_result->size()[0], &ptr_to_result->max_size()[0]);
-  }
 
   // Postconditions:
 
   // Exit:
 
-  return *ptr_to_result;
+  return _ext;
 }
 
-int
+unsigned
 dataspace::
 d() const
 {
-  int result;
+  unsigned result;
 
   // Preconditions:
 
-  assert(is_attached());
-
   // Body:
 
-  result = H5Sget_simple_extent_ndims(_hid);
+  result = _ext.d();
 
   // Postconditions:
-
-  assert(result >= 0);
 
   // Exit:
 
@@ -131,16 +120,66 @@ d() const
 
 void
 dataspace::
-select(const hyperslab& xsel)
+select(const hyperslab& xsubset, H5S_seloper_t xop)
 {
-  not_implemented;
+  // Preconditions:
+
+  assert(xsubset.d() == d());
+  assert(is_attached());
+
+  // Body:
+
+  H5Sselect_hyperslab(_hid,
+		      xop,
+		      &xsubset.origin()[0],
+		      &xsubset.stride()[0],
+		      &xsubset.ct()[0],
+		      &xsubset.block_size()[0]);
+
+  // Postconditions:
+
+  assert(invariant());
+
+  // Exit:
+
 }
 
 void
 dataspace::
-select(dataspace::selection xsel)
+select_all()
 {
-  not_implemented;
+  // Preconditions:
+
+  assert(is_attached());
+
+  // Body:
+
+  H5Sselect_all(_hid);
+
+  // Postconditions:
+
+  assert(invariant());
+
+  // Exit:
+}
+
+void
+dataspace::
+select_none()
+{
+  // Preconditions:
+
+  assert(is_attached());
+
+  // Body:
+
+  H5Sselect_none(_hid);
+
+  // Postconditions:
+
+  assert(invariant());
+
+  // Exit:
 }
 
 dataspace::
@@ -156,11 +195,13 @@ dataspace(hid_t xother)
 
   if (dim > 0)
   {
-    extent e(dim);
+    _ext.reserve(dim);
 
-    H5Sget_simple_extent_dims(xother, &e.size()[0], &e.max_size()[0]);
+    H5Sget_simple_extent_dims(xother, &_ext.size()[0], &_ext.max_size()[0]);
 
-    _hid = H5Screate_simple(dim, &e.size()[0], &e.max_size()[0]);
+    _hid = H5Screate_simple(dim, &_ext.size()[0], &_ext.max_size()[0]);
+
+    set_extent();
   }
   else
   {
@@ -170,7 +211,33 @@ dataspace(hid_t xother)
   // Postconditions:
 
   assert(invariant());
-  assert(d() == H5Sget_simple_extent_ndims(xother));
+  assert(d() == static_cast<unsigned>(H5Sget_simple_extent_ndims(xother)));
+
+  // Exit:
+}
+
+void
+dataspace::
+set_extent()
+{
+  // Preconditions:
+
+  assert(is_attached());
+
+  // Body:
+
+  int dim = H5Sget_simple_extent_ndims(_hid);
+
+  _ext.reserve(dim);
+
+  if (dim > 0)
+  {
+    H5Sget_simple_extent_dims(_hid, &_ext.size()[0], &_ext.max_size()[0]);
+  }
+
+  // Postconditions:
+
+  assert(invariant());
 
   // Exit:
 }

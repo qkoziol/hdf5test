@@ -62,24 +62,31 @@ class dataspace : public hdf5_handle
 
   /// Select a subset of this dataspace.
 
-  void select(const hyperslab& xsubset);
+  void select(const hyperslab& xsubset, H5S_seloper_t xop = H5S_SELECT_SET);
 
-  /*! @enum  selection
-      @brief An aid to selecting the entire space or none of it.
-   */
-  enum selection {ALL, NONE};
+  /// Select all of this dataspace.
 
-  /// Select ALL or NONE of this dataspace.
+  void select_all();
 
-  void select(selection xsel);
+  /// Select none of this dataspace.
+
+  void select_none();
 
   /// Get the extent of this dataspace.
 
-  extent& get_extent() const;
+  const extent& get_extent() const;
 
   /// The dimension of the dataspace.
 
-  int d() const;
+  unsigned d() const;
+
+ protected:
+
+  extent _ext;  //< The extent of this dataspace.
+
+  /// Define the extent.
+
+  void set_extent();
 
 };
 

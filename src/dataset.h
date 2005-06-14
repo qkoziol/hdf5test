@@ -107,7 +107,7 @@ class dataset : public pcontainer
   // Dataset type interface:
 
 
-  /// True if this is a ccontiguous dataset.
+  /// True if this is a contiguous dataset.
 
   bool is_contiguous() const;
 

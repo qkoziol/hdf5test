@@ -2,38 +2,42 @@
 #define TUPLE_H
 
 #include "hdf5.h"
+#include "std_iostream.h"
 
-/*
-  An n-tuple of hsize_ts, useful in describing
-  extents and hyperslabs and selections and
-  such things.
+/*! @class tuple
+    @brief An n-tuple of hsize_ts, useful for describing extents, hyperslabs, and selections.
 */
 
 class tuple
 {
+
+  /// Append tuple to ostream.
+
+  friend ostream& operator<<(ostream& xos, const tuple& xtuple);
+
  public:
 
 
-  // Canonical interface:
+  // Standard interface:
 
 
-  // Default constructor; make a tuple of dimension 0.
+  /// Default constructor; make a tuple of dimension 0.
 
   tuple();
 
-  // Destructor.
+  /// Destructor.
 
   ~tuple();
 
-  // Class invariant.
+  /// Class invariant.  Should always be true.
 
   bool invariant() const;
 
-  // Copy constructor.
+  /// Copy constructor.
 
   tuple(const tuple& xother);
 
-  // Assignment.
+  /// Assignment operator.
 
   tuple& operator=(const tuple& xother);
 
@@ -41,24 +45,27 @@ class tuple
   // Dimension and member access interface:
 
 
-  // Create a tuple of dimension xdim.
+  /// Create a tuple of dimension xdim.
 
-  tuple(int xdim);
+  tuple(unsigned xdim);
 
-  // The dimension of the tuple.
+  /// The dimension of the tuple.
 
-  int d() const;
+  unsigned d() const;
 
-  // Access to xindex element.
+  /// Access to xindex element.
 
-  hsize_t& operator[](int xindex);
-  const hsize_t& operator[](int xindex) const;
+  hsize_t& operator[](unsigned xindex);
 
-  // Change dimension.
+  /// Access to xindex element.
 
-  void reserve(int xdim);
+  const hsize_t& operator[](unsigned xindex) const;
 
-  // Assign xval to each element of this.
+  /// Change the dimension.
+
+  void reserve(unsigned xdim);
+
+  /// Assign xval to each element of this.
 
   tuple& operator=(const hsize_t& xval);
 
@@ -66,37 +73,36 @@ class tuple
   // Comparison interface:
 
 
-  // All elements are > 0.
+  /// True if all elements are > 0.
 
   bool is_positive() const;
 
-  // True if all elements of this > corresponding elements of xother.
+  /// True if all elements of this > corresponding elements of xother.
 
   bool operator>(const tuple& xother) const;
 
-  // True if all elements of this >= corresponding elements of xother.
+  /// True if all elements of this >= corresponding elements of xother.
 
   bool operator>=(const tuple& xother) const;
 
-  // True if all elements of this == corresponding elements of xother.
+  /// True if all elements of this == corresponding elements of xother.
 
   bool operator==(const tuple& xother) const;
 
-  // True if all elements of this < corresponding elements of xother.
+  /// True if all elements of this < corresponding elements of xother.
 
   bool operator<(const tuple& xother) const;
 
-  // True if all elements of this <= corresponding elements of xother.
+  /// True if all elements of this <= corresponding elements of xother.
 
   bool operator<=(const tuple& xother) const;
 
 
+ protected:
 
- private:
+  unsigned  _d;   //< dimension.
 
-  int      _d;   // dimension.
-
-  hsize_t* _mem; // storage for elements.
+  hsize_t*  _mem; //< storage for elements.
 };
 
 #endif

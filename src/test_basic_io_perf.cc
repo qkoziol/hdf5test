@@ -3,7 +3,6 @@
   kinds of containers.
 */
 
-#include "attribute.h"
 #include "contract.h"
 #include "dataset.h"
 #include "group.h"
@@ -215,33 +214,4 @@ main()
 
     e.detach();
   }
-
-  // Test attributes.
-
-  /*
-  {
-    // open group g named "name" in file f
-
-    group g;
-
-    g.open(f, "/");
-
-    // Visit all the attributes contained in g and
-    // do read and write performance tests on
-    // each.
-
-    group_itr gitr(g, group_itr::ATTRIBUTE);
-
-    for (gitr.start(); ! gitr.is_done(); gitr.next())
-    {
-      // Get the attribute.
-
-      attribute& item = dynamic_cast<attribute&>(gitr.item());
-
-      // Test attribute io.
-
-      do_read_write_tests(io_t, item);
-    }
-  }
-  */
 }

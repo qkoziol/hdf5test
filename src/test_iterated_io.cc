@@ -9,7 +9,7 @@ int
 main()
 {
   {
-    cerr << "`test_iterated_io' is currently broken." << endl;
+    cerr << "\t`test_iterated_io' is currently broken." << endl;
     exit(0);
   }
   /*

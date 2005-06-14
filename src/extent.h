@@ -5,15 +5,20 @@
 #include "std_iostream.h"
 #include "tuple.h"
 
-/*
-  An extent defines a bounding box around a space
-  of integer valued n-dimensional tuples or coordinates
-  or indices.  The box has two measures of size:
-
-  1)  size(),     which describes how big it is in each
-                  dimension, and
-  2)  max_size(), which describes the maximum size it can
-                  be in each dimension.
+/*! @class extent
+    @brief A bounding box around a space of integer valued n-dimensional
+           tuples or coordinates or indices.
+    <p>
+       The bounding box has two measures of size:
+       <ol>
+           <li>
+               size(), which describes how big it is in each dimension, and
+           </li>
+           <li>
+               max_size(), which describes the maximum size it can be in each dimension.
+           </li>
+        </ol>
+     </p>
 */
 
 class extent
@@ -23,25 +28,25 @@ class extent
 
  public:
 
-  // Canonical features:
+  // Standard features:
 
-  // Default constructor.
+  /// Default constructor.  Makes an extent of dimension 0.
 
   extent();
 
-  // Copy constructor.
+  /// Copy constructor.
 
   extent(const extent& xother);
 
-  // Destructor.
+  /// Destructor.
 
   ~extent();
 
-  // Assignment operator.
+  /// Assignment operator.
 
   extent& operator=(const extent& xother);
 
-  // Class invariant.
+  /// Class invariant.  Should always be true.
 
   bool invariant() const;
 
@@ -49,51 +54,65 @@ class extent
   // Queries:
 
 
-  // Number of dimensions of box.
+  /// Equality operator.
 
-  int d() const;
+  bool operator==(const extent& xother) const;
 
-  // Number of points in size of extent.
+  /// Number of dimensions of bounding box.
+
+  unsigned d() const;
+
+  /// Number of points in size of extent.
 
   hsize_t npoints() const;
 
-  // Maximum size in a given dimension, 0 <= xdim < d().
+  /// Maximum size in a given dimension, 0 <= xdim < d().
 
-  hsize_t max_size(int xdim) const;
+  hsize_t max_size(unsigned xdim) const;
 
-  // Max size in all dimensions.
+  /// Max size in all dimensions.
 
   const tuple& max_size() const;
+
+  /// Max size in all dimensions.
+
   tuple& max_size();
 
-  // Size in a given dimension.
+  /// Size in a given dimension.
 
-  hsize_t size(int xdim) const;
+  hsize_t size(unsigned xdim) const;
 
-  // Size in all dimensions.
+  /// Size in all dimensions.
 
   const tuple& size() const;
+
+  /// Size in all dimensions.
+
   tuple& size();
 
 
   // Change of extent.
 
 
-  // Add another dimension.
+  /// Add another dimension.
 
   void add(hsize_t xsize, hsize_t xmax_size);
 
-  // Define number and sizes of all dimensions.
+  /// Define number and sizes of all dimensions.
 
-  void set(int xdim, const tuple& xsize, const tuple& xmax_size);
+  void set(const tuple& xsize, const tuple& xmax_size);
 
-  // Create with defined number and sizes of all dimensions.
+  /// Create with defined number and sizes of all dimensions.
 
-  extent(int xdim, const tuple& xsize, const tuple& xmax_size);
+  extent(const tuple& xsize, const tuple& xmax_size);
 
-  // Create with defined dimension, 0 size and max_size.
+  /// Define dimension, set size and max_size to zero.
 
-  extent(int xdim);
+  void reserve(unsigned xdim);
+
+  /// Create with defined dimension, 0 size and max_size.
+
+  extent(unsigned xdim);
 
  protected:
  private:

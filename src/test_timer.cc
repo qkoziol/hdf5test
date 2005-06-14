@@ -20,7 +20,7 @@ resolution()
   }
   while (tv1.tv_usec == tv2.tv_usec);
 
-  cout << "gettimeofday resolution: "
+  cout << "\tgettimeofday() resolution: "
        << (tv2.tv_usec-tv1.tv_usec)
        << " us after "
        << ct
@@ -50,7 +50,7 @@ monotonicity(int xct)
     }
   }
 
-  cout << "In "
+  cout << "\tIn "
        << xct
        << " back-to-back calls to gettimeofday(), the time increased monotonically "
        << xct-zero-neg
@@ -72,7 +72,7 @@ main()
   t.start();
   t.stop();
 
-  cout << "Elapsed time after a quick start & stop: "
+  cout << "\tElapsed time after a quick start & stop: "
        << t.elapsed()
        << " seconds.  Should be roughly gettimeofday() resolution.\n";
 
@@ -80,7 +80,7 @@ main()
   sleep(1);
   t.stop();
 
-  cout << "Elapsed time in \"RESET\" mode after a 1 sec sleep: "
+  cout << "\tElapsed time in \"RESET\" mode after a 1 sec sleep: "
        << t.elapsed()
        << " seconds.  Should be about 1 second.\n";
 
@@ -88,15 +88,15 @@ main()
   sleep(1);
   t.stop();
 
-  cout << "Elapsed time after another 1 sec sleep: "
+  cout << "\tElapsed time after another 1 sec sleep: "
        << t.elapsed()
        << " seconds.  Should be about 1 second.\n";
 
-  cout << "Changing timer mode to \"ACCUMULATE\".\n";
+  cout << "\tChanging timer mode to \"ACCUMULATE\".\n";
 
   t.put_mode(timer::ACCUMULATE);
 
-  cout << "Elapsed time after a quick start & stop: "
+  cout << "\tElapsed time after a quick start & stop: "
        << t.elapsed()
        << " seconds.  Should be the same as after previous sleep.\n";
 
@@ -104,13 +104,13 @@ main()
   sleep(1);
   t.stop();
 
-  cout << "Elapsed time in \"ACCUMULATE\" mode after a 1 sec sleep: "
+  cout << "\tElapsed time in \"ACCUMULATE\" mode after a 1 sec sleep: "
        << t.elapsed()
        << " seconds.  Should be about 2 seconds.\n";
 
   t.reset();
 
-  cout << "Elapsed time after a reset: "
+  cout << "\tElapsed time after a reset: "
        << t.elapsed()
        << " seconds.  Should be 0 seconds.\n";
 
@@ -118,23 +118,7 @@ main()
   sleep(1);
   t.stop();
 
-  cout << "Elapsed time in \"ACCUMULATE\" mode after a 1 sec sleep: "
+  cout << "\tElapsed time in \"ACCUMULATE\" mode after a 1 sec sleep: "
        << t.elapsed()
        << " seconds.  Should be about 1 second.\n";
-
-  timer::cron c;
-
-  c.tv_sec = 0;
-
-  for (long usec = -100000; usec <= 100000; usec += 10000)
-  {
-    c.tv_usec = usec;
-
-    double d = c;
-
-    cout << c
-	 << " =? "
-	 << d
-	 << '\n';
-  }
 }
