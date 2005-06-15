@@ -95,8 +95,9 @@ lib_sources =	attribute.cc \
 		dataspace.cc \
 		datatype.cc \
 		dft.cc \
-		dft_io_perf.cc \
 		dft_ls.cc \
+		dft_namelen.cc \
+		dft_read_perf.cc \
 		extent.cc \
 		group.cc \
 		hdf5_file.cc \
@@ -125,15 +126,18 @@ test_sources =	test_access_patterns.cc \
 		test_basic_io_perf.cc \
 		test_bft_ls.cc \
 		test_dataspace.cc \
-		test_dft_io_perf.cc \
 		test_dft_ls.cc \
-		test_iterated_io.cc \
+		test_dft_read_perf.cc \
 		test_matrix.cc \
 		test_matrix_writer.cc \
 		test_timer.cc
 
-OBJ = $(lib_sources:.cc=.o)
-BIN = $(test_sources:.cc=)
+bin_sources =	h5dft_read.cc \
+		h5read.cc
+
+OBJ  = $(lib_sources:.cc=.o)
+TEST = $(test_sources:.cc=)
+BIN  = $(bin_sources:.cc=)
 
 # The following doesn't work on copper.
 %.d: %.cc
@@ -148,11 +152,11 @@ BIN = $(test_sources:.cc=)
 	$(CXX) -o $@ $(CXXFLAGS) -prefix=$(HDF5DIR) $< -g $(OBJ)
 
 obj: $(OBJ)
+$(BIN) : $(OBJ)
+$(TEST) : $(OBJ)
 
-bin: $(BIN)
-
-test: $(BIN)
-	for i in $(BIN); \
+test: $(TEST)
+	for i in $(TEST); \
 	do \
 		echo ""; \
 		echo "Running test $$i..."; \
@@ -160,15 +164,23 @@ test: $(BIN)
 		./$$i; \
 	done
 
+bin: $(BIN)
+	if [ ! -d ../bin ]; then mkdir ../bin; fi; \
+	for i in $(BIN); \
+	do \
+		mv $$i ../bin; \
+	done
+
 doc:
 	doxygen Doxyfile
 
-all: obj bin doc test
+all: obj test doc bin
 
-$(BIN): libperf.a
+# Don't try to make a library; h5c++ doesn't support it.
+#$(BIN): libperf.a
 
-libperf.a: $(OBJ)
-	ar r libperf.a $(OBJ)
+#libperf.a: $(OBJ)
+#	ar r libperf.a $(OBJ)
 
 #
 # ISSUE:
@@ -188,6 +200,7 @@ endif
 endif
 endif
 
+.PHONY: clean
+
 clean:
-	rm -f *~ *.d *.o $(BIN) *.hdf *.h5 *.a \#* core.* .\#* *.u *.s
-	rm -rf ../doc/html ../doc/latex
+	rm -f *~ *.d *.o $(TEST) *.hdf *.h5 *.a \#* core.* .\#* *.u *.s

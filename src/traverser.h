@@ -60,7 +60,13 @@ class traverser
 
   virtual void reset() = 0;
 
+  /// Returns the starting point of the traversal.
+
+  hid_t start() const;
+
+
  protected:
+
 
   /// Traverses graph starting at xstart, which may be a group,
   /// dataset, named datatype, or soft link.  The traversal can be filtered.  If

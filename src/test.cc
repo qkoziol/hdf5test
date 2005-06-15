@@ -64,27 +64,6 @@ operator=(const test& xother)
   return *this; // keeps pgi compiler happy until this is implemented.
 }
 
-double
-test::
-performance() const
-{
-  double result;
-
-  // Preconditions:
-
-  assert(status() == SUCCESS);
-
-  // Body:
-
-  result = _performance;
-
-  // Postconditions:
-
-  // Exit:
-
-  return result;
-}
-
 test::state
 test::
 status() const
@@ -102,25 +81,4 @@ status() const
   // Exit:
 
   return result;
-}
-
-
-ostream&
-operator<<(ostream& xos, const test& xt)
-{
-  // Preconditions:
-
-  not_implemented;
-
-  // Body:
-
-  not_implemented;
-
-  // Postconditions:
-
-  not_implemented;
-
-  // Exit:
-
-  return xos;
 }

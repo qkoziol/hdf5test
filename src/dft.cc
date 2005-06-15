@@ -80,9 +80,9 @@ traverse(hid_t xloc, int xfilter)
 
   // Body:
 
-  reset();
-
   _start.self = xloc;
+
+  reset();
 
   traverse(_start, xfilter);
 

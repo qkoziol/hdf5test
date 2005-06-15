@@ -14,9 +14,6 @@
 
 class test
 {
-  // Write test results to xos.
-
-  friend ostream& operator<<(ostream& xos, const test& xtest);
 
  public:
 
@@ -62,16 +59,8 @@ class test
 
   state status() const;
 
-  /// The performance of this test, typically interpreted as bytes/second.
-
-  double performance() const;
-
-  /// Makes a name consisting of
-  static string& make_test_name();
-
  protected:
 
-  double _performance; // a measure of the performance of this test.
   state  _status;      // current status of this test.
   timer  _timer;       // for timing whatever the test does.
 

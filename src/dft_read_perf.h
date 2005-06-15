@@ -1,16 +1,16 @@
-#ifndef DFT_IO_TEST_H
-#define DFT_IO_TEST_H
+#ifndef DFT_READ_PERF_H
+#define DFT_READ_PERF_H
 
 #include "dft.h"
 #include "io_perf.h"
 
-/*! @class dft_io_perf
+/*! @class dft_read_perf
     @brief A depth first traverser which runs an io performance test (read only)
            on every container it finds (in preorder).
 */
 
 
-class dft_io_perf : public dft
+class dft_read_perf : public dft
 {
  public:
 
@@ -20,11 +20,11 @@ class dft_io_perf : public dft
 
   /// Default constructor.
 
-  dft_io_perf();
+  dft_read_perf();
 
   /// Destructor.
 
-  ~dft_io_perf();
+  ~dft_read_perf();
 
   /// Class invariant.  Should always be true.
 
@@ -32,11 +32,11 @@ class dft_io_perf : public dft
 
   /// Copy constructor.
 
-  dft_io_perf(const dft_io_perf& xother);
+  dft_read_perf(const dft_read_perf& xother);
 
   /// Assignment operator.
 
-  dft_io_perf& operator=(const dft_io_perf& xother);
+  dft_read_perf& operator=(const dft_read_perf& xother);
 
 
   // Traversal interface:
@@ -64,9 +64,10 @@ class dft_io_perf : public dft
 
  protected:
 
-  io_perf  _tester;      //< The test to be run on every container.
-  unsigned _success_ct;  //< Number of containers whose i/o test succeeded.
-  unsigned _failure_ct;  //< Number of containers whose i/o test failed.
+  io_perf   _tester;      //< The test to be run on every container.
+  unsigned  _success_ct;  //< Number of containers whose i/o test succeeded.
+  unsigned  _failure_ct;  //< Number of containers whose i/o test failed.
+  size_t    _longest;     //< The size of the longest name encountered.  Aids formatting of output.
 };
 
 #endif

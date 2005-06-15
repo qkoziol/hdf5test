@@ -432,3 +432,22 @@ passes(const node& xnode, int xfilter) const
 
   return result;
 }
+
+hid_t
+traverser::
+start() const
+{
+  hid_t result;
+
+  // Preconditions:
+
+  // Body:
+
+  result = _start.self;
+
+  // Postconditions:
+
+  // Exit:
+
+  return result;
+}

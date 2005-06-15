@@ -105,13 +105,10 @@ run_test(const pcontainer& xcon, memory& xmem)
 
     _elapsed = _timer.elapsed();
 
-    _performance = _bytes/_elapsed;
-
     _status = SUCCESS;
   }
   else
   {
-    _performance = 0;
     _status = FAILURE;
   }
 
@@ -158,13 +155,10 @@ run_test(const memory& xmem, pcontainer& xcon)
 
     _elapsed = _timer.elapsed();
 
-    _performance = _bytes/_elapsed;
-
     _status = SUCCESS;
   }
   else
   {
-    _performance = 0;
     _status = FAILURE;
   }
 
@@ -181,36 +175,44 @@ run_test()
 }
 
 
-ostream&
-operator<<(ostream& xos, const io_perf& xiot)
+double
+io_perf::
+bytes() const
 {
+  double result;
+
   // Preconditions:
 
-  assert(xos.good());
+  assert(status() == SUCCESS);
 
   // Body:
 
-  if (xiot.status() == test::SUCCESS)
-  {
-    xos << "succeeded.  "
-	<< xiot._bytes
-        << " bytes transferred in "
-	<< xiot._elapsed
-	<< " seconds = "
-	<< xiot.performance();
-  }
-  else if (xiot.status() == test::FAILURE)
-  {
-    xos << "failed.";
-  }
-  else
-  {
-    xos << "not run.";
-  }
+  result = _bytes;
 
   // Postconditions:
 
   // Exit:
 
-  return xos;
+  return result;
+}
+
+double
+io_perf::
+elapsed() const
+{
+  double result;
+
+  // Preconditions:
+
+  assert(status() == SUCCESS);
+
+  // Body:
+
+  result = _elapsed;
+
+  // Postconditions:
+
+  // Exit:
+
+  return result;
 }

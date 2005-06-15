@@ -1,11 +1,11 @@
 
 #include <cassert>
-#include "dft_io_perf.h"
+#include "dft_read_perf.h"
 #include "hdf5.h"
 #include "std_iostream.h"
 
 /*!
-  @file Runs an io test on every container in an HDF5 file.
+  @file Runs a read test on every container in an HDF5 file.
 */
 
 int
@@ -19,7 +19,7 @@ main(int argc, char** argv)
 
   if (argc < 2)
     {
-      cerr << "\tUsage: test_dft_io_perf HDF5_file [HDF5_file...]\n";
+      cerr << "\tUsage: test_dft_read_perf HDF5_file [HDF5_file...]\n";
       result = 1;
     }
   else
@@ -45,7 +45,7 @@ main(int argc, char** argv)
 	    }
 	  else
 	    {
-	      cout << "Objects encountered in a depth first traversal of `"
+	      cout << "Read performance of objects encountered in a depth first traversal of `"
 		   << argv[i]
 		   << "':\n";
 
@@ -53,7 +53,7 @@ main(int argc, char** argv)
 
 	      assert(root >= 0);
 
-	      dft_io_perf tester;
+	      dft_read_perf tester;
 
 	      tester.traverse(root);
 

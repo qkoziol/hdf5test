@@ -12,9 +12,6 @@ class pcontainer;
 
 class io_perf : public test
 {
-
-  friend ostream& operator<<(ostream& xos, const io_perf& xiot);
-
  public:
 
 
@@ -53,11 +50,21 @@ class io_perf : public test
 
   void run_test(const pcontainer& xcon, memory& xmem);
 
-  // Execute run_io_perf_test() and measure the performance in bytes/second.
+  /// Execute run_io_perf_test() and measure the performance in bytes/second.
 
   virtual void run_test();
 
+  /// Number of bytes transferred during test.
+
+  double bytes() const;
+
+  /// Elapsed time in seconds for test.
+
+  double elapsed() const;
+
+
  protected:
+
 
   size_t _bytes;    //< Bytes transferred.
 

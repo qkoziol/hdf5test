@@ -45,13 +45,47 @@ do_read_write_tests(io_perf& xio_t, pcontainer& xcon)
   // H5Dfill() is probably what we want to do this.
 
   xio_t.run_test(m, xcon);
-  cout << "\tWrite test: " << xio_t << " bytes/s." << endl;
+
+  if (xio_t.status() == test::SUCCESS)
+  {
+    double mb      = xio_t.bytes()/1e6;
+    double elapsed = xio_t.elapsed();
+
+    cout << "\tWrite test succeeded.  "
+	 << mb
+	 << " mb transferred in "
+	 << elapsed
+	 << " seconds = "
+	 << mb/elapsed
+	 << " mb/s.\n";
+  }
+  else
+  {
+    cout << "\tWrite test failed.\n";
+  }
 
   // Read back what we just wrote and report
   // performance.
 
   xio_t.run_test(xcon, m);
-  cout << "\tRead  test: " << xio_t << " bytes/s." << endl;
+
+  if (xio_t.status() == test::SUCCESS)
+  {
+    double mb      = xio_t.bytes()/1e6;
+    double elapsed = xio_t.elapsed();
+
+    cout << "\tRead test succeeded.  "
+	 << mb
+	 << " mb transferred in "
+	 << elapsed
+	 << " seconds = "
+	 << mb/elapsed
+	 << " mb/s.\n";
+  }
+  else
+  {
+    cout << "\tRead test failed.\n";
+  }
 }
 
 void
@@ -159,7 +193,7 @@ main()
     tuple chunk_size(3);
 
     // Be careful not to specify a huge chunk size, since we'll have to allocate
-    // a memory buffer of similar size to do i/o.  A 512*512*512 shunk size may
+    // a memory buffer of similar size to do i/o.  A 512*512*512 chunk size may
     // be moderate on disk, but that's 134,217,728 elements.  At 4 bytes apiece
     // for H5T_NATIVE_INT on 32 bit linux, that's 536,870,912 bytes - more
     // memory than my laptop has even with swap.

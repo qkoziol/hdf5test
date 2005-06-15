@@ -150,6 +150,7 @@ class dft : public traverser
   /// Does a depth first traversal of graph starting at xstart, which may be a group,
   /// dataset, named datatype, or soft link.  The traversal can be filtered.  If
   /// (xfilter & DATASET), for example, then datasets will not be visited.
+  /// reset() is called immediately after xstart is saved.
 
   void traverse(const node& xstart, int xfilter);
 
