@@ -241,3 +241,25 @@ set_extent()
 
   // Exit:
 }
+
+void
+dataspace::
+attach(hid_t xhid)
+{
+  // Preconditions:
+
+  assert(H5Iget_type(xhid) == H5I_DATASPACE);
+
+  // Body:
+
+  hdf5_handle::attach(xhid);
+
+  set_extent();
+
+  // Postconditions:
+
+  assert(invariant());
+  assert(is_attached());
+
+  // Exit:
+}

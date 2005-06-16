@@ -89,7 +89,7 @@ visit_action()
     }
 
     cout << ' '
-	 << current_node.type()
+	 << current_node.type_name()
 	 << " named `"
 	 << name(true)
 	 << "'\n";

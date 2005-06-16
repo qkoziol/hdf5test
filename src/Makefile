@@ -90,7 +90,9 @@ CXX=$(HDF5DIR)/bin/h5c++
 lib_sources =	attribute.cc \
 		bft.cc \
 		bft_ls.cc \
+		container.cc \
 		contract.cc \
+		cron.cc \
 		dataset.cc \
 		dataspace.cc \
 		datatype.cc \
@@ -171,6 +173,8 @@ bin: $(BIN)
 		mv $$i ../bin; \
 	done
 
+.PHONY: doc clean
+
 doc:
 	doxygen Doxyfile
 
@@ -200,7 +204,5 @@ endif
 endif
 endif
 
-.PHONY: clean
-
 clean:
-	rm -f *~ *.d *.o $(TEST) *.hdf *.h5 *.a \#* core.* .\#* *.u *.s
+	rm -f *~ *.d *.o $(TEST) *.hdf *.h5 *.a \#* core* .\#* *.u *.s

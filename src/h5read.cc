@@ -145,5 +145,7 @@ main(int argc, char** argv)
     }
   }
 
+  mem.detach();
+
   H5Fclose(file);
 }

@@ -45,10 +45,19 @@ class pcontainer : public persistent, public container
   pcontainer& operator=(const pcontainer& xother);
 
 
-
   /// Description of type of container.
 
-  virtual const string& type() const = 0;
+  virtual const string& type_name() const = 0;
+
+
+  // hdf5_handle interface:
+
+
+  /// Decrement the reference count to hid().  The HDF5 library will close
+  /// the object when it determines that the reference count is zero.
+
+  void detach();
+
 
 };
 

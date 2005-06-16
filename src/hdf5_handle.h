@@ -107,12 +107,12 @@ class hdf5_handle : public handle
   /// Decrement the reference count to hid().  The HDF5 library will close
   /// the object when it determines that the reference count is zero.
 
-  void detach();
+  virtual void detach();
 
   /// Attach to xhid.  Stores xhid internally and increments the reference count
   /// to it, so client is still responsible for disposing of xhid.
 
-  void attach(hid_t xhid);
+  virtual void attach(hid_t xhid);
 
  protected:
 

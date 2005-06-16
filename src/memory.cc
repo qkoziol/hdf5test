@@ -3,7 +3,6 @@
 
 #include "hdf5.h"
 #include "pcontainer.h"
-#include "std_iostream.h"
 
 memory::
 memory()
@@ -15,7 +14,6 @@ memory()
   _mem   = 0;
   _ub    = 0;
   _type  = H5I_INVALID_HID;
-  _space = H5I_INVALID_HID;
 
   // Postconditions:
 
@@ -38,10 +36,9 @@ memory::
 
   // Body:
 
-  if (_mem != 0)
+  if (is_attached())
   {
-    H5Idec_ref(_space);
-    H5Idec_ref(_type);
+    detach();
     delete [] _mem;
   }
 
@@ -69,13 +66,15 @@ invariant() const
 
   // Body:
 
+  // Skip calling ancestral invariants because they don't exist.
+
   if (_mem == 0)
   {
-    result = (_ub == 0 && _type == H5I_INVALID_HID && _space ==  H5I_INVALID_HID);
+    result = (_ub == 0 && _type == H5I_INVALID_HID && !_space.is_attached());
   }
   else
   {
-    result = (_ub > 0 && H5Iget_type(_type) == H5I_DATATYPE && H5Iget_type(_space) == H5I_DATASPACE);
+    result = (_ub > 0 && H5Iget_type(_type) == H5I_DATATYPE && _space.is_attached());
   }
 
   // Postconditions:
@@ -112,10 +111,25 @@ reserve(const pcontainer& xcon)
   size_t size = H5Tget_size(xcon.get_type());
 
   _ub    = npts*size;
+
   _mem   = new char[_ub];
-  _space = xcon.get_space().hid();
-  H5Iinc_ref(_space);
+
+  // Since this hid is obtained from the test suite, in
+  // accordance with the rules described in hdf5_handle.h,
+  // we should not decrement or close this hid here.
+
+  hid_t sp = xcon.get_space().hid();
+
+  // Incrementing the reference count to sp happens in this call.
+
+  _space.attach(sp);
+
   _type  = xcon.get_type();
+
+  // In accordance with the rules described in hdf5_handle.h,
+  // we have to increment the reference count, since this is
+  // another copy of the same hid.
+
   H5Iinc_ref(_type);
 
   // Postconditions:
@@ -137,25 +151,6 @@ ub() const
   // Body:
 
   result = _ub;
-
-  // Postconditions:
-
-  // Exit:
-
-  return result;
-}
-
-hid_t
-memory::
-get_type() const
-{
-  hid_t result;
-
-  // Preconditions:
-
-  // Body:
-
-  result = _type;
 
   // Postconditions:
 
@@ -202,29 +197,6 @@ mem() const
   return result;
 }
 
-dataspace&
-memory::
-get_space() const
-{
-  dataspace* ptr_to_result;
-
-  // Preconditions:
-
-  assert(ub() > 0);
-
-  // Body:
-
-  ptr_to_result = new dataspace(_space);
-
-  // Postconditions:
-
-  assert(ptr_to_result->is_attached());
-
-  // Exit:
-
-  return *ptr_to_result;
-}
-
 bool
 memory::
 is_readable() const
@@ -269,7 +241,7 @@ is_attached() const
 
   // Postconditions:
 
-  assert(result = (mem() != 0));
+  assert(result == (mem() != 0));
 
   // Exit:
 
@@ -286,13 +258,13 @@ detach()
 
   if (_mem != 0)
   {
-    H5Idec_ref(_space);
+    _space.detach();
     H5Idec_ref(_type);
     delete [] _mem;
 
-    _space = H5I_INVALID_HID;
-    _type  = H5I_INVALID_HID;
-    _mem   = 0;
+    _type = H5I_INVALID_HID;
+    _mem  = 0;
+    _ub   = 0;
   }
 
   // Postconditions:

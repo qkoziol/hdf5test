@@ -53,16 +53,13 @@ class dataset : public pcontainer
   dataset& operator=(const dataset& xother);
 
 
-  // Container interface:
+  // hdf5_handle interface:
 
 
-  /// Get the dataspace associated with this dataset.
- 
-  dataspace& get_space() const;
+  /// Attach to xhid.  Stores xhid internally and increments the reference count
+  /// to it, so client is still responsible for disposing of xhid.
 
-  /// The type stored in this dataset.
-
-  hid_t get_type() const;
+  void attach(hid_t xhid);
 
 
   // Persistence interface:
@@ -134,12 +131,12 @@ class dataset : public pcontainer
 
   /// Type of container is "dataset".
 
-  const string& type() const;
+  const string& type_name() const;
 
 
  protected:
 
 
- static const string _type; //< "dataset".
+ static const string _type_name; //< "dataset".
 };
 #endif

@@ -51,18 +51,18 @@ class attribute : public pcontainer
 
   attribute& operator=(const attribute& xother);
 
-
   /// The hdf5 object to which this is bound.
 
   hdf5_handle& tail();
 
-  /// Get the dataspace associated with this attribute.
- 
-  dataspace& get_space() const;
 
-  /// The type stored in this attribute.
+  // hdf5_handle interface:
 
-  hid_t get_type() const;
+
+  /// Attach to xhid.  Stores xhid internally and increments the reference count
+  /// to it, so client is still responsible for disposing of xhid.
+
+  void attach(hid_t xhid);
 
 
   // Persistence interface:
@@ -87,13 +87,13 @@ class attribute : public pcontainer
 
   /// Type of container is "attribute".
 
-  const string& type() const;
+  const string& type_name() const;
 
 
  protected:
 
 
-  static const string _type; //< "attribute".
+  static const string _type_name; //< "attribute".
 
 };
 

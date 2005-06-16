@@ -168,7 +168,7 @@ traverse(const node& xnode, int xfilter)
 }
 
 
-const persistent&
+persistent&
 dft::
 current() const
 {
@@ -373,7 +373,7 @@ traverse_attrs(const node& xnode, int xfilter)
       _current.pop();
     }
 
-    H5Aclose(head.self);
+    H5Idec_ref(head.self);
   }
 
   // Postconditions:

@@ -83,7 +83,7 @@ preorder_action()
 
   if (type == H5I_DATASET || type == H5I_ATTR)
   {
-    const pcontainer& src(dynamic_cast<const pcontainer&>(current()));
+    pcontainer& src(dynamic_cast<pcontainer&>(current()));
     memory            dest;
 
     dest.reserve(src);
@@ -100,7 +100,7 @@ preorder_action()
 	 << name(true)
 	 << setw(11)
 	 << left
-	 << src.type();
+	 << src.type_name();
 
       if (_tester.status() == test::SUCCESS)
       {
@@ -124,6 +124,7 @@ preorder_action()
 	     << left
 	     << " failed\n";
       }
+    src.detach();
   }
 
   // Postconditions:

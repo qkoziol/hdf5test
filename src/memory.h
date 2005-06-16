@@ -17,37 +17,37 @@ class memory : public container, public handle
   // Standard features:
 
 
-  // Default constructor.
+  /// Default constructor.
 
   memory();
 
-  // Destructor.
+  /// Destructor.
 
   virtual ~memory();
 
-  // Class invariant.
+  /// Class invariant.  Should always be true.
 
   bool invariant() const;
 
-  // Copy constructor.
+  /// Copy constructor.
 
   memory(const memory& xother);
 
-  // Assignment.
+  /// Assignment operator.
 
   memory& operator=(const memory & xother);
 
-  // Resize memory buffer to be adequate to
-  // contain contents of current selection
-  // of xcon.
+  /// Resize memory buffer to be adequate to
+  /// contain contents of current selection
+  /// of xcon.
 
   void reserve(const pcontainer& xcon);
 
-  // Capacity of memory in bytes.
+  /// Capacity of memory in bytes.
 
   size_t ub() const;
 
-  // The memory itself;
+  /// The memory itself;
 
   void* mem();
   const void* mem() const;
@@ -65,18 +65,6 @@ class memory : public container, public handle
   void detach();
 
 
-  // Container interface:
-
-
-  // Get the dataspace associated with memory.
-
-  dataspace& get_space() const;
-
-  // Get the type stored in memory.
-
-  hid_t get_type() const;
-
-
   // Access interface:
 
 
@@ -84,12 +72,12 @@ class memory : public container, public handle
 
   bool is_readable() const;
 
- private:
 
-  char*   _mem;   // The memory buffer.
-  size_t  _ub;    // An upper bound on the number of bytes that can be stored in _mem.
-  hid_t   _type;  // The HDF5 type stored in this container.
-  hid_t   _space; // Associated dataspace.
+ protected:
+
+
+  char*   _mem;   //< The memory buffer.
+  size_t  _ub;    //< An upper bound on the number of bytes that can be stored in _mem.
 };
 
 #endif

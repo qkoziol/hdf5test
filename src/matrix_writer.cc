@@ -69,9 +69,9 @@ matrix_writer::
 
   // Body:
 
-  H5Dclose(_dataset);
-  H5Sclose(_file_space);
-  H5Sclose(_mem_space);
+  H5Idec_ref(_dataset);
+  H5Idec_ref(_file_space);
+  H5Idec_ref(_mem_space);
 
   // Postconditions:
 

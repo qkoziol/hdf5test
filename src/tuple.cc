@@ -43,8 +43,12 @@ invariant() const
 
   // Body:
 
-  result = _d >= 0;
-  result = result && _d > 0 ? _mem != 0 : _mem == 0;
+  // The state of a tuple consists of its dimension and a possible
+  // memory allocation.  There is no relationship between the two:
+  // any combination of values is a valid state.  So the invariant
+  // is trivially satisfied.
+
+  result = true;
 
   // Postconditions:
 
@@ -189,8 +193,6 @@ reserve(unsigned xdim)
 {
   // Preconditions:
 
-  assert(xdim > 0);
-
   // Body:
 
   if (_mem != 0)
@@ -198,7 +200,19 @@ reserve(unsigned xdim)
     delete [] _mem;
   }
 
-  _mem = new hsize_t[xdim];
+  if (xdim > 0)
+  {
+    _mem = new hsize_t[xdim];
+  }
+  else
+  {
+    // ISSUE:
+    // C++ requires that the arg to a new array be strictly positive.
+    // However, we can have zero-dimensional spaces, so it seems
+    // desirable to allow zero-dimensional tuples.
+
+    _mem = new hsize_t[1];
+  }
 
   _d = xdim;
 

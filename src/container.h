@@ -11,17 +11,40 @@ class container
 {
  public:
 
-  // Standard features are omitted.  All implementations are trivial
-  // since the class is abstract and has no representation.
+
+  // Standard features:
+
+
+  /// Default constructor.
+
+  container();
+
+  /// Destructor.
+
+  virtual ~container();
+
+  /// Class invariant.  Should always be true.
+
+  bool invariant() const;
+
+  /// Copy constructor.
+
+  container(const container& xother);
+
+  /// Assignment operator.
+
+  container& operator=(const container & xother);
 
 
   /// Get the dataspace associated with this container.
  
-  virtual dataspace& get_space() const = 0;
+  dataspace& get_space();
+  const dataspace& get_space() const;
 
-  /// Get the type stored in this container.
+  /// Get the type stored in this container.  Client should *not* call
+  /// H5Idec_ref() or H5Tclose() on the return value.
 
-  virtual hid_t get_type() const = 0;
+  hid_t get_type() const;
 
 
   // Access interface:
@@ -30,6 +53,11 @@ class container
   /// True if this container can be read.
 
   virtual bool is_readable() const = 0;
+
+ protected:
+
+  hid_t     _type;   //< The HDF5 datatype associated with this container.
+  dataspace _space;  //< The dataspace of this container.
 
 };
 

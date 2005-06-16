@@ -156,7 +156,7 @@ class dft : public traverser
 
   /// The current object, visible during the traversal.
 
- const persistent& current() const;
+  persistent& current() const;
 
   /// The hid of the current object, visible during the traversal.
 

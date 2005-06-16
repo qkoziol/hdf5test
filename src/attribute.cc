@@ -3,7 +3,7 @@
 
 const string
 attribute::
-_type = "attribute";
+_type_name = "attribute";
 
 attribute::
 attribute()
@@ -26,6 +26,8 @@ attribute::
   // Preconditions:
 
   // Body:
+
+  detach();
 
   // Postconditions:
 
@@ -63,55 +65,6 @@ operator=(const attribute& xother)
 {
   not_implemented;
   return *this;  // keeps the pgi compiler happy until this is implemented.
-}
-
-dataspace&
-attribute::
-get_space() const
-{
-  dataspace* ptr_to_result;
-
-  // Preconditions:
-
-  assert(is_attached());
-
-  // Body:
-
-  hid_t space = H5Aget_space(_hid);
-
-  ptr_to_result = new dataspace(space);
-
-  // Postconditions:
-
-  assert(ptr_to_result->is_attached());
-
-  // Exit:
-
-  return *ptr_to_result;
-}
-
-
-hid_t
-attribute::
-get_type() const
-{
-  hid_t result;
-
-  // Preconditions:
-
-  assert(is_attached());
-
-  // Body:
-
-  result = H5Aget_type(_hid);
-
-  // Postconditions:
-
-  assert(H5Iget_type(result) == H5I_DATATYPE);
-
-  // Exit:
-
-  return result;
 }
 
 bool
@@ -198,6 +151,14 @@ open(hid_t xloc, const string& xname)
 
   if (_hid >= 0)
   {
+    _type = H5Aget_type(_hid);
+
+    hid_t space = H5Aget_space(_hid);
+
+    _space.attach(space);
+
+    H5Idec_ref(space);
+
     result = true;
   }
   else
@@ -248,7 +209,36 @@ is_readable() const
 
 const string&
 attribute::
-type() const
+type_name() const
 {
-  return _type;
+  return _type_name;
+}
+
+void
+attribute::
+attach(hid_t xhid)
+{
+  // Preconditions:
+
+  assert(H5Iget_type(xhid) == H5I_ATTR);
+
+  // Body:
+
+  hdf5_handle::attach(xhid);
+
+  hid_t space = H5Aget_space(_hid);
+
+  _space.attach(space);
+
+  _type = H5Aget_type(_hid);
+
+  H5Idec_ref(space);
+
+  // Postconditions:
+
+  assert(invariant());
+  assert(is_attached());
+  assert(get_space().is_attached());
+
+  // Exit:
 }

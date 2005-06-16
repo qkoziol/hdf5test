@@ -7,7 +7,7 @@
 
 const string
 dataset::
-_type = "dataset";
+_type_name = "dataset";
 
 dataset::
 dataset()
@@ -31,6 +31,8 @@ dataset::
 
   // Body:
 
+  detach();
+
   // Postconditions:
 
   // Exit:
@@ -46,7 +48,7 @@ invariant() const
 
   // Body:
 
-  result = persistent::invariant();
+  result = pcontainer::invariant();
 
   // Postconditions:
 
@@ -91,6 +93,14 @@ open(hid_t xhost, const string& xname)
 
   if (_hid >= 0)
   {
+    _type = H5Dget_type(_hid);
+
+    hid_t ds = H5Dget_space(_hid);
+
+    _space.attach(ds);
+
+    H5Idec_ref(ds);
+
     result = true;
   }
   else
@@ -106,54 +116,6 @@ open(hid_t xhost, const string& xname)
   // Exit:
 
   return result;
-}
-
-hid_t
-dataset::
-get_type() const
-{
-  hid_t result;
-
-  // Preconditions:
-
-  assert(is_attached());
-
-  // Body:
-
-  result = H5Dget_type(_hid);
-
-  // Postconditions:
-
-  assert(H5Iget_type(result) == H5I_DATATYPE);
-
-  // Exit:
-
-  return result;
-}
-
-dataspace&
-dataset::
-get_space() const
-{
-  dataspace* ptr_to_result;
-
-  // Preconditions:
-
-  assert(is_attached());
-
-  // Body:
-
-  hid_t space = H5Dget_space(_hid);
-
-  ptr_to_result = new dataspace(space);
-
-  // Postconditions:
-
-  assert(ptr_to_result->is_attached());
-
-  // Exit:
-
-  return *ptr_to_result;
 }
 
 bool
@@ -179,7 +141,7 @@ is_contiguous() const
   else
     result = false;
 
-  H5Pclose(plist);
+  H5Idec_ref(plist);
 
   // Postconditions:
 
@@ -211,7 +173,7 @@ is_chunked() const
   else
     result = false;
 
-  H5Pclose(plist);
+  H5Idec_ref(plist);
 
   // Postconditions:
 
@@ -243,7 +205,7 @@ is_compact() const
   else
     result = false;
 
-  H5Pclose(plist);
+  H5Idec_ref(plist);
 
   // Postconditions:
 
@@ -279,7 +241,11 @@ create(const hdf5_file& xfile,
   _hid = H5Dcreate(xhost, xname.c_str(), xtype, xspace, xcreate_plist);
 
   if (_hid >= 0)
+  {
+    _space.attach(xspace);
+    _type = H5Tcopy(xtype);
     result = true;
+  }
   else
     result = false;
 
@@ -359,12 +325,24 @@ create(const hdf5_file& xfile,
                    d.hid(),
                    plist);
 
-  H5Pclose(plist);
+  H5Idec_ref(plist);
 
   if (_hid >= 0)
+  {
+    hid_t space = H5Dget_space(_hid);
+
+    _space.attach(space);
+
+    H5Idec_ref(space);
+
+    _type = H5Tcopy(xtype);
+
     result = true;
+  }
   else
+  {
     result = false;
+  }
 
   // Postconditions:
 
@@ -413,7 +391,7 @@ is_readable() const
 	  break;
 	}
       }
-      H5Pclose(plist);
+      H5Idec_ref(plist);
     }
     else
     {
@@ -440,7 +418,32 @@ is_readable() const
 
 const string&
 dataset::
-type() const
+type_name() const
 {
-  return _type;
+  return _type_name;
+}
+
+void
+dataset::
+attach(hid_t xhid)
+{
+  // Preconditions:
+
+  assert(H5Iget_type(xhid) == H5I_DATASET);
+
+  // Body:
+
+  hdf5_handle::attach(xhid);
+
+  _space.attach(H5Dget_space(_hid));
+
+  _type = H5Dget_type(xhid);
+
+  // Postconditions:
+
+  assert(invariant());
+  assert(is_attached());
+  assert(get_space().is_attached());
+
+  // Exit:
 }

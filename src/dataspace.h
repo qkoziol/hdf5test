@@ -53,6 +53,15 @@ class dataspace : public hdf5_handle
   dataspace& operator=(const dataspace& xother);
 
 
+  // hdf5_handle interface:
+
+
+  /// Attach to xhid.  Stores xhid internally and increments the reference count
+  /// to it, so client is still responsible for disposing of xhid.
+
+  void attach(hid_t xhid);
+
+
   // Other constructors:
 
 
