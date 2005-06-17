@@ -114,7 +114,7 @@ lib_sources =	attribute.cc \
 		partial.cc \
 		pcontainer.cc \
 		persistent.cc \
-		property_list.cc \
+		plist.cc \
 		scalar.cc \
 		temp_file.cc \
 		test.cc \

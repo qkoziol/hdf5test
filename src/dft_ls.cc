@@ -2,7 +2,9 @@
 #include "contract.h"
 
 #include "attribute.h"
+#include "dataset.h"
 #include "pcontainer.h"
+#include "plist.h"
 
 dft_ls::
 dft_ls()
@@ -76,24 +78,57 @@ preorder_action()
 
   if (type == H5I_DATASET || type == H5I_ATTR)
   {
-    const pcontainer& current_node(dynamic_cast<const pcontainer&>(current()));
+    pcontainer& current_node(dynamic_cast<pcontainer&>(current()));
 
-    cout << "\tfound a";
-
-    if (dynamic_cast<const attribute*>(&current_node) != 0)
+    if (dynamic_cast<attribute*>(&current_node) != 0)
     {
-      // Kinda klugey, but this test decides whether we eventually
-      // print "found a dataset" or "found an attribute".
+      // current node is an attribute.
 
-      cout << 'n';
+      cout << "\tfound an attribute named `"
+	   << name(true)
+	   << "'\n";
+    }
+    else
+    {
+      // current node is a dataset.
+
+    cout << "\tfound a ";
+
+      dataset* dset = dynamic_cast<dataset*>(&current_node);
+
+      if (dset->is_contiguous())
+	cout << "contiguous";
+      if (dset->is_chunked())
+      {
+	tuple chunk(dset->get_space().d());
+
+	dset->get_chunk_size(chunk);
+
+	cout << "chunked ("
+	     << chunk
+	     << ')';
+      }
+      if (dset->is_external())
+	cout << "external";
+      if (dset->is_compact())
+	cout << "compact";
+
+      /*
+	hid_t cpl = H5Dget_create_plist(dset->hid());
+
+	plist::write(cpl);
+
+	H5Pclose(cpl);
+      */
+    cout << " dataset named `"
+	 << name(true)
+	 << "' with extent "
+	 << dset->get_space().get_extent()
+	 << '\n';
     }
 
-    cout << ' '
-	 << current_node.type_name()
-	 << " named `"
-	 << name(true)
-	 << "'\n";
-     
+
+    current_node.detach();
   }
 
   // Postconditions:

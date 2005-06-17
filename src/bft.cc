@@ -81,6 +81,8 @@ traverse(hid_t xloc, int xfilter)
 
   // Body:
 
+  _filter = xfilter;
+
   reset();
 
   _start.self = xloc;
@@ -90,7 +92,7 @@ traverse(hid_t xloc, int xfilter)
 
   H5Iinc_ref(_start.self);
 
-  traverse(_start, xfilter);
+  traverse(_start);
 
   // Cleanup:
 
@@ -107,7 +109,7 @@ traverse(hid_t xloc, int xfilter)
 
 void
 bft::
-traverse(const node& xnode, int xfilter)
+traverse(const node& xnode)
 {
   // Preconditions:
 
@@ -124,7 +126,7 @@ traverse(const node& xnode, int xfilter)
   {
     _current = _pending.front();
 
-    if (passes(_current, xfilter))
+    if (passes(_current))
     {
       visit_action();
     }
@@ -136,14 +138,14 @@ traverse(const node& xnode, int xfilter)
 
     if (H5Iget_type(_current.self) == H5I_GROUP)
     {
-      follow_group_links(_current, xfilter);
+      follow_group_links(_current);
     }
 
     // Explore the attributes, if any, of this node.
 
     if (H5Iget_type(_current.self) != H5I_ATTR)
     {
-      traverse_attrs(_current, xfilter);
+      traverse_attrs(_current);
     }
 
     // Recycle the hids.  This might look like a dangerous thing to do, since
@@ -233,7 +235,7 @@ current_hid() const
 
 void
 bft::
-follow_group_links(const node& xnode, int xfilter)
+follow_group_links(const node& xnode)
 {
   // Preconditions:
 
@@ -325,7 +327,7 @@ follow_group_links(const node& xnode, int xfilter)
 
 void
 bft::
-traverse_attrs(const node& xnode, int xfilter)
+traverse_attrs(const node& xnode)
 {
   // Preconditions:
 

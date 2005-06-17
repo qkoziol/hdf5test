@@ -35,7 +35,7 @@ main(int argc, char** argv)
   if (argc < 3)
   {
     usage();
-    exit(-1);
+    exit(1);
   }
 
   if (strncmp(argv[1], "-v", 2) == 0)
@@ -47,7 +47,7 @@ main(int argc, char** argv)
   if (argc < 4 && verbose)
   {
     usage();
-    exit(-1);
+    exit(1);
   }
 
   // Command line is ok.  Try to open HDF5 file.
@@ -65,7 +65,7 @@ main(int argc, char** argv)
     cerr << "Unable to open file `"
 	 << argv[file_name_index]
 	 << "'.\n";
-    exit(-1);
+    exit(1);
   }
 
   // File is open, try reading datasets.
@@ -89,8 +89,8 @@ main(int argc, char** argv)
        << "dataset name"
        << setw(11)
        << " status  "
-       << setw(11)
-       << "  kb read  "
+       << setw(19)
+       << "  bytes read (kb)  "
        << setw(21)
        << "   elapsed time (ms) "
        << setw(16) << left
@@ -123,7 +123,7 @@ main(int argc, char** argv)
 	     << "succeeded"
 	     << setw(11) << right << fixed << setprecision(3)
 	     << kb
-	     << setw(15) << right << fixed << setprecision(3)
+	     << setw(19) << right << fixed << setprecision(3)
 	     << elapsed*1e3
 	     << "    "
 	     << setw(13) << right << fixed << setprecision(3)
@@ -148,4 +148,6 @@ main(int argc, char** argv)
   mem.detach();
 
   H5Fclose(file);
+
+  exit(0);
 }

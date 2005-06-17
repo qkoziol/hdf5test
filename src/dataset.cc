@@ -184,6 +184,38 @@ is_chunked() const
 
 bool
 dataset::
+is_external() const
+{
+  bool result;
+
+  // Preconditions:
+
+  assert(is_attached());
+
+  // Body:
+
+  hid_t plist = H5Dget_create_plist(_hid);
+
+  int layout;
+
+  H5Pget(plist, "layout", &layout);
+
+  if (layout == H5D_CHUNKED)
+    result = true;
+  else
+    result = false;
+
+  H5Idec_ref(plist);
+
+  // Postconditions:
+
+  // Exit:
+
+  return result;
+}
+
+bool
+dataset::
 is_compact() const
 {
   bool result;
@@ -444,6 +476,30 @@ attach(hid_t xhid)
   assert(invariant());
   assert(is_attached());
   assert(get_space().is_attached());
+
+  // Exit:
+}
+
+void
+dataset::
+get_chunk_size(tuple& xresult)
+{
+
+  // Preconditions:
+
+  assert(is_attached());
+  assert(is_chunked());
+  assert(xresult.d() == get_space().d());
+
+  // Body:
+
+  hid_t plist = H5Dget_create_plist(_hid);
+
+  H5Pget_chunk(plist, get_space().d(), &xresult[0]);
+
+  H5Pclose(plist);
+
+  // Postconditions:
 
   // Exit:
 }

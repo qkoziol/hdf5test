@@ -109,9 +109,9 @@ preorder_action()
 
 	cout << setw(13) << left
 	     << " succeeded"
-	     << setw(11) << right << fixed << setprecision(3)
-	     << kb
 	     << setw(15) << right << fixed << setprecision(3)
+	     << kb
+	     << setw(19) << right << fixed << setprecision(3)
 	     << elapsed*1e3
 	     << "    "
 	     << setw(13) << right << fixed << setprecision(3)
@@ -167,7 +167,7 @@ reset()
 
   dft_namelen len;
 
-  len.traverse(start());
+  len.traverse(start(), _filter);
 
   _longest = len.longest();
 
@@ -188,9 +188,9 @@ reset()
        << setw(13)
        << left
        << "test status"
-       << setw(11)
-       << "  kb read  "
-       << setw(21)
+       << setw(15)
+       << "  bytes read (kb)  "
+       << setw(25)
        << "   elapsed time (ms) "
        << setw(16)
        << left

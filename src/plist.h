@@ -1,7 +1,7 @@
-#ifndef PROPERTY_LIST_H
-#define PROPERTY_LIST_H
+#ifndef PLIST_H
+#define PLIST_H
 
-/*! @class property_list
+/*! @class plist
     @brief A handle to an HDF5 property list.
 
   This is the property_list hierarchy that appears in
@@ -141,10 +141,10 @@
 #include "hdf5_handle.h"
 #include "std_iostream.h"
 
-class property_list : public hdf5_handle
+class plist : public hdf5_handle
 {
 
-  friend ostream& operator<<(ostream& xos, const property_list& xlist);
+  friend ostream& operator<<(ostream& xos, const plist& xlist);
 
  public:
 
@@ -154,11 +154,11 @@ class property_list : public hdf5_handle
 
   /// Default constructor.  Creates a handle not attached to any underlying HDF5 object.
 
-  property_list();
+  plist();
 
   /// Destructor.
 
-  ~property_list();
+  ~plist();
 
   /// Class invariant.  Should always be true.
 
@@ -166,15 +166,15 @@ class property_list : public hdf5_handle
 
   /// Copy constructor.
 
-  property_list(const property_list& xother);
+  plist(const plist& xother);
 
   /// Assignment operator.
 
-  property_list& operator=(const property_list& xother);
+  plist& operator=(const plist& xother);
 
   /// Copy constructor.
 
-  property_list(const hid_t xother);
+  plist(const hid_t xother);
 
 
   // Queries:
@@ -211,6 +211,18 @@ class property_list : public hdf5_handle
   /// Is this property list an external dataset creation property list?
 
   static bool is_external(hid_t xplist);
+
+
+  /// Write a property list to cout.
+
+  static void write(hid_t xhid);
+
+ protected:
+ private:
+
+  /// Writes individual property.  Called by write().
+
+  static herr_t write_property(hid_t xhid, const char* xname, void* xiter_data);
 };
 
 #endif

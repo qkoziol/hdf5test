@@ -47,7 +47,7 @@ class bft : public traverser
   /// dataset, named datatype, or soft link.  The traversal can be filtered.  If
   /// (xfilter & DATASET), for example, then datasets will not be visited.
 
-  void traverse(hid_t xstart, int xfilter = 0);
+  void traverse(hid_t xstart, int xfilter = NONE);
 
   /// What to do when a node is visited.
 
@@ -60,7 +60,7 @@ class bft : public traverser
   /// dataset, named datatype, or soft link.  The traversal can be filtered.  If
   /// (xfilter & DATASET), for example, then datasets will not be visited.
 
-  void traverse(const node& xstart, int xfilter);
+  void traverse(const node& xstart);
 
 
   /// The current object, visible during the traversal.
@@ -81,11 +81,11 @@ class bft : public traverser
 
   /// Adds heads of the links emanating from xnode to queue of nodes to visit.
 
-  void follow_group_links(const node& xnode, int xfilter);
+  void follow_group_links(const node& xnode);
 
   /// Adds heads of the links emanating from xnode to queue of nodes to visit.
 
-  void traverse_attrs(const node& xnode, int xfilter);
+  void traverse_attrs(const node& xnode);
 
 
   // Data:

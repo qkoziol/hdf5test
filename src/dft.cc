@@ -80,11 +80,13 @@ traverse(hid_t xloc, int xfilter)
 
   // Body:
 
+  _filter = xfilter;
+
   _start.self = xloc;
 
   reset();
 
-  traverse(_start, xfilter);
+  traverse(_start);
 
   _start.self = H5I_INVALID_HID;
 
@@ -99,7 +101,7 @@ traverse(hid_t xloc, int xfilter)
 
 void
 dft::
-traverse(const node& xnode, int xfilter)
+traverse(const node& xnode)
 {
   // Preconditions:
 
@@ -121,7 +123,7 @@ traverse(const node& xnode, int xfilter)
 
     mark(xnode);
 
-    if (passes(xnode, xfilter))
+    if (passes(xnode))
     {
       preorder_action();
     }
@@ -131,16 +133,16 @@ traverse(const node& xnode, int xfilter)
 
     if (H5Iget_type(xnode.self) == H5I_GROUP)
     {
-      follow_group_links(xnode, xfilter);
+      follow_group_links(xnode);
     }
 
     // Explore the attributes, if any, of this node.
 
-    traverse_attrs(xnode, xfilter);
+    traverse_attrs(xnode);
 
     // We encounter this node for the last time; do postorder operation here.
 
-    if (passes(xnode, xfilter))
+    if (passes(xnode))
     {
       postorder_action();
     }
@@ -259,7 +261,7 @@ current_hid() const
 
 void
 dft::
-follow_group_links(const node& xnode, int xfilter)
+follow_group_links(const node& xnode)
 {
   // Preconditions:
 
@@ -326,7 +328,7 @@ follow_group_links(const node& xnode, int xfilter)
 
       assert(invariant());
 
-      traverse(head, xfilter);
+      traverse(head);
     }
   }
 
@@ -339,7 +341,7 @@ follow_group_links(const node& xnode, int xfilter)
 
 void
 dft::
-traverse_attrs(const node& xnode, int xfilter)
+traverse_attrs(const node& xnode)
 {
   // Preconditions:
 
@@ -360,7 +362,7 @@ traverse_attrs(const node& xnode, int xfilter)
     head.parent = xnode.self;
     head.index  = link;
 
-    if (passes(head, xfilter))
+    if (passes(head))
     {
       // Start a new depth first search starting at the head.
 

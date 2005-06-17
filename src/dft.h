@@ -132,7 +132,7 @@ class dft : public traverser
   /// dataset, named datatype, or soft link.  The traversal can be filtered.  If
   /// (xfilter & DATASET), for example, then datasets will not be visited.
 
-  void traverse(hid_t xstart, int xfilter = 0);
+  void traverse(hid_t xstart, int xfilter = NONE);
 
   /// What to do when a node is encountered for the first time in a depth first
   /// traversal.
@@ -148,11 +148,9 @@ class dft : public traverser
  protected:
 
   /// Does a depth first traversal of graph starting at xstart, which may be a group,
-  /// dataset, named datatype, or soft link.  The traversal can be filtered.  If
-  /// (xfilter & DATASET), for example, then datasets will not be visited.
-  /// reset() is called immediately after xstart is saved.
+  /// dataset, named datatype, or soft link.
 
-  void traverse(const node& xstart, int xfilter);
+  void traverse(const node& xstart);
 
   /// The current object, visible during the traversal.
 
@@ -176,11 +174,11 @@ class dft : public traverser
 
   /// Recursively begins new traversals at the heads of the links emanating from xnode.
 
-  void follow_group_links(const node& xnode, int xfilter);
+  void follow_group_links(const node& xnode);
 
   /// Recursively begins new traversals at the heads of the links to attributes.
 
-  void traverse_attrs(const node& xnode, int xfilter);
+  void traverse_attrs(const node& xnode);
 
 
   // Data:

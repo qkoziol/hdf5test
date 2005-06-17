@@ -9,88 +9,115 @@
   @file Runs a read test on every container in an HDF5 file.
 */
 
+void
+usage()
+{
+  cerr << "usage: h5dft_read [OPTIONS] HDF5_file dataset [datasets...]\n"
+       << "   OPTIONS\n"
+       << "      -a   Include attributes in performance report.\n";
+}
+
 int
 main(int argc, char** argv)
 {
-  int result;
 
   // Preconditions:
 
-  // Body:
+  // Command line sanity check:
 
-  if (argc < 2)
+  // Command line must contain at least 2 args.  The first
+  // is the name of the program.  If the 2nd arg is not -a, then
+  // the 2nd is the name of an HDF5 file.
+  //
+  // If the 2nd argv is "-a", then the 3rd arg is the name of an
+  // HDF5 file.
+  //
+  // Additional args are interpreted as additional HDF5 file names.
+
+  if (argc < 2 || (argc < 3 && strncmp(argv[1], "-a", 2) == 0))
   {
     // Then the command line has an insufficient number of arguments.
 
-    cerr << "\tUsage: h5dft_read HDF5_file [HDF5_file...]\n";
-    result = 1;
+    usage();
+    exit(1);
+  }
+
+  // Body:
+
+  traverser::filter filter;
+  int               file_name_index;
+  int               result = 0;
+
+  if (strncmp(argv[1], "-a", 2) == 0)
+  {
+    filter = traverser::NONE;
+    file_name_index = 2;
   }
   else
   {
-    // Then the command line supplied at least one HDF5 file name.
+    filter = traverser::ATTRIBUTE;
+    file_name_index = 1;
+  }
 
-    result = 0;
+  // Loop through each HDF5 file name on the command line.
 
-    // Loop through each HDF5 file name on the command line.
+  for (int i = file_name_index; i < argc; ++i)
+  {
+    hid_t file;
 
-    for (int i = 1; i < argc; ++i)
+    // Try to open the HDF5 file.
+
+    H5E_BEGIN_TRY
     {
-      hid_t file;
+      file = H5Fopen(argv[i], H5F_ACC_RDONLY, H5P_DEFAULT);
+    }
+    H5E_END_TRY;
 
-      // Try to open the HDF5 file.
+    if (file < 0)
+    {
+      // Something's wrong with the file.  Skip it.
 
-      H5E_BEGIN_TRY
-      {
-	file = H5Fopen(argv[i], H5F_ACC_RDONLY, H5P_DEFAULT);
-      }
-      H5E_END_TRY;
+      cerr << "Failed to open `"
+	   << argv[i]
+	   << "'.  Skipping it.\n";
+      ++result;
+    }
+    else
+    {
+      // The file appears to be a legitimate HDF5 file.  Measure
+      // rates of reading datasets and attributes and report results.
 
-      if (file < 0)
-      {
-	// Something's wrong with the file.  Skip it.
+      cout << "Objects encountered in a depth first traversal of `"
+	   << argv[i]
+	   << "':\n";
 
-	cerr << "Failed to open `"
-	     << argv[i]
-	     << "'.  Skipping it.\n";
-	++result;
-      }
-      else
-      {
-	// The file appears to be a legitimate HDF5 file.  Measure
-	// rates of reading datasets and attributes and report results.
+      hid_t root = H5Gopen(file, "/");
 
-	cout << "Objects encountered in a depth first traversal of `"
-	     << argv[i]
-	     << "':\n";
+      assert(root >= 0);
 
-	hid_t root = H5Gopen(file, "/");
+      // Do a quick traversal of the file to get max length of any
+      // name in it.  This assists formatting of results.
 
-	assert(root >= 0);
+      dft_namelen len;
 
-	// Do a quick traversal of the file to get max length of any
-	// name in it.  This assists formatting of results.
+      len.traverse(root, filter);
 
-	dft_namelen len;
+      // Now traverse again to measure i/o rates.
 
-	len.traverse(root);
+      dft_read_perf tester;
 
-	// Now traverse again to measure i/o rates.
+      tester.traverse(root, filter);
 
-	dft_read_perf tester;
+      cout << "Summary for `"
+	   << argv[i]
+	   << "': "
+	   << tester.success_ct()
+	   << " tests succeeded and "
+	   << tester.failure_ct()
+	   << " tests failed.\n\n";
 
-	tester.traverse(root);
-
-	cout << "Summary for `"
-	     << argv[i]
-	     << "': "
-	     << tester.success_ct()
-	     << " tests succeeded and "
-	     << tester.failure_ct()
-	     << " tests failed.\n\n";
-
-	H5Gclose(root);
-	H5Fclose(file);
-      }
+      H5Gclose(root);
+      H5Fclose(file);
     }
   }
 

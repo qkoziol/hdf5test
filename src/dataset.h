@@ -112,6 +112,10 @@ class dataset : public pcontainer
 
   bool is_chunked() const;
 
+  /// Get the size of the chunks.
+
+  void get_chunk_size(tuple& xresult);
+
   /// True if this is an external dataset.
 
   bool is_external() const;

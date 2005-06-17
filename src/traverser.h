@@ -72,7 +72,7 @@ class traverser
   /// dataset, named datatype, or soft link.  The traversal can be filtered.  If
   /// (xfilter & DATASET), for example, then datasets will not be visited.
 
-  virtual void traverse(const node& xstart, int xfilter) = 0;
+  virtual void traverse(const node& xstart) = 0;
 
   /// An object corresponding to xhid, of the right dynamic type.
 
@@ -100,15 +100,15 @@ class traverser
 
   /// Continues traversal at the heads of the links emanating from xnode.
 
-  virtual void follow_group_links(const node& xnode, int xfilter) = 0;
+  virtual void follow_group_links(const node& xnode) = 0;
 
   /// Continues traversals at the heads of the links to attributes.
 
-  virtual void traverse_attrs(const node& xnode, int xfilter) = 0;
+  virtual void traverse_attrs(const node& xnode) = 0;
 
-  /// Decides whether xnode passes through xfilter.
+  /// Decides whether xnode passes through filter.
 
-  bool passes(const node& xnode, int xfilter) const;
+  bool passes(const node& xnode) const;
 
 
   // Data:
@@ -117,6 +117,7 @@ class traverser
   node            _start;   //< Starting point of traversal.
   set<objno>      _marked;  //< The set of nodes that have been marked.
   array_of<char>  _name;    //< Buffer to hold object names in various class operators.
+  int             _filter;  //< Which classes of nodes are filtered from visitation.
 };
 
 #endif

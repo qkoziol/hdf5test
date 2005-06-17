@@ -15,6 +15,8 @@ traverser()
 
   // Body:
 
+  _filter = NONE;
+
   // Postconditions:
 
   assert(invariant());
@@ -163,11 +165,13 @@ traverse(hid_t xloc, int xfilter)
 
   // Body:
 
+  _filter = xfilter;
+
   reset();
 
   _start.self = xloc;
 
-  traverse(_start, xfilter);
+  traverse(_start);
 
   _start.self = H5I_INVALID_HID;
 
@@ -320,7 +324,7 @@ name(const node& xnode, bool xpath)
 
 void
 traverser::
-follow_group_links(const node& xnode, int xfilter)
+follow_group_links(const node& xnode)
 {
   // Preconditions:
 
@@ -387,7 +391,7 @@ follow_group_links(const node& xnode, int xfilter)
 
       assert(invariant());
 
-      traverse(head, xfilter);
+      traverse(head);
     }
   }
 
@@ -400,7 +404,7 @@ follow_group_links(const node& xnode, int xfilter)
 
 bool
 traverser::
-passes(const node& xnode, int xfilter) const
+passes(const node& xnode) const
 {
   bool result;
 
@@ -413,13 +417,13 @@ passes(const node& xnode, int xfilter) const
   switch (type)
   {
     case H5I_DATASET:
-      result =!(xfilter & DATASET);
+      result =!(_filter & DATASET);
       break;
     case H5I_DATATYPE:
-      result = !(xfilter & DATATYPE);
+      result = !(_filter & DATATYPE);
       break;
     case H5I_ATTR:
-      result = !(xfilter & ATTRIBUTE);
+      result = !(_filter & ATTRIBUTE);
       break;
     default:
       result = false;
