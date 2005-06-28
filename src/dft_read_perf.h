@@ -3,6 +3,7 @@
 
 #include "dft.h"
 #include "io_perf.h"
+#include "memory.h"
 
 /*! @class dft_read_perf
     @brief A depth first traverser which runs an io performance test (read only)
@@ -64,10 +65,13 @@ class dft_read_perf : public dft
 
  protected:
 
-  io_perf   _tester;      //< The test to be run on every container.
-  unsigned  _success_ct;  //< Number of containers whose i/o test succeeded.
-  unsigned  _failure_ct;  //< Number of containers whose i/o test failed.
-  size_t    _longest;     //< The size of the longest name encountered.  Aids formatting of output.
+  io_perf        _tester;      ///< The test to be run on every container.
+  memory         _dest;        ///< Memory buffer used as destination for reads of containers.
+  unsigned       _success_ct;  ///< Number of containers whose i/o test succeeded.
+  unsigned       _failure_ct;  ///< Number of containers whose i/o test failed.
+  size_t         _longest;     ///< The size of the longest name encountered.  Aids formatting of output.
+  stack<double>  _open;        ///< Elapsed time to open current container.
+  stack<double>  _close;       ///< Elapsed time to close current container.
 };
 
 #endif

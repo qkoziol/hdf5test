@@ -71,7 +71,7 @@ class partial : public test
 
  protected:
 
-  timer  _step;  //< A timer for individual partial i/o steps.
+  timer  _step;  ///< A timer for individual partial i/o steps.
 
 };
 

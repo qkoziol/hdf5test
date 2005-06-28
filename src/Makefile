@@ -113,6 +113,7 @@ lib_sources =	attribute.cc \
 		objno.cc \
 		partial.cc \
 		pcontainer.cc \
+		perf_data.cc \
 		persistent.cc \
 		plist.cc \
 		scalar.cc \
@@ -205,4 +206,4 @@ endif
 endif
 
 clean:
-	rm -f *~ *.d *.o $(TEST) *.hdf *.h5 *.a \#* core* .\#* *.u *.s
+	rm -f *~ *.d *.o $(TEST) *.hdf *.h5 *.a \#* core* .\#* *.u *.s junk*

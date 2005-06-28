@@ -185,6 +185,9 @@ current() const
 
   // Body:
 
+  // ISSUE:
+  // Will this work for attributes?
+
   hid_t id = _current.top().self;
 
   switch(H5Iget_type(id))

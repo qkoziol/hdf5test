@@ -100,9 +100,9 @@ class tuple
 
  protected:
 
-  unsigned  _d;   //< dimension.
+  unsigned  _d;   ///< dimension.
 
-  hsize_t*  _mem; //< storage for elements.
+  hsize_t*  _mem; ///< storage for elements.
 };
 
 #endif

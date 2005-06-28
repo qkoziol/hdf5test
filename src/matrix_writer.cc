@@ -17,9 +17,10 @@ matrix_writer(const temp_file& xfile, const matrix& xmat, hid_t xtype, hid_t xcr
 
   extent e(2);
 
-  xmat.get_extent(e);
+  e.size()[0] = xmat.row_ct();
+  e.size()[1] = xmat.col_ct();
 
-  // If we're writing to a chunked dataset, make it extendible by specifying
+  // If we're writing to a chunked dataset, make it extendable by specifying
   // an unlimited maximum size in each dimension of the dataspace.
 
   if (xcreate_plist != H5P_DEFAULT)
@@ -30,34 +31,44 @@ matrix_writer(const temp_file& xfile, const matrix& xmat, hid_t xtype, hid_t xcr
       e.max_size()[1] = H5S_UNLIMITED;
     }
   }
+  else
+  {
+    e.max_size()[0] = e.size()[0];
+    e.max_size()[1] = e.size()[1]; 
+  }
 
-  _file_space = H5Screate_simple(2, &e.size()[0], &e.max_size()[0]);
+  hid_t file_space = H5Screate_simple(2, &e.size()[0], &e.max_size()[0]);
 
-  // The memory space is meant to represent the first _ct columns or rows (depending
-  // on the value of _access) stored contiguously.  Hence the memory space is 1 dimensional.
-  // At this point we don't know the size of the space, since clients may call
-  // set_access().  So we make it unlimited in size.
+  assert(file_space >= 0);
 
-  hsize_t dims     = 1;
-  hsize_t max_dims = H5S_UNLIMITED;
-
-  _mem_space = H5Screate_simple(1, &dims, &max_dims); 
-
-  _dataset = H5Dcreate(xfile.hid(),
+  hid_t id = H5Dcreate(xfile.hid(),
 		       "tmp",
 		       xtype,
-		       _file_space,
+		       file_space,
 		       xcreate_plist);
+
+  assert(id >= 0);
+
+  _dataset.attach(id);
+
+  H5Sclose(file_space);
 
   // Default access pattern.  It can be modified by a subsequent call to
   // set_access().
 
-  _ct = 1;
-  _access = BY_ROWS;
+  _max_write_ct = 1;
+  _cur_write_ct = 1;
+  _access       = BY_ROWS;
+  _accum_ct     = 0;
+  _type         = H5Tcopy(xtype);
+
+  assert(_type >= 0);
 
   // Postconditions:
 
   assert(invariant());
+  assert(ct() == 0);
+  assert(per_write_ct() == 1);
 
   // Exit:
 }
@@ -69,9 +80,9 @@ matrix_writer::
 
   // Body:
 
-  H5Idec_ref(_dataset);
-  H5Idec_ref(_file_space);
-  H5Idec_ref(_mem_space);
+  _dataset.detach();
+  _mem.detach();
+  H5Tclose(_type);
 
   // Postconditions:
 
@@ -89,13 +100,10 @@ invariant() const
   // Body:
   
   result = partial::invariant();
-  result = result && (H5Iget_type(_dataset) == H5I_DATASET);
-  result = result && (_ct > 0);
-  result = result && (_access == BY_ROWS ? _ct <= _mat.row_ct() : _ct <= _mat.col_ct());
-  result = result && (H5Sis_simple(_mem_space));
-  result = result && (H5Sget_simple_extent_ndims(_mem_space) == 1);
-  result = result && (H5Sis_simple(_file_space));
-  result = result && (H5Sget_simple_extent_ndims(_file_space) == 2);
+  result = result && (is_done() ? _accum_ct > 0 : true);
+  result = result && (_access == BY_ROWS ? _max_write_ct <= _mat.row_ct() : _max_write_ct <= _mat.col_ct());
+  result = result && (_max_write_ct >= _cur_write_ct);
+  result = result && (_cur_write_ct > 0);
 
   // Postconditions:
 
@@ -125,36 +133,38 @@ start()
 {
   // Preconditions:
 
+  assert(! is_done());
+
   // Body:
 
   hyperslab h(2);
 
+  _accum_ct = 0;
+  _cur_write_ct = _max_write_ct;
+
   if (_access == BY_ROWS)
   {
-    _mat.select_rows(0, _ct, h);
+    _mat.select_rows(0, _cur_write_ct, h);
   }
   else
   {
-    _mat.select_cols(0, _ct, h);
+    _mat.select_cols(0, _cur_write_ct, h);
   }
 
-  // The file space selection is just the first _ct rows or columns.
+  herr_t status = H5Sselect_hyperslab(_dataset.get_space().hid(),
+		                      H5S_SELECT_SET,
+		                      &h.origin()[0],
+		                      &h.stride()[0],
+		                      &h.ct()[0],
+		                      &h.block_size()[0]);
 
-  H5Sselect_hyperslab(_file_space,
-		      H5S_SELECT_SET,
-		      &h.origin()[0],
-		      &h.stride()[0],
-		      &h.ct()[0],
-		      &h.block_size()[0]);
+  assert(status >= 0);
 
-  // The memory space selection is the same size as the file space
-  // selection, but it's guaranteed to be a contiguous 1-d space
+  _mem.reserve(_dataset);
 
-  hsize_t dims = H5Sget_select_npoints(_file_space);
-  hsize_t max_dims = H5S_UNLIMITED;
+  status = H5Sselect_all(_mem.get_space().hid());
 
-  H5Sset_extent_simple(_mem_space, 1, &dims, &max_dims);
-  H5Sselect_all(_mem_space);
+  assert(status >= 0);
 
   // Postconditions:
 
@@ -167,7 +177,66 @@ void
 matrix_writer::
 next()
 {
-  not_implemented;
+  // Preconditions:
+
+  // Body:
+
+  // Protecting all the machinery of next() with this if
+  // statement might seem a little strange, but there's a
+  // method to this madness.  After the last piece of the
+  // matrix is written, but before next() is called, is_done()
+  // is true.  It makes no sense whatever to try to advance the
+  // matrix selection beyond its boundaries, yet the standard
+  // C/C++ loop structure in partial::run_test() requires next()
+  // to be called even though is_done() is true.  So in that
+  // case we make next() a no-op.
+
+  if (! is_done())
+  {
+    unsigned unwritten;
+
+    if (_access == BY_ROWS)
+    {
+      unwritten = _mat.row_ct()-_accum_ct;
+    }
+    else
+    {
+      unwritten = _mat.col_ct()-_accum_ct;
+    }
+
+    _cur_write_ct = _max_write_ct;
+
+    if (_cur_write_ct > unwritten)
+    {
+      _cur_write_ct = unwritten;
+    }
+
+    hyperslab h(2);
+
+    if (_access == BY_ROWS)
+    {
+      _mat.select_rows(_accum_ct, _cur_write_ct, h);
+    }
+    else
+    {
+      _mat.select_cols(_accum_ct, _cur_write_ct, h);
+    }
+
+    herr_t status = H5Sselect_hyperslab(_dataset.get_space().hid(),
+                                        H5S_SELECT_SET,
+                                        &h.origin()[0],
+                                        &h.stride()[0],
+                                        &h.ct()[0],
+                                        &h.block_size()[0]);
+
+    assert(status >= 0);
+  }
+
+  // Postconditions:
+
+  assert(invariant());
+
+  // Exit:
 }
 
 bool
@@ -176,7 +245,33 @@ is_done() const
 {
   bool result;
 
-  not_implemented;
+  // Preconditions:
+
+  // Body:
+
+  unsigned n;
+
+  if (_access == BY_ROWS)
+  {
+    n = _mat.row_ct();
+  }
+  else
+  {
+    n = _mat.col_ct();
+  }
+
+  if (_accum_ct == n)
+  {
+    result = true;
+  }
+  else
+  {
+    result = false;
+  }
+
+  // Postconditions:
+
+  // Exit:
 
   return result;
 }
@@ -187,28 +282,96 @@ do_partial_io()
 {
   double result;
 
-  not_implemented;
+  // Preconditions:
+
+  assert(! is_done());
+  assert(H5Iget_type(_dataset.hid()) == H5I_DATASET);
+  assert(H5Iget_type(_dataset.get_type()) == H5I_DATATYPE);
+  assert(H5Iget_type(_dataset.get_space().hid()) == H5I_DATASPACE);
+  assert(H5Sget_select_type(_dataset.get_space().hid()) == H5S_SEL_HYPERSLABS);
+  assert(H5Sget_select_type(_mem.get_space().hid()) == H5S_SEL_ALL);
+  assert(H5Sget_select_npoints(_dataset.get_space().hid()) == H5Sget_select_npoints(_mem.get_space().hid()));
+
+  // Body:
+
+  unsigned old_ct = ct();
+
+
+  herr_t status = H5Dwrite(_dataset.hid(),
+			   _dataset.get_type(),
+			   _mem.get_space().hid(),
+			   _dataset.get_space().hid(),
+			   H5P_DEFAULT,
+			   _mem.mem());
+
+  assert(status >= 0);
+
+  _accum_ct += _cur_write_ct;
+
+  // Postconditions:
+
+  assert(ct() == old_ct + _cur_write_ct);
+
+  // Exit:
 
   return result;
 }
 
 void
 matrix_writer::
-set_access(unsigned xct, access xaccess)
+set_access(unsigned xper_write_ct, access xaccess)
 {
   // Preconditions:
 
-  assert(xct > 0);
-  assert(xaccess == BY_ROWS ? xct <= _mat.row_ct() : xct <= _mat.col_ct());
+  assert(xper_write_ct > 0);
+  assert(xaccess == BY_ROWS ? xper_write_ct <= _mat.row_ct() : xper_write_ct <= _mat.col_ct());
 
   // Body:
 
-  _ct = xct;
-  _access = xaccess;
+  _max_write_ct = xper_write_ct;
+  _access       = xaccess;
 
   // Postconditions:
 
   assert(invariant());
 
   // Exit:
+}
+
+unsigned
+matrix_writer::
+ct() const
+{
+  unsigned result;
+
+  // Preconditions:
+
+  // Body:
+
+  result = _accum_ct;
+
+  // Postconditions:
+
+  // Exit:
+
+  return result;
+}
+
+unsigned
+matrix_writer::
+per_write_ct() const
+{
+  unsigned result;
+
+  // Preconditions:
+
+  // Body:
+
+  result = _max_write_ct;
+
+  // Postconditions:
+
+  // Exit:
+
+  return result;
 }

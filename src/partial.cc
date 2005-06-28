@@ -69,8 +69,12 @@ run_test()
 
   // Body:
 
+  _timer.put_mode(timer::ACCUMULATE);
+  _step.put_mode(timer::RESET);
+
   for (start(); ! is_done(); next())
   {
+    _timer.start();
     _step.start();
 
 
@@ -82,11 +86,14 @@ run_test()
     do_partial_io();
 
     _step.stop();
+cout << "step time = " << _step.elapsed() << endl;
+    _timer.stop();
 
     // TODO:
     // The step timer's state gets overwritten every time through this loop.  We
     // need to do something with the state here, either writing it out or saving it.
   }
+cout << "overall time = " << _timer.elapsed() << endl;
 
   // Postconditions:
 

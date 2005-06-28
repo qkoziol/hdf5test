@@ -61,7 +61,7 @@ main()
   {
     attribute a;
 
-    const dataspace& d = a.get_space();
+    dataspace& d = a.get_space();
 
     int ndim = d.get_extent().d(); // dimension of the dataspace
 

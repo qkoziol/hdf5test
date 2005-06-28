@@ -2,7 +2,6 @@
 #include "contract.h"
 
 #include "dft_namelen.h"
-#include "memory.h"
 #include "pcontainer.h"
 #include "std_iomanip.h"
 #include "std_iostream.h"
@@ -84,11 +83,10 @@ preorder_action()
   if (type == H5I_DATASET || type == H5I_ATTR)
   {
     pcontainer& src(dynamic_cast<pcontainer&>(current()));
-    memory            dest;
 
-    dest.reserve(src);
+    _dest.reserve(src);
 
-    _tester.run_test(src, dest);
+    _tester.run_test(src, _dest);
 
     if (_tester.status() == test::SUCCESS)
       ++_success_ct;
@@ -102,28 +100,30 @@ preorder_action()
 	 << left
 	 << src.type_name();
 
-      if (_tester.status() == test::SUCCESS)
-      {
-	double kb      = _tester.bytes()/1e3;
-	double elapsed = _tester.elapsed();
+    if (_tester.status() == test::SUCCESS)
+    {
+      double kb      = _tester.bytes()/1e3;
+      double elapsed = _tester.elapsed();
 
-	cout << setw(13) << left
-	     << " succeeded"
-	     << setw(15) << right << fixed << setprecision(3)
-	     << kb
-	     << setw(19) << right << fixed << setprecision(3)
-	     << elapsed*1e3
-	     << "    "
-	     << setw(13) << right << fixed << setprecision(3)
-	     << kb/elapsed/1e3
-	     << '\n';
-      }
-      else
-      {
-	cout << setw(13)
-	     << left
-	     << " failed\n";
-      }
+      cout << setw(13) << left
+	   << " succeeded"
+	   << setw(15) << right << fixed << setprecision(3)
+	   << kb
+	   << setw(19) << right << fixed << setprecision(3)
+	   << elapsed*1e3
+	   << "    "
+	   << setw(13) << right << fixed << setprecision(3)
+	   << kb/elapsed/1e3
+	   << '\n';
+    }
+    else
+    {
+      cout << setw(13)
+	   << left
+	   << " failed\n";
+    }
+
+    _dest.detach();
     src.detach();
   }
 

@@ -12,9 +12,6 @@ io_perf()
 
   // Body:
 
-  _bytes   = 0;
-  _elapsed = 0;
-
   // Postconditions:
 
   assert(invariant());
@@ -69,7 +66,7 @@ operator=(const io_perf& xother)
 
 void
 io_perf::
-run_test(const pcontainer& xcon, memory& xmem)
+run_test(pcontainer& xcon, memory& xmem)
 {
   // Preconditions:
 
@@ -101,9 +98,16 @@ run_test(const pcontainer& xcon, memory& xmem)
 
     size_t type_size = H5Tget_size(xcon.get_type());
 
-    _bytes = xcon.get_space().get_extent().npoints()*type_size;
+    if (xcon.get_space().d() > 0)
+    {
+      _results.bytes = xcon.get_space().get_extent().npoints()*type_size;
+    }
+    else
+    {
+      _results.bytes = type_size;
+    }
 
-    _elapsed = _timer.elapsed();
+    _results.elapsed = _timer.elapsed();
 
     _status = SUCCESS;
   }
@@ -151,9 +155,16 @@ run_test(const memory& xmem, pcontainer& xcon)
 
     size_t type_size = H5Tget_size(xcon.get_type());
 
-    _bytes = xcon.get_space().get_extent().npoints()*type_size;
+    if (xcon.get_space().d() > 0)
+    {
+      _results.bytes = xcon.get_space().get_extent().npoints()*type_size;
+    }
+    else
+    {
+      _results.bytes = type_size;
+    }
 
-    _elapsed = _timer.elapsed();
+    _results.elapsed = _timer.elapsed();
 
     _status = SUCCESS;
   }
@@ -187,7 +198,7 @@ bytes() const
 
   // Body:
 
-  result = _bytes;
+  result = _results.bytes;
 
   // Postconditions:
 
@@ -208,7 +219,7 @@ elapsed() const
 
   // Body:
 
-  result = _elapsed;
+  result = _results.elapsed;
 
   // Postconditions:
 

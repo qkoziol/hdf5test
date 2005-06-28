@@ -6,7 +6,11 @@
 #include "std_iostream.h"
 
 /*!
-  @file Runs a read test on every container in an HDF5 file.
+  @file h5dft_read.cc Runs a read test on every dataset in an HDF5 file
+                      (plus every attribute with the -a option).  Reports
+                      bytes read (in kb, where 1 kb = 1e3 bytes), elapsed
+                      time to read the data, and the transfer rate (in
+                      mb/s, where 1 mb = 1e6 bytes).
 */
 
 void

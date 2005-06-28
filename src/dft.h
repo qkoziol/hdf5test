@@ -169,7 +169,7 @@ class dft : public traverser
   int depth() const;
 
 
- private:
+ protected:
 
 
   /// Recursively begins new traversals at the heads of the links emanating from xnode.
@@ -183,7 +183,8 @@ class dft : public traverser
 
   // Data:
 
-  stack<node>  _current;  //< Top is current node being visited in traversal.
+
+  stack<node>  _current;  ///< Top is current node being visited in traversal.
 };
 
 #endif

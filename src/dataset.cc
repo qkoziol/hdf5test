@@ -357,11 +357,15 @@ create(const hdf5_file& xfile,
                    d.hid(),
                    plist);
 
+  assert(_hid >= 0);
+
   H5Idec_ref(plist);
 
   if (_hid >= 0)
   {
     hid_t space = H5Dget_space(_hid);
+
+    assert(space >= 0);
 
     _space.attach(space);
 
@@ -464,6 +468,9 @@ attach(hid_t xhid)
   assert(H5Iget_type(xhid) == H5I_DATASET);
 
   // Body:
+
+  if (is_attached())
+    detach();
 
   hdf5_handle::attach(xhid);
 

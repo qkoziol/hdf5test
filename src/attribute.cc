@@ -224,6 +224,9 @@ attach(hid_t xhid)
 
   // Body:
 
+  if (is_attached())
+    detach();
+
   hdf5_handle::attach(xhid);
 
   hid_t space = H5Aget_space(_hid);

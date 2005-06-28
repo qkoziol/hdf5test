@@ -96,9 +96,9 @@ class matrix
 
  protected:
 
-  unsigned _row_ct;  //< Number of rows.
+  unsigned _row_ct;  ///< Number of rows.
 
-  unsigned _col_ct;  //< Number of columns;
+  unsigned _col_ct;  ///< Number of columns;
 
  private:
 

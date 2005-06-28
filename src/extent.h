@@ -115,11 +115,10 @@ class extent
   extent(unsigned xdim);
 
  protected:
- private:
 
-  tuple  _max_size;
+  tuple  _max_size;  ///< The maximum size of all dimensions of the extent.
 
-  tuple  _size;
+  tuple  _size;     ///< The current size of all dimensions of the extent.
 
 };
 

@@ -114,10 +114,10 @@ class traverser
   // Data:
 
 
-  node            _start;   //< Starting point of traversal.
-  set<objno>      _marked;  //< The set of nodes that have been marked.
-  array_of<char>  _name;    //< Buffer to hold object names in various class operators.
-  int             _filter;  //< Which classes of nodes are filtered from visitation.
+  node            _start;   ///< Starting point of traversal.
+  set<objno>      _marked;  ///< The set of nodes that have been marked.
+  array_of<char>  _name;    ///< Buffer to hold object names in various class operators.
+  int             _filter;  ///< Which classes of nodes are filtered from visitation.
 };
 
 #endif

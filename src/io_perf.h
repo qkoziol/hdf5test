@@ -3,6 +3,7 @@
 
 class memory;
 class pcontainer;
+#include "perf_data.h"
 #include "std_iostream.h"
 #include "test.h"
 
@@ -48,7 +49,7 @@ class io_perf : public test
 
   /// Test data transfer from xcon to xmem.
 
-  void run_test(const pcontainer& xcon, memory& xmem);
+  void run_test(pcontainer& xcon, memory& xmem);
 
   /// Execute run_io_perf_test() and measure the performance in bytes/second.
 
@@ -66,9 +67,7 @@ class io_perf : public test
  protected:
 
 
-  size_t _bytes;    //< Bytes transferred.
-
-  double _elapsed;  //< Seconds elapsed during i/o operation.
+  perf_data  _results;  ///< Results of test;
 };
 
 #endif

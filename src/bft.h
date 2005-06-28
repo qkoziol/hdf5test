@@ -90,8 +90,8 @@ class bft : public traverser
 
   // Data:
 
-  node          _current;  //< The node currently being visited.
-  queue<node>  _pending;   //< The queue of nodes encountered but not yet visited.
+  node         _current;  ///< The node currently being visited.
+  queue<node>  _pending;  ///< The queue of nodes encountered but not yet visited.
 };
 
 #endif

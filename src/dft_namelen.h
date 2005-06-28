@@ -77,9 +77,9 @@ class dft_namelen : public dft
 
  protected:
 
-  size_t  _longest;  //< Max length of any name at current point in traversal.
+  size_t  _longest;  ///< Max length of any name at current point in traversal.
 
-  mode    _mode;     //< Mode of operation. 
+  mode    _mode;     ///< Mode of operation. 
 
 
 };

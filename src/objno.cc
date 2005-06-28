@@ -6,8 +6,10 @@
 objno::
 objno(const H5G_stat_t& xstat)
 {
-  a = xstat.objno[0];
-  b = xstat.objno[1];
+  id[0]   = xstat.objno[0];
+  id[1]   = xstat.objno[1];
+  idx     = 0;
+  is_attr = false;
 }
 
 bool
@@ -20,15 +22,30 @@ operator<(const objno& xother) const
 
   // Body:
 
-  if (a < xother.a)
+  // All this logic is just a field by field comparison,
+  // arbitrarily assigning id[0] the highest precedence,
+  // id[1] the next highest, and idx the lowest precedence.
+
+  if (id[0] < xother.id[0])
   {
     result = true;
   }
-  else if (a == xother.a)
+  else if (id[0] == xother.id[0])
   {
-    if (b < xother.b)
+    if (id[1] < xother.id[1])
     {
       result = true;
+    }
+    else if (id[1] == xother.id[1])
+    {
+      if (idx < xother.idx)
+      {
+	result = true;
+      }
+      else
+      {
+	result = false;
+      }
     }
     else
     {
@@ -57,8 +74,8 @@ operator=(const objno& xother)
 
   // Body:
 
-  a = xother.a;
-  b = xother.b;
+  id[0] = xother.id[0];
+  id[1] = xother.id[1];
   ptr_to_result = this;
 
   // Postconditions:
@@ -95,8 +112,19 @@ objno(const hid_t xhid)
 
   H5Idec_ref(file);
 
-  a = statbuf.objno[0];
-  b = statbuf.objno[1];
+  id[0] = statbuf.objno[0];
+  id[1] = statbuf.objno[1];
+
+  if ( H5Iget_type(xhid) == H5I_ATTR)
+  {
+    not_implemented;
+    is_attr = true;
+  }
+  else
+  {
+    is_attr = false;
+    idx     = 0;
+  }
 
   // Postconditions:
 
@@ -113,9 +141,9 @@ operator<<(ostream& xos, const objno& xobj)
   // Body:
 
   xos << '('
-      << xobj.a
+      << xobj.id[0]
       << ", "
-      << xobj.b
+      << xobj.id[1]
       << ')';
 
   // Postconditions:

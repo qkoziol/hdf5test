@@ -35,6 +35,9 @@ dataspace(const tuple& xsize, const tuple& xmax_size)
   // Body:
 
   _hid = H5Screate_simple(xsize.d(), &xsize[0], &xmax_size[0]);
+
+  assert(_hid >= 0);
+
   set_extent();
 
   // Postconditions:
@@ -84,13 +87,18 @@ invariant() const
 
 const extent&
 dataspace::
-get_extent() const
+get_extent()
 {
   // Preconditions:
 
   assert(is_attached());
+  assert(d() > 0);
 
   // Body:
+
+  int status = H5Sget_simple_extent_dims(_hid, &_ext.size()[0], &_ext.max_size()[0]);
+
+  assert(status >= 0);
 
   // Postconditions:
 
@@ -129,12 +137,14 @@ select(const hyperslab& xsubset, H5S_seloper_t xop)
 
   // Body:
 
-  H5Sselect_hyperslab(_hid,
-		      xop,
-		      &xsubset.origin()[0],
-		      &xsubset.stride()[0],
-		      &xsubset.ct()[0],
-		      &xsubset.block_size()[0]);
+  herr_t status = H5Sselect_hyperslab(_hid,
+		                      xop,
+		                      &xsubset.origin()[0],
+		                      &xsubset.stride()[0],
+		                      &xsubset.ct()[0],
+		                      &xsubset.block_size()[0]);
+
+  assert(status >= 0);
 
   // Postconditions:
 
@@ -154,7 +164,9 @@ select_all()
 
   // Body:
 
-  H5Sselect_all(_hid);
+  herr_t status = H5Sselect_all(_hid);
+
+  assert(status >= 0);
 
   // Postconditions:
 
@@ -173,7 +185,9 @@ select_none()
 
   // Body:
 
-  H5Sselect_none(_hid);
+  herr_t status = H5Sselect_none(_hid);
+
+  assert(status >= 0);
 
   // Postconditions:
 
@@ -193,19 +207,27 @@ dataspace(hid_t xother)
 
   int dim = H5Sget_simple_extent_ndims(xother);
 
+  assert(dim >= 0);
+
   if (dim > 0)
   {
     _ext.reserve(dim);
 
-    H5Sget_simple_extent_dims(xother, &_ext.size()[0], &_ext.max_size()[0]);
+    int status = H5Sget_simple_extent_dims(xother, &_ext.size()[0], &_ext.max_size()[0]);
+
+    assert(status >= 0);
 
     _hid = H5Screate_simple(dim, &_ext.size()[0], &_ext.max_size()[0]);
+
+    assert(_hid >= 0);
 
     set_extent();
   }
   else
   {
     _hid = H5Screate(H5S_SCALAR);
+
+    assert(_hid >= 0);
   }
 
   // Postconditions:
@@ -228,11 +250,15 @@ set_extent()
 
   int dim = H5Sget_simple_extent_ndims(_hid);
 
+  assert(dim >= 0);
+
   _ext.reserve(dim);
 
   if (dim > 0)
   {
-    H5Sget_simple_extent_dims(_hid, &_ext.size()[0], &_ext.max_size()[0]);
+    int status = H5Sget_simple_extent_dims(_hid, &_ext.size()[0], &_ext.max_size()[0]);
+
+    assert(status >= 0);
   }
 
   // Postconditions:
@@ -251,6 +277,9 @@ attach(hid_t xhid)
   assert(H5Iget_type(xhid) == H5I_DATASPACE);
 
   // Body:
+
+  if (is_attached())
+    detach();
 
   hdf5_handle::attach(xhid);
 

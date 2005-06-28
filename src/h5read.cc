@@ -5,6 +5,15 @@
 #include "std_cstring.h"
 #include "std_iostream.h"
 #include "std_iomanip.h"
+#include "timer.h"
+
+/*!
+  @file h5read.cc Runs a read test on every dataset named on the command
+                  line.  Reports bytes read (in kb, where 1 kb = 1e3
+                  bytes), elapsed time to open, read, and close the
+                  dataset, and the transfer rate (in mb/s, where
+                  1 mb = 1e6 bytes).
+*/
 
 void
 usage()
@@ -87,32 +96,44 @@ main(int argc, char** argv)
        << ":\n"
        << setw(max_name_len+2) << setfill(' ') << left
        << "dataset name"
-       << setw(11)
-       << " status  "
-       << setw(19)
-       << "  bytes read (kb)  "
-       << setw(21)
-       << "   elapsed time (ms) "
+       << setw(13) << left
+       << "  status"
+       << setw(17) << left
+       << "  bytes read (kb)"
        << setw(16) << left
+       << "  open time (ms)"
+       << setw(16) << left
+       << " read time (ms)"
+       << setw(17) << left
+       << " close time (ms)"
+       << setw(14) << left
        << "  io rate (mb/s)"
        << '\n';
 
   dataset ds;
   io_perf tester;
   memory  mem;
+  timer   close;
+  timer   open;
 
   for (int i = file_name_index+1; i < argc; ++i)
   {
     cout << setw(max_name_len+2) << left
 	 << argv[i];
 
+    open.start();
     ds.open(file, argv[i]);
+    open.stop();
 
     if (ds.is_attached())
     {
       mem.reserve(ds);
 
       tester.run_test(ds, mem);
+
+      close.start();
+      ds.detach();
+      close.stop();
 
       if (tester.status() == test::SUCCESS)
       {
@@ -121,12 +142,15 @@ main(int argc, char** argv)
 
 	cout << setw(13) << left
 	     << "succeeded"
-	     << setw(11) << right << fixed << setprecision(3)
+	     << setw(15) << right << fixed << setprecision(3)
 	     << kb
-	     << setw(19) << right << fixed << setprecision(3)
+	     << setw(15) << right << fixed << setprecision(3)
+	     << open.elapsed()*1e3
+	     << setw(16) << right << fixed << setprecision(3)
 	     << elapsed*1e3
-	     << "    "
-	     << setw(13) << right << fixed << setprecision(3)
+	     << setw(16) << right << fixed << setprecision(3)
+	     << close.elapsed()*1e3
+	     << setw(16) << right << fixed << setprecision(3)
 	     << kb/elapsed/1e3
 	     << '\n';
 
@@ -136,8 +160,6 @@ main(int argc, char** argv)
 	cout << setw(13) << left
 	     << "failed\n";
       }
-
-      ds.detach();
     }
     else
     { 

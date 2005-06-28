@@ -93,7 +93,7 @@ class attribute : public pcontainer
  protected:
 
 
-  static const string _type_name; //< "attribute".
+  static const string _type_name; ///< "attribute".
 
 };
 

@@ -3,13 +3,14 @@
 int
 main()
 {
-  temp_file scratch("junk");
-  matrix m(2,3);
+  temp_file scratch("test_matrix_writer.h5");
 
-  matrix_writer junk(scratch, m);
+  matrix m(60,60);
 
-  junk.set_access(2, matrix_writer::BY_COLUMNS);
+  matrix_writer test(scratch, m);
 
-  junk.run_test();
+  test.set_access(2, matrix_writer::BY_COLUMNS);
+
+  test.run_test();
 }
 

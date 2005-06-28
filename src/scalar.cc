@@ -10,6 +10,8 @@ scalar()
 
   _hid = H5Screate(H5S_SCALAR);
 
+  assert(_hid >= 0);
+
   // Postconditions:
 
   assert(is_attached());

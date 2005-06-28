@@ -86,7 +86,7 @@ invariant() const
 
 void
 memory::
-reserve(const pcontainer& xcon)
+reserve(pcontainer& xcon)
 {
   // Preconditions:
 
@@ -96,17 +96,16 @@ reserve(const pcontainer& xcon)
 
   // ISSUE:
   // How much memory should we allocate?
-  // One choice is to allocate as
-  // much as the container's dataspace.  This could
-  // be wasteful.  As an example, suppose we're transferring
-  // one column at a time of a very large matrix between
-  // memory and container.  If we only need one column at
-  // a time in memory, then there's no need to allocate
-  // memory to hold the entire matrix.  But, for the
-  // moment, this is the easy implementation, so that's
-  // what we'll do.
+  // The policy here will be to allocate as much as the current
+  // selection of xcon.  That policy assumes that one wants to
+  // map the current selection, which may be scattered throughout
+  // its dataspace, to a compact, contiguous memory buffer.  That
+  // may not always be the case, but it's certainly a useful
+  // behavior in this test suite. 
 
-  hsize_t npts = xcon.get_space().get_extent().npoints();
+  hssize_t npts = H5Sget_select_npoints(xcon.get_space().hid());
+
+  assert(npts >= 0);
 
   size_t size = H5Tget_size(xcon.get_type());
 
@@ -118,11 +117,18 @@ reserve(const pcontainer& xcon)
   // accordance with the rules described in hdf5_handle.h,
   // we should not decrement or close this hid here.
 
-  hid_t sp = xcon.get_space().hid();
+  hsize_t dim = npts;
+
+  hid_t sp = H5Screate_simple(1, &dim, &dim);
 
   // Incrementing the reference count to sp happens in this call.
 
   _space.attach(sp);
+
+  // Decrement the reference count, since sp goes out of scope at the
+  // end of this function.
+
+  H5Idec_ref(sp);
 
   _type  = xcon.get_type();
 

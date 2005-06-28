@@ -83,15 +83,17 @@ class dataspace : public hdf5_handle
 
   /// Get the extent of this dataspace.
 
-  const extent& get_extent() const;
+  const extent& get_extent();
 
   /// The dimension of the dataspace.
 
   unsigned d() const;
 
+
  protected:
 
-  extent _ext;  //< The extent of this dataspace.
+
+  extent _ext;  ///< The extent of this dataspace.
 
   /// Define the extent.
 

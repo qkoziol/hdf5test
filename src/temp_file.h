@@ -36,7 +36,7 @@ class temp_file : public hdf5_file
 
  protected:
 
-  string _name; //< File name.
+  string _name; ///< File name.
 
 };
 

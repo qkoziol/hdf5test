@@ -134,10 +134,10 @@ class hyperslab
 
   // Data members:
 
-  tuple _block_size;  //< block size in each dimension
-  tuple _origin;      //< coordinates of origin of blocks
-  tuple _stride;      //< separation of blocks in each dimension
-  tuple _ct;          //< number of blocks in each dimension
+  tuple _block_size;  ///< block size in each dimension
+  tuple _origin;      ///< coordinates of origin of blocks
+  tuple _stride;      ///< separation of blocks in each dimension
+  tuple _ct;          ///< number of blocks in each dimension
 
  private:
 

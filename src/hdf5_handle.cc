@@ -127,6 +127,9 @@ attach(hid_t xhid)
 
   // Body:
 
+  if (is_attached())
+    detach();
+
   _hid = xhid;
   H5Iinc_ref(xhid);
 

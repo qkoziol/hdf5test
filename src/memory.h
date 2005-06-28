@@ -1,6 +1,7 @@
 #ifndef MEMORY_H
 #define MEMORY_H
 
+#include "extent.h"
 #include "handle.h"
 #include "pcontainer.h"
 #include "std_cstdlib.h"
@@ -39,9 +40,9 @@ class memory : public container, public handle
 
   /// Resize memory buffer to be adequate to
   /// contain contents of current selection
-  /// of xcon.
+  /// of xcon.  Memory buffer is contiguous.
 
-  void reserve(const pcontainer& xcon);
+  void reserve(pcontainer& xcon);
 
   /// Capacity of memory in bytes.
 
@@ -76,8 +77,8 @@ class memory : public container, public handle
  protected:
 
 
-  char*   _mem;   //< The memory buffer.
-  size_t  _ub;    //< An upper bound on the number of bytes that can be stored in _mem.
+  char*   _mem;   ///< The memory buffer.
+  size_t  _ub;    ///< An upper bound on the number of bytes that can be stored in _mem.
 };
 
 #endif

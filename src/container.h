@@ -56,8 +56,8 @@ class container
 
  protected:
 
-  hid_t     _type;   //< The HDF5 datatype associated with this container.
-  dataspace _space;  //< The dataspace of this container.
+  hid_t     _type;   ///< The HDF5 datatype associated with this container.
+  dataspace _space;  ///< The dataspace of this container.
 
 };
 

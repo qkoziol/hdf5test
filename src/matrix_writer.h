@@ -1,8 +1,10 @@
 #ifndef MATRIX_WRITER_H
 #define MATRIX_WRITER_H
 
+#include "dataset.h"
 #include "hdf5.h"
 #include "matrix.h"
+#include "memory.h"
 #include "partial.h"
 #include "temp_file.h"
 
@@ -72,16 +74,26 @@ class matrix_writer : public partial
   /// Set the matrix access pattern: xct rows or columns at each partial write,
   /// and by rows or by columns.
 
-  void set_access(unsigned xct = 1, access xaccess = BY_ROWS);
+  void set_access(unsigned xper_write_ct = 1, access xaccess = BY_ROWS);
+
+  /// The number of rows or columns written thus far.
+
+  unsigned ct() const;
+
+  /// The number of columns or rows to write at each interation.
+
+  unsigned per_write_ct() const;
 
  protected:
 
-  hid_t    _dataset;    //< The hid of the dataset used as the destination of the write.
-  unsigned _ct;         //< The number of rows or columns to write at each partial write.
-  access   _access;     //< Are partial writes by rows or columns?
-  matrix   _mat;        //< The dimensions of the matrix being written.
-  hid_t    _mem_space;  //< The memory dataspace.
-  hid_t    _file_space; //< The file dataspace.
+  dataset  _dataset;       ///< The dataset used as the destination of the write.
+  unsigned _max_write_ct;  ///< The max number of rows or columns to write at each iteration.
+  unsigned _cur_write_ct;  ///< The number of rows or columns to write at this iteration.
+  unsigned _accum_ct;      ///< The number of rows or columns written thus far.
+  access   _access;        ///< Are partial writes by rows or columns?
+  matrix   _mat;           ///< The dimensions of the matrix being written.
+  memory   _mem;           ///< The memory buffer.
+  hid_t    _type;          ///< Datatype transferred.
 };
 
 #endif

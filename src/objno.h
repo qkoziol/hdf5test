@@ -21,8 +21,9 @@ class objno
 
  public:
 
-  unsigned long a;
-  unsigned long b;
+  unsigned long id[2];     ///< The object id within a given file; objno field in H5G_stat_t.
+  unsigned int  idx;       ///< Attribute index. 
+  bool          is_attr;   ///< True if this identifies an attribute.
 
   /// Comparison operator required by STL's sorted associative container.
 

@@ -2,8 +2,8 @@
 #define ARRAY_OF_H
 
 #include "contract.h"
-#include <cstddef>
-#include <ostream>
+#include "std_cstddef.h"
+#include "std_ostream.h"
 
 /*! @class array_of
     @brief A contiguous resizable array of any C++ type.
