@@ -87,7 +87,7 @@ invariant() const
 
 const extent&
 dataspace::
-get_extent()
+get_extent() const
 {
   // Preconditions:
 
@@ -95,10 +95,6 @@ get_extent()
   assert(d() > 0);
 
   // Body:
-
-  int status = H5Sget_simple_extent_dims(_hid, &_ext.size()[0], &_ext.max_size()[0]);
-
-  assert(status >= 0);
 
   // Postconditions:
 
@@ -291,4 +287,55 @@ attach(hid_t xhid)
   assert(is_attached());
 
   // Exit:
+}
+
+ostream&
+operator<<(ostream& xos, const dataspace& xspace)
+{
+  // Preconditions:
+
+  assert(xos.good());
+
+  // Body:
+
+  unsigned d = xspace.d();
+
+  xos << "d = "
+      << d;
+
+  if (d > 0)
+  {
+    xos << " extent = ("
+	<< xspace.get_extent()
+	<< ')';
+  }
+
+  // Postconditions:
+
+  // Exit:
+
+  return xos;
+}
+
+void
+dataspace::
+select(hsize_t xnpts)
+{
+  // Preconditions:
+
+  assert(is_attached());
+  assert(d() == 1);
+
+  // Body:
+
+  hyperslab h(1);
+
+  h.ct()[0] = xnpts;
+
+  select(h);
+
+  // Postconditions:
+
+  // Exit:
+
 }

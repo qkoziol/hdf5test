@@ -196,16 +196,14 @@ is_external() const
 
   hid_t plist = H5Dget_create_plist(_hid);
 
-  int layout;
+  int ext_ct = H5Pget_external_count(plist);
 
-  H5Pget(plist, "layout", &layout);
-
-  if (layout == H5D_CHUNKED)
+  if (ext_ct > 0)
     result = true;
   else
     result = false;
 
-  H5Idec_ref(plist);
+  H5Pclose(plist);
 
   // Postconditions:
 
@@ -237,7 +235,7 @@ is_compact() const
   else
     result = false;
 
-  H5Idec_ref(plist);
+  H5Pclose(plist);
 
   // Postconditions:
 
@@ -489,7 +487,7 @@ attach(hid_t xhid)
 
 void
 dataset::
-get_chunk_size(tuple& xresult)
+get_chunk_size(tuple& xresult) const
 {
 
   // Preconditions:
@@ -510,3 +508,60 @@ get_chunk_size(tuple& xresult)
 
   // Exit:
 }
+
+ostream&
+operator<<(ostream& xos, const dataset& xds)
+{
+  // Preconditions:
+
+  assert(xos.good());
+
+  // Body:
+
+  xos << "dataspace = ("
+      << xds.get_space()
+      << ')';
+
+  if (xds.is_chunked())
+  {
+    tuple chunk(xds.get_space().d());
+
+    xds.get_chunk_size(chunk);
+
+    xos << " chunk size = ("
+	<< chunk
+	<< ')';
+  }
+  else if (xds.is_external())
+  {
+    xos << " external, file sizes = (";
+    {
+      hid_t plist = H5Dget_create_plist(xds.hid());
+
+      int ext_ct = H5Pget_external_count(plist);
+
+      tuple size(ext_ct);
+
+      for (int i = 0; i < ext_ct; ++i)
+      {
+	H5Pget_external(plist, i, 0, 0, 0, &size[i]);
+      }
+
+      xos << size
+	  << ')';
+
+      H5Pclose(plist);
+    }
+  }
+  else if (xds.is_compact())
+  {
+    xos << " compact";
+  }
+
+  // Postconditions:
+
+  // Exit:
+
+  return xos;
+}
+

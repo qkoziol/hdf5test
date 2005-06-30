@@ -16,7 +16,7 @@
 void
 usage()
 {
-  cerr << "usage: h5dft_read [OPTIONS] HDF5_file dataset [datasets...]\n"
+  cerr << "usage: h5dft_read [OPTIONS] HDF5_file [HDF5_file...]\n"
        << "   OPTIONS\n"
        << "      -a   Include attributes in performance report.\n";
 }

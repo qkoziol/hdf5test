@@ -5,6 +5,7 @@ class dataset_creation;
 class group;
 class hdf5_file;
 #include "pcontainer.h"
+#include "std_iostream.h"
 #include "std_string.h"
 class tuple;
 
@@ -26,6 +27,10 @@ class tuple;
 
 class dataset : public pcontainer
 {
+  /// Writes dataset characteristics to an ostream.
+
+  friend ostream& operator<<(ostream& xos, const dataset& xds);
+
  public:
 
 
@@ -114,7 +119,7 @@ class dataset : public pcontainer
 
   /// Get the size of the chunks.
 
-  void get_chunk_size(tuple& xresult);
+  void get_chunk_size(tuple& xresult) const;
 
   /// True if this is an external dataset.
 

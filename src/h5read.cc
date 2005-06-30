@@ -1,3 +1,4 @@
+#include "config.h"
 #include "dataset.h"
 #include "hdf5.h"
 #include "io_perf.h"
@@ -5,6 +6,7 @@
 #include "std_cstring.h"
 #include "std_iostream.h"
 #include "std_iomanip.h"
+#include "std_sstream.h"
 #include "timer.h"
 
 /*!
@@ -108,6 +110,7 @@ main(int argc, char** argv)
        << " close time (ms)"
        << setw(14) << left
        << "  io rate (mb/s)"
+       << "  dataset characteristics"
        << '\n';
 
   dataset ds;
@@ -131,13 +134,28 @@ main(int argc, char** argv)
 
       tester.run_test(ds, mem);
 
+      // Sigh...  We want to print dataset characteristics and closing time,
+      // but that's awkward to do.  We can only print dataset characteristics
+      // of an attached dataset, but we gotta detach/close it to get the
+      // closing time.  And we want to print the dataset characteristics
+      // after the closing time to make a neat printout - dataset characteristics
+      // are an arbitrary length, so they need to be last on the output line.
+      // As a bit of a hack I guess we can write dataset characteristics to
+      // a string before closing, then write the string.
+
+      ostringstream output;
+
+      output << ds;
+
+      string ds_char = output.str();
+
       close.start();
       ds.detach();
       close.stop();
 
       if (tester.status() == test::SUCCESS)
       {
-	double kb      = tester.bytes()/1e3;
+	double kb      = tester.bytes()/((double)BYTES_PER_KB);
 	double elapsed = tester.elapsed();
 
 	cout << setw(13) << left
@@ -145,13 +163,15 @@ main(int argc, char** argv)
 	     << setw(15) << right << fixed << setprecision(3)
 	     << kb
 	     << setw(15) << right << fixed << setprecision(3)
-	     << open.elapsed()*1e3
+	     << open.elapsed()*BYTES_PER_KB
 	     << setw(16) << right << fixed << setprecision(3)
-	     << elapsed*1e3
+	     << elapsed*BYTES_PER_KB
 	     << setw(16) << right << fixed << setprecision(3)
-	     << close.elapsed()*1e3
+	     << close.elapsed()*BYTES_PER_KB
 	     << setw(16) << right << fixed << setprecision(3)
-	     << kb/elapsed/1e3
+	     << kb/elapsed/((double)BYTES_PER_KB)
+	     << "     "
+	     << ds_char
 	     << '\n';
 
       }

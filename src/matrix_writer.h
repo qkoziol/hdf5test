@@ -64,7 +64,7 @@ class matrix_writer : public partial
 
   /// Write a portion of the matrix in a single operation.
 
-  virtual double do_partial_io();
+  virtual bool do_partial_io();
 
   /// Each partial write accesses either a contiguous set of rows or
   /// a contiguous set of columns.

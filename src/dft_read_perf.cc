@@ -1,6 +1,9 @@
 #include "dft_read_perf.h"
 #include "contract.h"
 
+#include "attribute.h"
+#include "config.h"
+#include "dataset.h"
 #include "dft_namelen.h"
 #include "pcontainer.h"
 #include "std_iomanip.h"
@@ -102,7 +105,7 @@ preorder_action()
 
     if (_tester.status() == test::SUCCESS)
     {
-      double kb      = _tester.bytes()/1e3;
+      double kb      = _tester.bytes()/((double)BYTES_PER_KB);
       double elapsed = _tester.elapsed();
 
       cout << setw(13) << left
@@ -110,11 +113,25 @@ preorder_action()
 	   << setw(15) << right << fixed << setprecision(3)
 	   << kb
 	   << setw(19) << right << fixed << setprecision(3)
-	   << elapsed*1e3
-	   << "    "
+	   << elapsed*BYTES_PER_KB
+	   << "         "
 	   << setw(13) << right << fixed << setprecision(3)
-	   << kb/elapsed/1e3
-	   << '\n';
+	   << kb/elapsed/((double)BYTES_PER_KB)
+	   << "     ";
+
+      dataset* ds = dynamic_cast<dataset*>(&src);
+
+      if (ds != 0)
+      {
+	cout << *ds;
+      }
+      else
+      {
+	attribute* attr = dynamic_cast<attribute*>(&src);
+
+	cout << *attr;
+      }
+      cout << '\n';
     }
     else
     {
@@ -179,24 +196,20 @@ reset()
 
   // Print a header
 
-  cout << setw(_longest+2)
-       << setfill(' ')
-       << left
+  cout << setw(_longest+2) << setfill(' ') << left
        << "container name"
        << setw(11)
        << "  type   "
-       << setw(13)
-       << left
+       << setw(13) << left
        << "test status"
        << setw(15)
        << "  bytes read (kb)  "
        << setw(25)
        << "   elapsed time (ms) "
-       << setw(16)
-       << left
+       << setw(16) << left
        << "  io rate (mb/s)"
+       << "  persistent container characteristics"
        << endl;
-
 
   // Postconditions:
 

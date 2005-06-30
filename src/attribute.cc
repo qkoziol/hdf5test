@@ -245,3 +245,23 @@ attach(hid_t xhid)
 
   // Exit:
 }
+
+ostream&
+operator<<(ostream& xos, const attribute& xattr)
+{
+  // Preconditions:
+
+  assert(xos.good());
+
+  // Body:
+
+  xos << "dataspace = ("
+      << xattr.get_space()
+      << ')';
+
+  // Postconditions:
+
+  // Exit:
+
+  return xos;
+}

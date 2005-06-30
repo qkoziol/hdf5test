@@ -280,3 +280,23 @@ detach()
 
   // Exit:
 }
+
+ostream&
+operator<<(ostream& xos, const memory& xmem)
+{
+  // Preconditions:
+
+  assert(xos.good());
+
+  // Body:
+
+  xos << "dataspace = ("
+      << xmem.get_space()
+      << ')';
+
+  // Postconditions:
+
+  // Exit:
+
+  return xos;
+}

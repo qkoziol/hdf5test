@@ -297,10 +297,11 @@ operator<<(ostream& xos, const extent& xextent)
 
   // Body:
 
-  xos << "size = "
+  xos << "size = ("
       << xextent._size
-      << "max_size = "
-      << xextent._max_size;
+      << ") max_size = ("
+      << xextent._max_size
+      << ')';
 
   // Postconditions:
 

@@ -1,7 +1,12 @@
 #include "contract.h"
 #include "matrix_writer.h"
 
+#include "config.h"
 #include "matrix.h"
+#include "std_iomanip.h"
+#include "std_iostream.h"
+
+#define MILLI_PER_MICRO ((double)1000)
 
 matrix_writer::
 matrix_writer(const temp_file& xfile, const matrix& xmat, hid_t xtype, hid_t xcreate_plist) :
@@ -42,7 +47,7 @@ matrix_writer(const temp_file& xfile, const matrix& xmat, hid_t xtype, hid_t xcr
   assert(file_space >= 0);
 
   hid_t id = H5Dcreate(xfile.hid(),
-		       "tmp",
+		       "matrix_writer",
 		       xtype,
 		       file_space,
 		       xcreate_plist);
@@ -137,6 +142,9 @@ start()
 
   // Body:
 
+  // Select the first _cur_write_ct rows or columns of
+  // the dataset's dataspace as the write destination.
+ 
   hyperslab h(2);
 
   _accum_ct = 0;
@@ -151,20 +159,48 @@ start()
     _mat.select_cols(0, _cur_write_ct, h);
   }
 
-  herr_t status = H5Sselect_hyperslab(_dataset.get_space().hid(),
-		                      H5S_SELECT_SET,
-		                      &h.origin()[0],
-		                      &h.stride()[0],
-		                      &h.ct()[0],
-		                      &h.block_size()[0]);
+  _dataset.get_space().select(h);
 
-  assert(status >= 0);
+  // Reserve sufficient memory to hold the first _cur_write_ct
+  // rows or columns as the write source.  Make sure the entire
+  // memory space is selected.
 
   _mem.reserve(_dataset);
 
-  status = H5Sselect_all(_mem.get_space().hid());
+  herr_t status = H5Sselect_all(_mem.get_space().hid());
 
   assert(status >= 0);
+
+  // Make sure the timer is in reset mode so we can time all the
+  // individual writes.  Make sure the time is zeroed.
+
+  _timer.put_mode(timer::RESET);
+
+  _timer.reset();
+
+  // Write out a header.
+
+  cout << _dataset
+       << '\n'
+       << setw(11)
+       << "status   ";
+
+  if (_access == BY_ROWS)
+  {
+    cout << setw(12)
+	 << "rows    ";
+  }
+  else
+  {
+    cout << setw(12)
+	 << "columns   ";
+  }
+  cout << setw(20)
+       << "bytes written (kb)"
+       << setw(19)
+       << "elapsed time (ms)"
+       << setw(16)
+       << "io rate (mb/s)\n";
 
   // Postconditions:
 
@@ -193,6 +229,13 @@ next()
 
   if (! is_done())
   {
+    // Write the minimum of the number of not-yet-written
+    // rows/columns and the standard number of rows/columns
+    // to be written.  Only on the last iteration, and only
+    // if the number of rows/columns is not evenly divisible
+    // by the standard row/column write count should the
+    // size of the selection change.
+
     unsigned unwritten;
 
     if (_access == BY_ROWS)
@@ -222,14 +265,8 @@ next()
       _mat.select_cols(_accum_ct, _cur_write_ct, h);
     }
 
-    herr_t status = H5Sselect_hyperslab(_dataset.get_space().hid(),
-                                        H5S_SELECT_SET,
-                                        &h.origin()[0],
-                                        &h.stride()[0],
-                                        &h.ct()[0],
-                                        &h.block_size()[0]);
-
-    assert(status >= 0);
+    _dataset.get_space().select(h);
+    _mem.get_space().select(h.npoints());
   }
 
   // Postconditions:
@@ -276,26 +313,23 @@ is_done() const
   return result;
 }
 
-double::
+bool::
 matrix_writer::
 do_partial_io()
 {
-  double result;
+  bool result;
 
   // Preconditions:
 
   assert(! is_done());
-  assert(H5Iget_type(_dataset.hid()) == H5I_DATASET);
-  assert(H5Iget_type(_dataset.get_type()) == H5I_DATATYPE);
-  assert(H5Iget_type(_dataset.get_space().hid()) == H5I_DATASPACE);
-  assert(H5Sget_select_type(_dataset.get_space().hid()) == H5S_SEL_HYPERSLABS);
-  assert(H5Sget_select_type(_mem.get_space().hid()) == H5S_SEL_ALL);
+  assert(_dataset.is_attached());
   assert(H5Sget_select_npoints(_dataset.get_space().hid()) == H5Sget_select_npoints(_mem.get_space().hid()));
 
   // Body:
 
   unsigned old_ct = ct();
 
+  _timer.start();
 
   herr_t status = H5Dwrite(_dataset.hid(),
 			   _dataset.get_type(),
@@ -304,13 +338,49 @@ do_partial_io()
 			   H5P_DEFAULT,
 			   _mem.mem());
 
-  assert(status >= 0);
+  _timer.stop();
 
-  _accum_ct += _cur_write_ct;
+  if (status >= 0)
+  {
+    double kb      = H5Sget_select_npoints(_mem.get_space().hid())*H5Tget_size(_dataset.get_type())/((double)BYTES_PER_KB);
+    double elapsed = _timer.elapsed();
+
+    cout << setw(11)
+	 << "succeeded "
+	 << setw(3)
+	 << _accum_ct
+	 << " to "
+	 << setw(3)
+	 << _accum_ct+_cur_write_ct-1
+	 << fixed << setprecision(3) << setw(18)
+	 << kb
+	 << "  "
+	 << fixed << setprecision(3) << setw(16)
+	 << elapsed*MILLI_PER_MICRO
+	 << setw(16)
+	 << kb/elapsed/((double)BYTES_PER_KB)
+	 << endl;
+
+    _accum_ct += _cur_write_ct;
+    result = true;
+  }
+  else
+  {
+    cout << setw(11)
+	 << "failed   "
+	 << setw(3)
+	 << _accum_ct
+	 << " to "
+	 << setw(3)
+	 << _accum_ct+_cur_write_ct-1
+	 << endl;
+
+    result = false;
+  }
 
   // Postconditions:
 
-  assert(ct() == old_ct + _cur_write_ct);
+  assert(result ? ct() == old_ct + _cur_write_ct : ct() == old_ct);
 
   // Exit:
 

@@ -434,8 +434,10 @@ operator<<(ostream& xos, const tuple& xtuple)
 
   for (unsigned i = 0; i < xtuple._d; ++i)
   {
-    xos << *(xtuple._mem+i)
-	<< ' ';
+    xos << *(xtuple._mem+i);
+
+    if (i < xtuple._d-1)
+      xos << ", ";
   }
 
   // Postconditions:

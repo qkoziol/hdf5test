@@ -126,8 +126,9 @@ class hyperslab
   tuple& block_size();
   const tuple& block_size() const;
 
+  /// The number of points represented by the hyperslab.
 
-  // Restriction interface:
+  hsize_t npoints() const;
 
 
  protected:

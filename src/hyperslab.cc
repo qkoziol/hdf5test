@@ -28,10 +28,22 @@ hyperslab(unsigned xdim)
   _stride.reserve(xdim);
   _ct.reserve(xdim);
 
+  if (xdim > 0)
+  {
+    _block_size[0] = 1;
+    _ct[0]         = 1;
+    _origin[0]     = 0;
+    _stride[0]     = 1;
+  }
+
   // Postconditions:
 
   assert(invariant());
   assert(d() == xdim);
+  assert(d() > 0 ? block_size()[0] == 1 : true);
+  assert(d() > 0 ? ct()[0] == 1 : true);
+  assert(d() > 0 ? origin()[0] == 0 : true);
+  assert(d() > 0 ? stride()[0] == 1 : true);
 
   // Exit:
 }
@@ -262,4 +274,33 @@ stride() const
   // Exit:
 
   return _stride;
+}
+
+hsize_t
+hyperslab::
+npoints() const
+{
+  hsize_t result;
+
+  // Preconditions:
+
+  // Body:
+
+  result = 1;
+
+  int dim = d();
+
+  for (int i = 0; i < dim; ++i)
+  {
+    // ISSUE:
+    // What prevents overflow in this computation?
+
+    result *= _ct[i]*_block_size[i];
+  }
+
+  // Postconditions:
+
+  // Exit:
+
+  return result;
 }

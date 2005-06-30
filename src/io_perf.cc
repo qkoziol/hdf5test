@@ -100,7 +100,7 @@ run_test(pcontainer& xcon, memory& xmem)
 
     if (xcon.get_space().d() > 0)
     {
-      _results.bytes = xcon.get_space().get_extent().npoints()*type_size;
+      _results.bytes = H5Sget_select_npoints(xcon.get_space().hid())*type_size;
     }
     else
     {

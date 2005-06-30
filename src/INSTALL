@@ -5,18 +5,24 @@
       The value assigned to HDF5DIR should be
       the name of the directory containing the
       directories bin, doc, include, and lib.
+      The makefile has commented-out definitions
+      for a number of ncsa machines and architectures.
 
 2)  Edit config.h.
 
       Define the max and min values for the type
       suseconds_t found in gettimeofday().
+      Commented out definitions for a number of
+      ncsa machines and architectures are in
+      the file.
 
 3)  make
 
       This should compile all the code and
       produce several binaries.  Only Gnu make
       has been used in development and testing.
-      It is probably required.
+      It is required.  The compilation should be
+      clean - no warnings or errors.
 
 4)  make test
 
@@ -24,10 +30,9 @@
       supported.  Many are intended just to test
       the test suite.
 
-5)  ./test_dft_io_perf hdf5_file [hdf5_file ...]
+5)  ./test_dft_read_perf hdf5_file [hdf5_file ...]
 
-      (Gotta think of a different name for this!)
-      test_dft_io_perf expects to find the name
+      test_dft_read_perf expects to find the name
       of one or more hdf5 files on the command
       line.  It does a depth first traversal of
       each file starting at the root group, reads
@@ -39,7 +44,7 @@
 
       For a trivial example, try:
 
-      ./test_dft_io_perf test_basic_io_perf.h5
+      ./test_dft_read_perf test_basic_io_perf.h5
 
       To generate the file `test_basic_io_perf.h5'
       run ./test_basic_io_perf.
@@ -56,6 +61,15 @@
       Uses doxygen to generate documentation from the
       source files.  The documentation is placed
       in ../doc/html.
+
+7) make bin
+
+      Currently makes 2 executables - h5read and
+      h5dft_read.  Execute each without arguments for
+      usage.  h5read is for measuring the performance
+      of reading selected datasets.  h5dft_read is for
+      measuring the performance of reading all
+      datasets and attributes in an HDF5 file.
 
 Things that could go wrong:
 

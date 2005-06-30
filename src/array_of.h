@@ -334,8 +334,8 @@ reserve(size_t xub)
 }
 
 template<class t>
-std::ostream&
-operator<<(std::ostream& xos, const array_of<t>& x)
+ostream&
+operator<<(ostream& xos, const array_of<t>& x)
 {
   xos << x(0);
 

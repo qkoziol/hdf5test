@@ -3,6 +3,7 @@
   kinds of containers.
 */
 
+#include "config.h"
 #include "contract.h"
 #include "dataset.h"
 #include "group.h"
@@ -48,7 +49,7 @@ do_read_write_tests(io_perf& xio_t, pcontainer& xcon)
 
   if (xio_t.status() == test::SUCCESS)
   {
-    double mb      = xio_t.bytes()/1e6;
+    double mb      = xio_t.bytes()/((double)(BYTES_PER_KB*BYTES_PER_KB));
     double elapsed = xio_t.elapsed();
 
     cout << "\tWrite test succeeded.  "
@@ -71,7 +72,7 @@ do_read_write_tests(io_perf& xio_t, pcontainer& xcon)
 
   if (xio_t.status() == test::SUCCESS)
   {
-    double mb      = xio_t.bytes()/1e6;
+    double mb      = xio_t.bytes()/((double)(BYTES_PER_KB*BYTES_PER_KB));
     double elapsed = xio_t.elapsed();
 
     cout << "\tRead test succeeded.  "
@@ -179,7 +180,10 @@ main()
 
     // Test contiguous io.
 
-    cout << "Contiguous dataset test:\n";
+    cout << "Contiguous dataset test: "
+         << cg
+         << endl;
+
     do_read_write_tests(io_t, cg);
 
     cg.detach();
@@ -209,7 +213,10 @@ main()
 
     // Test chunked io.
 
-    cout << "Chunked dataset test:\n";
+    cout << "Chunked dataset test: "
+         << ch
+         << endl;
+
     do_read_write_tests(io_t, ch);
 
     ch.detach();
@@ -226,7 +233,10 @@ main()
 
     // Test compact io.
 
-    cout << "Compact dataset test:\n";
+    cout << "Compact dataset test: "
+         << c
+         << endl;
+
     do_read_write_tests(io_t, c);
 
     c.detach();
@@ -243,7 +253,10 @@ main()
 
     // Test external io.
 
-    cout << "External dataset test:\n";
+    cout << "External dataset test: "
+         << e
+         << endl;
+
     do_read_write_tests(io_t, e);
 
     e.detach();

@@ -5,6 +5,7 @@
 #include "extent.h"
 #include "hdf5_handle.h"
 class hyperslab;
+#include "std_iostream.h"
 
 /*! @class dataspace
     @brief A handle to a "simple" HDF5 dataspace.
@@ -22,6 +23,8 @@ class hyperslab;
 
 class dataspace : public hdf5_handle
 {
+  friend ostream& operator<<(ostream& xos, const dataspace& xspace);
+
  public:
 
 
@@ -81,9 +84,17 @@ class dataspace : public hdf5_handle
 
   void select_none();
 
+  /// If a 1-d dataspace, select the first xn points.
+
+  void select(hsize_t xn);
+
   /// Get the extent of this dataspace.
 
-  const extent& get_extent();
+  const extent& get_extent() const;
+
+  /// Define the extent by querying the HDF5 library.
+
+  void set_extent();
 
   /// The dimension of the dataspace.
 
@@ -95,9 +106,6 @@ class dataspace : public hdf5_handle
 
   extent _ext;  ///< The extent of this dataspace.
 
-  /// Define the extent.
-
-  void set_extent();
 
 };
 

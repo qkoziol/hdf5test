@@ -25,6 +25,10 @@
 
 class attribute : public pcontainer
 {
+  /// Writes attribute characteristics to an ostream.
+
+  friend ostream& operator<<(ostream& xos, const attribute& xattr);
+
  public:
 
 

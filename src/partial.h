@@ -55,10 +55,10 @@ class partial : public test
 
   virtual bool is_done() const = 0;
 
-  /// Performs the partial i/o being timed and returns the number of bytes transferred.
-  /// By convention, returning a negative number means the i/o operation failed.
+  /// Attempts a partil i/o operation.  Returns true if the attempt succeeded, false
+  /// if it failed.
 
-  virtual double do_partial_io() = 0;
+  virtual bool do_partial_io() = 0;
 
 
   // Test interface:
@@ -71,7 +71,6 @@ class partial : public test
 
  protected:
 
-  timer  _step;  ///< A timer for individual partial i/o steps.
 
 };
 

@@ -37,7 +37,7 @@ invariant() const
 
   // Body:
 
-  result = (_timer.elapsed() >= _step.elapsed());
+  result = test::invariant();
 
   // Postconditions:
 
@@ -69,31 +69,21 @@ run_test()
 
   // Body:
 
-  _timer.put_mode(timer::ACCUMULATE);
-  _step.put_mode(timer::RESET);
+  bool error = false;
 
-  for (start(); ! is_done(); next())
+  for (start(); ! is_done() && ! error; next())
   {
-    _timer.start();
-    _step.start();
-
 
     // TODO:
     // do_partial_io() returns the number of bytes transferred and signals failure
     // of io operation if it returns a negative number.  We need to do something with
     // that return value here.
 
-    do_partial_io();
-
-    _step.stop();
-cout << "step time = " << _step.elapsed() << endl;
-    _timer.stop();
-
-    // TODO:
-    // The step timer's state gets overwritten every time through this loop.  We
-    // need to do something with the state here, either writing it out or saving it.
+    if (do_partial_io() < 0)
+    {
+      error = true;
+    }
   }
-cout << "overall time = " << _timer.elapsed() << endl;
 
   // Postconditions:
 
