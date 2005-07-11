@@ -12,8 +12,13 @@ class handle
  public:
 
 
-  // Standard features are omitted.  All implementations are trivial
+  // Most standard features are omitted.  All implementations are trivial
   // since the class is abstract and has no representation.
+
+  /// Destructor is implemented (trivially) to avoid gcc warnings about
+  /// a virtual class w/o a virtual destructor.
+
+  virtual ~handle();
 
 
   // Attachment interface:

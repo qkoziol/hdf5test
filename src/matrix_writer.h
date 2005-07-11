@@ -9,7 +9,7 @@
 #include "temp_file.h"
 
 /*! @class matrix_writer
-    @brief A class that writes a matrix to a dataset in various ways.
+    @brief A class that writes a matrix to a dataset.
 */
 
 class matrix_writer : public partial

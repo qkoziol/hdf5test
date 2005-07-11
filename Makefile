@@ -1,4 +1,4 @@
-.PHONY:	doc bin
+.PHONY:	doc bin clean
 
 doc:
 	cd src && $(MAKE) doc

@@ -102,6 +102,7 @@ lib_sources =	attribute.cc \
 		dft_read_perf.cc \
 		extent.cc \
 		group.cc \
+		handle.cc \
 		hdf5_file.cc \
 		hdf5_handle.cc \
 		hyperslab.cc \

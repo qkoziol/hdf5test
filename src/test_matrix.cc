@@ -52,7 +52,7 @@ test_dims_selections()
 
   hyperslab result(2);
 
-  cout << "\tDefault contruction of 2-d hyperslab: "
+  cout << "\tDefault construction of 2-d hyperslab: "
        << result
        << endl;
 

@@ -12,5 +12,9 @@ main()
   test.set_access(100, matrix_writer::BY_COLUMNS);
 
   test.run_test();
+
+  m.put_col(7);
+
+  test.run_test();
 }
 

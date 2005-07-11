@@ -138,8 +138,6 @@ start()
 {
   // Preconditions:
 
-  assert(! is_done());
-
   // Body:
 
   // Select the first _cur_write_ct rows or columns of
