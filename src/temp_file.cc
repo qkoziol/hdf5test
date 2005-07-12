@@ -1,6 +1,8 @@
 #include "contract.h"
 #include "temp_file.h"
 
+#include <unistd.h>
+
 temp_file::
 temp_file(const string& xname, hid_t xcreation_plist, hid_t xaccess_plist)
 {
