@@ -417,7 +417,11 @@ is_readable() const
       {
 	unsigned int flags;
 
+#if H5_VERS_MINOR==6
 	H5Z_filter_t filter = H5Pget_filter(plist, i, &flags, 0, 0, 0, 0);
+#else
+	H5Z_filter_t filter = H5Pget_filter(plist, i, &flags, 0, 0, 0, 0, 0);
+#endif
 
 	if (H5Zfilter_avail(filter) <= 0)
 	{

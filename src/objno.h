@@ -21,7 +21,11 @@ class objno
 
  public:
 
+#if H5_VERS_MINOR==6
   unsigned long id[2];     ///< The object id within a given file; objno field in H5G_stat_t.
+#else
+  haddr_t       id;        ///< The object id within a given file; objno field in H5G_stat_t.
+#endif
   unsigned int  idx;       ///< Attribute index. 
   bool          is_attr;   ///< True if this identifies an attribute.
 
