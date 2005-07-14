@@ -10,7 +10,7 @@ main()
 
   H5E_BEGIN_TRY
   {
-    file = H5Fopen("../../testfiles/file5.h5", H5F_ACC_RDONLY, H5P_DEFAULT);
+    file = H5Fopen("../testfiles/file5.h5", H5F_ACC_RDONLY, H5P_DEFAULT);
   }
   H5E_END_TRY;
 
