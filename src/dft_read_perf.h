@@ -63,6 +63,15 @@ class dft_read_perf : public dft
 
   void reset();
 
+  /// Turns verbose output on (if x is true) and off (if x is false).  Verbose
+  /// output prints the dataset/attribute dataspace, storage mode, etc.
+
+  void  set_verbose(bool x);
+
+  /// Is output mode verbose?
+
+  bool is_verbose() const;
+
  protected:
 
   io_perf        _tester;      ///< The test to be run on every container.
@@ -72,6 +81,7 @@ class dft_read_perf : public dft
   size_t         _longest;     ///< The size of the longest name encountered.  Aids formatting of output.
   stack<double>  _open;        ///< Elapsed time to open current container.
   stack<double>  _close;       ///< Elapsed time to close current container.
+  bool           _verbose;     ///< Output mode.
 };
 
 #endif

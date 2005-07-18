@@ -109,15 +109,19 @@ main(int argc, char** argv)
        << setw(17) << left
        << " close time (ms)"
        << setw(14) << left
-       << "  io rate (mb/s)"
-       << "  dataset characteristics"
-       << '\n';
+       << "  io rate (mb/s)";
+  if (verbose)
+  {
+    cout << "  dataset characteristics";
+  }
+  cout << '\n';
 
   dataset ds;
   io_perf tester;
   memory  mem;
   timer   close;
   timer   open;
+  string  ds_char;
 
   for (int i = file_name_index+1; i < argc; ++i)
   {
@@ -134,20 +138,23 @@ main(int argc, char** argv)
 
       tester.run_test(ds, mem);
 
-      // Sigh...  We want to print dataset characteristics and closing time,
-      // but that's awkward to do.  We can only print dataset characteristics
-      // of an attached dataset, but we gotta detach/close it to get the
-      // closing time.  And we want to print the dataset characteristics
-      // after the closing time to make a neat printout - dataset characteristics
-      // are an arbitrary length, so they need to be last on the output line.
-      // As a bit of a hack I guess we can write dataset characteristics to
-      // a string before closing, then write the string.
+      if (verbose)
+      {
+	// Sigh...  We want to print dataset characteristics and closing time,
+	// but that's awkward to do.  We can only print dataset characteristics
+	// of an attached dataset, but we gotta detach/close it to get the
+	// closing time.  And we want to print the dataset characteristics
+	// after the closing time to make a neat printout - dataset characteristics
+	// are an arbitrary length, so they need to be last on the output line.
+	// As a bit of a hack I guess we can write dataset characteristics to
+	// a string before closing, then write the string.
 
-      ostringstream output;
+	ostringstream output;
 
-      output << ds;
+	output << ds;
 
-      string ds_char = output.str();
+	ds_char = output.str();
+      }
 
       close.start();
       ds.detach();
@@ -169,10 +176,13 @@ main(int argc, char** argv)
 	     << setw(16) << right << fixed << setprecision(3)
 	     << close.elapsed()*BYTES_PER_KB
 	     << setw(16) << right << fixed << setprecision(3)
-	     << kb/elapsed/((double)BYTES_PER_KB)
-	     << "     "
-	     << ds_char
-	     << '\n';
+	     << kb/elapsed/((double)BYTES_PER_KB);
+	if (verbose)
+	{
+	     cout << "     "
+		  << ds_char;
+	}
+	cout << '\n';
 
       }
       else

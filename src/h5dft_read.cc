@@ -3,6 +3,7 @@
 #include "dft_read_perf.h"
 #include "dft_namelen.h"
 #include "hdf5.h"
+#include "std_cstring.h"
 #include "std_iostream.h"
 
 /*!
@@ -18,7 +19,8 @@ usage()
 {
   cerr << "usage: h5dft_read [OPTIONS] HDF5_file [HDF5_file...]\n"
        << "   OPTIONS\n"
-       << "      -a   Include attributes in performance report.\n";
+       << "      -a   Include attributes in performance report.\n"
+       << "      -v   Verbose output.  Include dataspace and storage characteristics in output.\n";
 }
 
 int
@@ -29,38 +31,76 @@ main(int argc, char** argv)
 
   // Command line sanity check:
 
-  // Command line must contain at least 2 args.  The first
-  // is the name of the program.  If the 2nd arg is not -a, then
-  // the 2nd is the name of an HDF5 file.
-  //
-  // If the 2nd argv is "-a", then the 3rd arg is the name of an
-  // HDF5 file.
-  //
-  // Additional args are interpreted as additional HDF5 file names.
 
-  if (argc < 2 || (argc < 3 && strncmp(argv[1], "-a", 2) == 0))
+
+  // The command line must contain exactly 2 mandatory args.  It may
+  // contain 0, 1, or 2 optional flags, and may contain any number of
+  // optional args.  Any flags must be supplied after the 1st mandatory
+  // arg, and before the 2nd mandatory arg.
+  //
+  // Mandatory args:
+  //
+  //    1st:  name of the program
+  //    2nd:  name of an hdf5 file.
+  //
+  // Optional flags:
+  //
+  //    -a:  include attributes in measurements and output.
+  //    -v:  verbose output; print dataspace and dataset storage characteristics.
+  //    -av: equivalent to -a -v
+  //    -va: equivalent to -av
+  //
+  //    If more than one optional flag is present, they all must occur as
+  //    consecutive args.
+  //
+  // Optional args:
+  //
+  //    Any additional args come after the 2nd mandatory arg.  All such args
+  //    are interpreted as possible hdf5 file names.
+  //
+
+  if (argc < 2)
   {
-    // Then the command line has an insufficient number of arguments.
+    // Insufficient number of args.
 
     usage();
     exit(1);
   }
 
+
   // Body:
 
-  traverser::filter filter;
-  int               file_name_index;
-  int               result = 0;
+  // Parse command line and set options.
 
-  if (strncmp(argv[1], "-a", 2) == 0)
+  traverser::filter filter = traverser::ATTRIBUTE;
+  int               file_name_index = argc-1;  // index of 1st file name on command line.
+  int               result = 0;
+  bool              verbose = false;
+
+  for (int i = 1; i < file_name_index; ++i)
   {
-    filter = traverser::NONE;
-    file_name_index = 2;
-  }
-  else
-  {
-    filter = traverser::ATTRIBUTE;
-    file_name_index = 1;
+    if (strncmp(argv[i], "-av", 3) == 0)
+    {
+      filter = traverser::NONE;
+      verbose = true;
+    }
+    else if (strncmp(argv[i], "-va", 3) == 0)
+    {
+      filter = traverser::NONE;
+      verbose = true;
+    }
+    else if (strncmp(argv[i], "-a", 2) == 0)
+    {
+      filter  = traverser::NONE;
+    }
+    else if (strncmp(argv[i], "-v", 2) == 0)
+    {
+      verbose = true;
+    }
+    else
+    {
+      file_name_index = i;
+    }
   }
 
   // Loop through each HDF5 file name on the command line.
@@ -109,6 +149,8 @@ main(int argc, char** argv)
       // Now traverse again to measure i/o rates.
 
       dft_read_perf tester;
+
+      tester.set_verbose(verbose);
 
       tester.traverse(root, filter);
 

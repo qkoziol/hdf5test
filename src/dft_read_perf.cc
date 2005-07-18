@@ -19,10 +19,12 @@ dft_read_perf()
   _success_ct = 0;
   _failure_ct = 0;
   _longest    = 0;
+  _verbose    = false;
 
   // Postconditions:
 
   assert(invariant());
+  assert(! is_verbose());
 
   // Exit:
 
@@ -119,17 +121,20 @@ preorder_action()
 	   << kb/elapsed/((double)BYTES_PER_KB)
 	   << "     ";
 
-      dataset* ds = dynamic_cast<dataset*>(&src);
-
-      if (ds != 0)
+      if (_verbose)
       {
-	cout << *ds;
-      }
-      else
-      {
-	attribute* attr = dynamic_cast<attribute*>(&src);
+	dataset* ds = dynamic_cast<dataset*>(&src);
 
-	cout << *attr;
+	if (ds != 0)
+	{
+	  cout << *ds;
+	}
+	else
+	{
+	  attribute* attr = dynamic_cast<attribute*>(&src);
+
+	  cout << *attr;
+	}
       }
       cout << '\n';
     }
@@ -205,11 +210,14 @@ reset()
        << setw(15)
        << "  bytes read (kb)  "
        << setw(25)
-       << "   elapsed time (ms) "
+       << "      read time (ms) "
        << setw(16) << left
-       << "  io rate (mb/s)"
-       << "  persistent container characteristics"
-       << endl;
+       << "  io rate (mb/s)";
+  if (_verbose)
+  {
+    cout << "  persistent container characteristics";
+  }
+  cout << endl;
 
   // Postconditions:
 
@@ -250,6 +258,44 @@ failure_ct() const
   // Body:
 
   result = _failure_ct;
+
+  // Postconditions:
+
+  // Exit:
+
+  return result;
+}
+
+void
+dft_read_perf::
+set_verbose(bool x)
+{
+  // Preconditions:
+
+  // Body:
+
+  _verbose = x;
+
+  // Postconditions:
+
+  assert(invariant());
+  assert(is_verbose() == x);
+
+  // Exit:
+
+}
+
+bool
+dft_read_perf::
+is_verbose() const
+{
+  bool result;
+
+  // Preconditions:
+
+  // Body:
+
+  result = _verbose;
 
   // Postconditions:
 
