@@ -61,27 +61,23 @@ operator=(const partial& xother)
 }
 
 
-void
+bool
 partial::
 run_test()
 {
+  bool result;
+
   // Preconditions:
 
   // Body:
 
-  bool error = false;
+  result = true;
 
-  for (start(); ! is_done() && ! error; next())
+  for (start(); ! is_done() && result; next())
   {
-
-    // TODO:
-    // do_partial_io() returns the number of bytes transferred and signals failure
-    // of io operation if it returns a negative number.  We need to do something with
-    // that return value here.
-
-    if (do_partial_io() < 0)
+    if (!do_partial_io())
     {
-      error = true;
+      result = false;
     }
   }
 
@@ -90,4 +86,6 @@ run_test()
   assert(invariant());
 
   // Exit:
+
+  return result;
 }

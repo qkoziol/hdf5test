@@ -261,4 +261,14 @@ main()
 
     e.detach();
   }
+
+  // Delete hdf5 file.
+
+  f.rm();
+
+  // And delete external dataset file.
+
+  string name = test_name() + "_external.h5";
+
+  unlink(name.c_str());
 }

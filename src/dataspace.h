@@ -5,6 +5,7 @@
 #include "extent.h"
 #include "hdf5_handle.h"
 class hyperslab;
+class matrix;
 #include "std_iostream.h"
 
 /*! @class dataspace
@@ -72,6 +73,10 @@ class dataspace : public hdf5_handle
 
   dataspace(const tuple& xsize, const tuple& xmax_size);
 
+
+  // Selection interface:
+
+
   /// Select a subset of this dataspace.
 
   void select(const hyperslab& xsubset, H5S_seloper_t xop = H5S_SELECT_SET);
@@ -88,6 +93,14 @@ class dataspace : public hdf5_handle
 
   void select(hsize_t xn);
 
+  /// The number of points in the current selection.  A wrapper around the H5S function of the same name.
+
+  hsize_t get_select_npoints() const;
+
+
+  // Geometry of dataspace.
+
+
   /// Get the extent of this dataspace.
 
   const extent& get_extent() const;
@@ -99,6 +112,15 @@ class dataspace : public hdf5_handle
   /// The dimension of the dataspace.
 
   unsigned d() const;
+
+  /// True if dataspace is 2-d and size matches matrix in each dimension.
+
+  bool is_congruent(const matrix& xmat) const;
+
+  /// True if dataspace is congruent to the first xct rows of xmat if xby_rows, or
+  /// first xct columns otherwise.
+
+  bool is_subset_congruent(const matrix& xmat, unsigned xct, bool xby_rows) const; 
 
 
  protected:

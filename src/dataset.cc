@@ -60,7 +60,30 @@ invariant() const
 dataset::
 dataset(const dataset& xother)
 {
-  not_implemented;
+  // Preconditions:
+
+  // Body:
+
+  if (xother.is_attached())
+  {
+    _hid   = xother._hid;
+    H5Iinc_ref(_hid);
+    _type  = H5Tcopy(xother._type);
+    _space = xother._space;
+  }
+  else
+  {
+    _hid  = H5I_BADID;
+    _type = H5I_BADID;
+  }
+
+  // Postconditions:
+
+  assert(invariant());
+  // TODO:
+  // Somehow express that this and xother are the same.
+
+  // Exit:
 }
 
 dataset&
@@ -569,3 +592,32 @@ operator<<(ostream& xos, const dataset& xds)
   return xos;
 }
 
+dataset::
+dataset(hid_t xhid)
+{
+  // Preconditions:
+
+  assert(H5Iget_type(xhid) == H5I_DATASET);
+
+  // Body:
+
+  _hid = xhid;
+
+  H5Iinc_ref(_hid);
+
+  _type = H5Dget_type(_hid);
+
+  hid_t space = H5Dget_space(_hid);
+
+  _space.attach(space);
+
+  H5Sclose(space);
+
+
+  // Postconditions:
+
+  assert(invariant());
+  assert(is_attached());
+
+  // Exit:
+}

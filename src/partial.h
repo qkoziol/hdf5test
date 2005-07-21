@@ -66,7 +66,7 @@ class partial : public test
 
   /// Runs all of the partial i/o operations from start() to is_done().
 
-  virtual void run_test();
+  virtual bool run_test();
 
 
  protected:

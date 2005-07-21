@@ -7,11 +7,16 @@ objno::
 objno(const H5G_stat_t& xstat)
 {
 #if H5_VERS_MINOR==6
+
   id[0]   = xstat.objno[0];
   id[1]   = xstat.objno[1];
+
 #else
+
   id = xstat.objno;
+
 #endif
+
   idx     = 0;
   is_attr = false;
 }
@@ -75,15 +80,13 @@ operator<(const objno& xother) const
   }
   else if (id == xother.id)
   {
+    if (idx < xother.idx)
     {
-      if (idx < xother.idx)
-      {
-	result = true;
-      }
-      else
-      {
-	result = false;
-      }
+      result = true;
+    }
+    else
+    {
+      result = false;
     }
   }
   else
@@ -111,11 +114,16 @@ operator=(const objno& xother)
   // Body:
 
 #if H5_VERS_MINOR==6
+
   id[0] = xother.id[0];
   id[1] = xother.id[1];
+
 #else
+
   id = xother.id;
+
 #endif
+
   idx = xother.idx;
   ptr_to_result = this;
 
@@ -154,10 +162,14 @@ objno(const hid_t xhid)
   H5Idec_ref(file);
 
 #if H5_VERS_MINOR==6
+
   id[0] = statbuf.objno[0];
   id[1] = statbuf.objno[1];
+
 #else
+
   id = statbuf.objno;
+
 #endif
 
   if ( H5Iget_type(xhid) == H5I_ATTR)
@@ -186,13 +198,20 @@ operator<<(ostream& xos, const objno& xobj)
   // Body:
 
   xos << '('
+
 #if H5_VERS_MINOR==6
+
       << xobj.id[0]
       << ", "
       << xobj.id[1]
+
 #else
+
       << xobj.id
+
 #endif
+      << ", "
+      << xobj.idx
       << ')';
 
   // Postconditions:

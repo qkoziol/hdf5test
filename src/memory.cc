@@ -26,7 +26,34 @@ memory()
 memory::
 memory(const memory& xother)
 {
-  not_implemented;
+  // Preconditions:
+
+  // Body:
+
+  _ub = xother._ub;
+
+  if (xother.is_attached())
+  {
+    _mem = new char[_ub];
+    _type = H5Tcopy(xother._type);
+    _space = xother.get_space();
+  }
+  else
+  {
+    _mem = 0;
+    _type = xother._type;
+  }
+  
+
+  // Postconditions:
+
+  assert(invariant());
+  assert(is_attached() == xother.is_attached());
+  assert(ub() == xother.ub());
+  // TODO
+  // this also has same datatype and same dataspace as xother.  How to express?
+
+  // Exit:
 }
 
 memory::

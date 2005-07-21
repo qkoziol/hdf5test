@@ -71,6 +71,14 @@ class hdf5_file : public hdf5_handle
 
   bool create(const string& xname);
 
+  /// Delete an hdf5 file.  Returns true on success, false otherwise.
+
+  static bool rm(hid_t xfile);
+
+  /// Delete underlying hdf5 file.  Returns true on success, false otherwise.
+
+  bool rm();
+
 
   // Sanity tests for very basic file properties:
 

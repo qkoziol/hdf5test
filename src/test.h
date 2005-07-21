@@ -48,7 +48,7 @@ class test
   /// Run the test, compute performance, and store internally
   /// the status and performance figures.
 
-  virtual void run_test() = 0;
+  virtual bool run_test() = 0;
 
   /// Possible states of the test.  If it was run, it either
   /// succeeded or failed.  But it may not have been run yet.

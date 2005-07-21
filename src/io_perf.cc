@@ -178,11 +178,14 @@ run_test(const memory& xmem, pcontainer& xcon)
   // Exit:
 }
 
-void
+bool
 io_perf::
 run_test()
 {
   not_implemented;
+  // The following is just a placebo to keep the compiler happy
+  // in the absence of a real implementation.
+  return false;
 }
 
 

@@ -309,3 +309,26 @@ operator<<(ostream& xos, const extent& xextent)
 
   return xos;
 }
+
+extent&
+extent::
+operator=(const extent& xother)
+{
+  // Preconditions:
+
+  // Body:
+
+  _size = xother._size;
+  _max_size = xother._max_size;
+
+  // Postconditions:
+
+  assert(invariant());
+  assert(d() == xother.d());
+  // TODO:
+  // express the fact that the values of _max_size and _size are identical to those of xother.
+
+  // Exit:
+
+  return *this;
+}

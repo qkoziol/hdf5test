@@ -4,24 +4,35 @@
 #include "hdf5.h"
 
 bool
+plist::
 is_contiguous(hid_t xplist)
 {
   bool result;
 
   // Preconditions:
 
-  assert(H5Pget_class(xplist) == H5P_DATASET_CREATE);
-
   // Body:
 
-  int layout;
+  int    layout;
+  herr_t status;
 
-  H5Pget(xplist, "layout", &layout);
+  H5E_BEGIN_TRY
+  {
+    status = H5Pget(xplist, "layout", &layout);
+  }
+  H5E_END_TRY;
 
-  if (layout == H5D_CONTIGUOUS)
-    result = true;
+  if (status >= 0)
+  {
+    if (layout == H5D_CONTIGUOUS)
+      result = true;
+    else
+      result = false;
+  }
   else
+  {
     result = false;
+  }
 
   // Postconditions:
 
@@ -31,24 +42,35 @@ is_contiguous(hid_t xplist)
 }
 
 bool
+plist::
 is_chunked(hid_t xplist)
 {
   bool result;
 
   // Preconditions:
 
-  assert(H5Pget_class(xplist) == H5P_DATASET_CREATE);
-
   // Body:
 
-  int layout;
+  int    layout;
+  herr_t status;
 
-  H5Pget(xplist, "layout", &layout);
+  H5E_BEGIN_TRY
+  {
+    status = H5Pget(xplist, "layout", &layout);
+  }
+  H5E_END_TRY;
 
-  if (layout == H5D_CHUNKED)
-    result = true;
+  if (status >= 0)
+  {
+    if (layout == H5D_CHUNKED)
+      result = true;
+    else
+      result = false;
+  }
   else
+  {
     result = false;
+  }
 
   // Postconditions:
 
@@ -58,24 +80,35 @@ is_chunked(hid_t xplist)
 }
 
 bool
+plist::
 is_compact(hid_t xplist)
 {
   bool result;
 
   // Preconditions:
 
-  assert(H5Pget_class(xplist) == H5P_DATASET_CREATE);
-
   // Body:
 
-  int layout;
+  int    layout;
+  herr_t status;
 
-  H5Pget(xplist, "layout", &layout);
+  H5E_BEGIN_TRY
+  {
+    status = H5Pget(xplist, "layout", &layout);
+  }
+  H5E_END_TRY;
 
-  if (layout == H5D_COMPACT)
-    result = true;
+  if (status >= 0)
+  {
+    if (layout == H5D_COMPACT)
+      result = true;
+    else
+      result = false;
+  }
   else
+  {
     result = false;
+  }
 
   // Postconditions:
 

@@ -75,6 +75,10 @@ class dataset : public pcontainer
 
   bool open(hid_t xhost, const string& xname);
 
+  /// Create a new dataset attached to xhid.
+
+  dataset(hid_t xhid);
+
   /// Create a new dataset identified by xname associated with a
   /// file or group identified by xhost in xfile.
 

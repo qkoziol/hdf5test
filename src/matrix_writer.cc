@@ -9,71 +9,34 @@
 #define MILLI_PER_MICRO ((double)1000)
 
 matrix_writer::
-matrix_writer(const temp_file& xfile, const matrix& xmat, hid_t xtype, hid_t xcreate_plist) :
-  _mat(xmat)
+matrix_writer()
 {
   // Preconditions:
 
-  assert(xfile.is_attached());
-  assert(H5Iget_type(xtype) == H5I_DATATYPE);
-  assert(xcreate_plist == H5P_DEFAULT || H5Pget_class(xcreate_plist) == H5P_DATASET_CREATE);
-
   // Body:
-
-  extent e(2);
-
-  e.size()[0] = xmat.row_ct();
-  e.size()[1] = xmat.col_ct();
-
-  // If we're writing to a chunked dataset, make it extendable by specifying
-  // an unlimited maximum size in each dimension of the dataspace.
-
-  if (xcreate_plist != H5P_DEFAULT)
-  {
-    if (H5Pget_layout(xcreate_plist) == H5D_CHUNKED)
-    {
-      e.max_size()[0] = H5S_UNLIMITED;
-      e.max_size()[1] = H5S_UNLIMITED;
-    }
-  }
-  else
-  {
-    e.max_size()[0] = e.size()[0];
-    e.max_size()[1] = e.size()[1]; 
-  }
-
-  hid_t file_space = H5Screate_simple(2, &e.size()[0], &e.max_size()[0]);
-
-  assert(file_space >= 0);
-
-  hid_t id = H5Dcreate(xfile.hid(),
-		       "matrix_writer",
-		       xtype,
-		       file_space,
-		       xcreate_plist);
-
-  assert(id >= 0);
-
-  _dataset.attach(id);
-
-  H5Sclose(file_space);
 
   // Default access pattern.  It can be modified by a subsequent call to
   // set_access().
 
   _max_write_ct = 1;
   _cur_write_ct = 1;
-  _access       = BY_ROWS;
+  _by_rows      = true;
   _accum_ct     = 0;
-  _type         = H5Tcopy(xtype);
+  _mat          = 0;
+  _dest         = 0;
 
-  assert(_type >= 0);
+  _size.reserve(2);
+  _size = 0;
+
+  _max_size.reserve(2);
+  _max_size = H5S_UNLIMITED;
 
   // Postconditions:
 
   assert(invariant());
   assert(ct() == 0);
   assert(per_write_ct() == 1);
+  assert(access_is_by_rows());
 
   // Exit:
 }
@@ -84,10 +47,6 @@ matrix_writer::
   // Preconditions:
 
   // Body:
-
-  _dataset.detach();
-  _mem.detach();
-  H5Tclose(_type);
 
   // Postconditions:
 
@@ -106,9 +65,9 @@ invariant() const
   
   result = partial::invariant();
   result = result && (is_done() ? _accum_ct > 0 : true);
-  result = result && (_access == BY_ROWS ? _max_write_ct <= _mat.row_ct() : _max_write_ct <= _mat.col_ct());
   result = result && (_max_write_ct >= _cur_write_ct);
   result = result && (_cur_write_ct > 0);
+  result = result && (_size.d() == 2);
 
   // Postconditions:
 
@@ -118,8 +77,7 @@ invariant() const
 }
 
 matrix_writer::
-matrix_writer(const matrix_writer& xother) :
-  _mat(xother._mat)
+matrix_writer(const matrix_writer& xother)
 {
   not_implemented;
 }
@@ -148,24 +106,50 @@ start()
   _accum_ct = 0;
   _cur_write_ct = _max_write_ct;
 
-  if (_access == BY_ROWS)
+  if (_by_rows)
   {
-    _mat.select_rows(0, _cur_write_ct, h);
+    _mat->select_rows(0, _cur_write_ct, h);
   }
   else
   {
-    _mat.select_cols(0, _cur_write_ct, h);
+    _mat->select_cols(0, _cur_write_ct, h);
   }
 
-  _dataset.get_space().select(h);
+  _dest->get_space().select(h);
+
+  // Now make sure that the dataset's extent encompasses the first
+  // write.
+
+  if (_dest->is_chunked())
+  {
+    // Define the desired size of the matrix on disk after the upcoming
+    // write.
+
+    if (_by_rows)
+    {
+      _size[0] = _cur_write_ct;
+      _size[1] = _mat->col_ct();
+    }
+    else
+    {
+      _size[0] = _mat->row_ct();
+      _size[1] = _cur_write_ct;
+    }
+
+    // Ask HDF5 to make the dataset at least the desired size.
+
+    herr_t status = H5Dextend(_dest->hid(), &_size[0]);
+
+    assert(status >= 0);
+  }
 
   // Reserve sufficient memory to hold the first _cur_write_ct
   // rows or columns as the write source.  Make sure the entire
   // memory space is selected.
 
-  _mem.reserve(_dataset);
+  _src->reserve(*_dest);
 
-  herr_t status = H5Sselect_all(_mem.get_space().hid());
+  herr_t status = H5Sselect_all(_src->get_space().hid());
 
   assert(status >= 0);
 
@@ -178,12 +162,23 @@ start()
 
   // Write out a header.
 
-  cout << _dataset
+  cout << "Writing "
+       << _max_write_ct;
+
+  if (_by_rows)
+    cout << " rows";
+  else
+    cout << " columns";
+
+  cout << " of ("
+       << *_mat
+       << ") matrix at a time.\n"
+       << *_dest
        << '\n'
        << setw(11)
        << "status   ";
 
-  if (_access == BY_ROWS)
+  if (_by_rows)
   {
     cout << setw(12)
 	 << "rows    ";
@@ -227,7 +222,9 @@ next()
 
   if (! is_done())
   {
-    // Write the minimum of the number of not-yet-written
+    // Determine the number of rows/columns to write next time.
+
+    // Compute the minimum of the number of not-yet-written
     // rows/columns and the standard number of rows/columns
     // to be written.  Only on the last iteration, and only
     // if the number of rows/columns is not evenly divisible
@@ -236,13 +233,13 @@ next()
 
     unsigned unwritten;
 
-    if (_access == BY_ROWS)
+    if (_by_rows)
     {
-      unwritten = _mat.row_ct()-_accum_ct;
+      unwritten = _mat->row_ct()-_accum_ct;
     }
     else
     {
-      unwritten = _mat.col_ct()-_accum_ct;
+      unwritten = _mat->col_ct()-_accum_ct;
     }
 
     _cur_write_ct = _max_write_ct;
@@ -252,19 +249,51 @@ next()
       _cur_write_ct = unwritten;
     }
 
+    // Select the next group of rows/columns in the dataset's dataspace.
+
     hyperslab h(2);
 
-    if (_access == BY_ROWS)
+    if (_by_rows)
     {
-      _mat.select_rows(_accum_ct, _cur_write_ct, h);
+      _mat->select_rows(_accum_ct, _cur_write_ct, h);
     }
     else
     {
-      _mat.select_cols(_accum_ct, _cur_write_ct, h);
+      _mat->select_cols(_accum_ct, _cur_write_ct, h);
     }
 
-    _dataset.get_space().select(h);
-    _mem.get_space().select(h.npoints());
+    _dest->get_space().select(h);
+
+    _src->get_space().select(h.npoints());
+
+    // Now ensure that the dataset's extent encompasses the upcoming write.
+
+    if (_dest->is_chunked())
+    {
+      // Define the desired size of the matrix on disk after the upcoming
+      // write.
+
+      if (_by_rows)
+      {
+	_size[0] = _accum_ct + _cur_write_ct;
+      }
+      else
+      {
+	_size[1] = _accum_ct + _cur_write_ct;
+      }
+
+      // Ask HDF5 to extend the dataset's dataspace to the desired size.
+
+      herr_t status = H5Sset_extent_simple(_dest->get_space().hid(), 2, &_size[0], &_max_size[0]);
+
+      assert(status >= 0);
+
+      // Ask HDF5 to extend the dataset to at least the desired size.
+
+      status = H5Dextend(_dest->hid(), &_size[0]);
+
+      assert(status >= 0);
+    }
   }
 
   // Postconditions:
@@ -286,22 +315,32 @@ is_done() const
 
   unsigned n;
 
-  if (_access == BY_ROWS)
+  if (_mat == 0)
   {
-    n = _mat.row_ct();
-  }
-  else
-  {
-    n = _mat.col_ct();
-  }
+    // is_done() can only be true if we're in the midst of run_test(..)
+    // and that's the only place where _mat != 0;
 
-  if (_accum_ct == n)
-  {
-    result = true;
+    result = false;
   }
   else
   {
-    result = false;
+    if (_by_rows)
+    {
+      n = _mat->row_ct();
+    }
+    else
+    {
+      n = _mat->col_ct();
+    }
+
+    if (_accum_ct == n)
+    {
+      result = true;
+    }
+    else
+    {
+      result = false;
+    }
   }
 
   // Postconditions:
@@ -320,8 +359,8 @@ do_partial_io()
   // Preconditions:
 
   assert(! is_done());
-  assert(_dataset.is_attached());
-  assert(H5Sget_select_npoints(_dataset.get_space().hid()) == H5Sget_select_npoints(_mem.get_space().hid()));
+  assert(_dest->is_attached());
+  assert(H5Sget_select_npoints(_dest->get_space().hid()) == H5Sget_select_npoints(_src->get_space().hid()));
 
   // Body:
 
@@ -329,18 +368,18 @@ do_partial_io()
 
   _timer.start();
 
-  herr_t status = H5Dwrite(_dataset.hid(),
-			   _dataset.get_type(),
-			   _mem.get_space().hid(),
-			   _dataset.get_space().hid(),
+  herr_t status = H5Dwrite(_dest->hid(),
+			   _dest->get_type(),
+			   _src->get_space().hid(),
+			   _dest->get_space().hid(),
 			   H5P_DEFAULT,
-			   _mem.mem());
+			   _src->mem());
 
   _timer.stop();
 
   if (status >= 0)
   {
-    double kb      = H5Sget_select_npoints(_mem.get_space().hid())*H5Tget_size(_dataset.get_type())/((double)BYTES_PER_KB);
+    double kb      = H5Sget_select_npoints(_src->get_space().hid())*H5Tget_size(_dest->get_type())/((double)BYTES_PER_KB);
     double elapsed = _timer.elapsed();
 
     cout << setw(11)
@@ -387,21 +426,23 @@ do_partial_io()
 
 void
 matrix_writer::
-set_access(unsigned xper_write_ct, access xaccess)
+set_access(unsigned xper_write_ct, bool xby_rows)
 {
   // Preconditions:
 
   assert(xper_write_ct > 0);
-  assert(xaccess == BY_ROWS ? xper_write_ct <= _mat.row_ct() : xper_write_ct <= _mat.col_ct());
 
   // Body:
 
   _max_write_ct = xper_write_ct;
-  _access       = xaccess;
+  _cur_write_ct = xper_write_ct;
+  _by_rows      = xby_rows;
 
   // Postconditions:
 
   assert(invariant());
+  assert(access_is_by_rows() == xby_rows);
+  assert(per_write_ct() == xper_write_ct);
 
   // Exit:
 }
@@ -436,6 +477,96 @@ per_write_ct() const
   // Body:
 
   result = _max_write_ct;
+
+  // Postconditions:
+
+  // Exit:
+
+  return result;
+}
+
+bool
+matrix_writer::
+run_test(matrix& xmat, memory& xsrc, dataset& xdest)
+{
+  bool result;
+
+  // Preconditions:
+
+  assert(access_is_by_rows() ? xmat.row_ct() >= per_write_ct() : xmat.col_ct() >= per_write_ct());
+  assert(xdest.is_attached());
+  assert(xdest.get_space().d() == 2);
+  // ISSUE:
+  // Is any condition necessary for mem?  We'll resize it as necessary.
+  //assert(xsrc.is_attached() ? xsrc.get_space().get_select_npoints() == per_write_npoints() : true);
+  // HACK: commented out - too strict and memory dataspace is 1-d, anyway
+  //assert(xsrc.is_attached() ? xsrc.get_space().is_subset_congruent(xmat, per_write_ct(), access_is_by_rows()) : true);
+
+  // Body:
+
+  _mat  = &xmat;
+  _src  = &xsrc;
+  _dest = &xdest;
+
+  result = partial::run_test();
+
+  _mat  = 0;
+  _src  = 0;
+  _dest = 0;
+
+  // Postconditions:
+
+  assert(invariant());
+
+  // Exit:
+
+  return result;
+}
+
+bool
+matrix_writer::
+access_is_by_rows() const
+{
+  bool result;
+
+  // Preconditions:
+
+  // Body:
+
+  result = _by_rows;
+
+  // Postconditions:
+
+  // Exit:
+
+  return result;
+}
+
+unsigned
+matrix_writer::
+per_write_npoints() const
+{
+  unsigned result;
+
+  // Preconditions:
+
+  // Body:
+
+  if (_mat == 0)
+  {
+    result = 0;
+  }
+  else
+  {
+    if (_by_rows)
+    {
+      result = _cur_write_ct*_mat->col_ct();
+    }
+    else
+    {
+      result = _cur_write_ct*_mat->row_ct();
+    }
+  }
 
   // Postconditions:
 

@@ -2,6 +2,7 @@
 #include "contract.h"
 
 #include "hyperslab.h"
+#include "matrix.h"
 
 dataspace::
 dataspace()
@@ -338,4 +339,134 @@ select(hsize_t xnpts)
 
   // Exit:
 
+}
+
+dataspace&
+dataspace::
+operator=(const dataspace& xother)
+{
+  // Preconditions:
+
+  // Body:
+
+  _ext = xother._ext;
+  _hid = H5Scopy(xother._hid);
+
+  // Postconditions:
+
+  assert(invariant());
+
+  // Exit:
+
+  return *this;
+}
+
+bool
+dataspace::
+is_congruent(const matrix& xmat) const
+{
+  bool result;
+
+  // Preconditions:
+
+  // Body:
+
+  not_implemented;
+
+  // HACK:
+  // The following just keeps the compiler from complaining
+  // that result is uninitialized.
+
+  result = false;
+
+  // Postconditions:
+
+  // Exit:
+
+  return result;
+}
+
+bool
+dataspace::
+is_subset_congruent(const matrix& xmat, unsigned xct, bool xby_rows) const
+{
+  bool result;
+
+  // Preconditions:
+
+  // Body:
+
+  // We're trying to determine whether a dataspace matches the 1st xct
+  // rows or columns of a matrix.  It does if the dataspace is 2 dimensional,
+  // and if the length of a row (if xby_rows) or a column (if !xby_rows)
+  // is the same length as the corresponding row/col of the matrix and
+  // if there are at least xct rows/cols in the matrix and dataspace.
+
+  result = false;
+
+  if (is_attached())
+  {
+    const extent& e = get_extent();
+
+    if (e.d() == 2)
+    {
+      // Then the dataspace is 2-d, same as a matrix,
+
+      if (xby_rows)
+      {
+	if (xmat.row_ct() >= xct)
+	{
+	  // and the matrix has at least xct rows,
+
+	  if (e.size(1) == xmat.col_ct())
+	  {
+	    // and the length of the dataspace's row matches the length of the matrix row.
+
+	    result = true;
+	  }
+	}
+      }
+      else
+      {
+	if (xmat.col_ct() >= xct)
+	{
+	  // and the matrix has at least xct columns,
+
+	  if (e.size(0) == xmat.row_ct())
+	  {
+	    // and the length of the dataspace's column matches the length of the matrix column.
+
+	    result = true;
+	  }
+	}
+      }
+    }
+  }
+
+  // Postconditions:
+
+  // Exit:
+
+  return result;
+}
+
+hsize_t
+dataspace::
+get_select_npoints() const
+{
+  hsize_t result;
+
+  // Preconditions:
+
+  assert(is_attached());
+
+  // Body:
+
+  result = H5Sget_select_npoints(_hid);
+
+  // Postconditions:
+
+  // Exit:
+
+  return result;
 }

@@ -53,7 +53,7 @@ class io_perf : public test
 
   /// Execute run_io_perf_test() and measure the performance in bytes/second.
 
-  virtual void run_test();
+  virtual bool run_test();
 
   /// Number of bytes transferred during test.
 

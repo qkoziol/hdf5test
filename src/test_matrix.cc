@@ -108,4 +108,6 @@ main()
   hdf5_file f;
 
   assert(f.create(test_name() + ".h5"));
+
+  hdf5_file::rm(f.hid());
 }

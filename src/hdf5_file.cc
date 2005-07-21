@@ -353,3 +353,72 @@ is_write_protected() const
 
   return result;
 }
+
+bool
+hdf5_file::
+rm(hid_t xfile)
+{
+  bool result;
+
+  // Preconditions:
+
+  // Body:
+
+  ssize_t nchars = H5Fget_name(xfile, 0, 0);
+
+  if (nchars >= 0)
+  {
+    char* name = new char[nchars+1];
+
+    H5Fget_name(xfile, name, nchars+1);
+
+    name[nchars+1] = '\0';
+
+    unlink(name);
+
+    delete name;
+
+    result = true;
+  }
+  else
+  {
+    result = false;
+  }
+  
+  // Postconditions:
+
+  // Exit:
+
+  return result;
+}
+
+bool
+hdf5_file::
+rm()
+{
+  bool result;
+
+  // Preconditions:
+
+  // Body:
+
+  if (is_attached())
+  {
+    result = rm(_hid);
+    H5Fclose(_hid);
+    _hid = H5I_INVALID_HID;
+  }
+  else
+  {
+    result = false;
+  }
+  
+  // Postconditions:
+
+  assert(! is_attached());
+  assert(invariant());
+
+  // Exit:
+
+  return result;
+}

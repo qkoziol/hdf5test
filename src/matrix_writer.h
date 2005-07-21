@@ -6,7 +6,7 @@
 #include "matrix.h"
 #include "memory.h"
 #include "partial.h"
-#include "temp_file.h"
+#include "tuple.h"
 
 /*! @class matrix_writer
     @brief A class that writes a matrix to a dataset.
@@ -20,15 +20,9 @@ class matrix_writer : public partial
   // Standard features:
 
 
-  /// Default constructor.  Makes a dataset in xfile of HDF5 datatype `xtype' using
-  /// creation properties `xcreate_plist' as the destination for the matrix write.  To
-  /// exercise chunking, specify chunking and the chunk size in xcreate_plist through
-  /// the HDF5 API calls H5Pset_layout() and H5Pset_chunk(). 
+  /// Default constructor.
 
-  matrix_writer(const temp_file& xfile,
-	        const matrix&    xmat,
-	        hid_t            xtype = H5T_NATIVE_INT,
-	        hid_t            xcreate_plist = H5P_DEFAULT);
+  matrix_writer();
 
   /// Destructor.
 
@@ -50,6 +44,9 @@ class matrix_writer : public partial
   // Partial i/o interface:
 
 
+  bool run_test(matrix& xmat, memory& xsrc, dataset& xdest);
+
+
   /// Initialize state of matrix_writer for first partial write.
 
   virtual void start();
@@ -66,15 +63,15 @@ class matrix_writer : public partial
 
   virtual bool do_partial_io();
 
-  /// Each partial write accesses either a contiguous set of rows or
-  /// a contiguous set of columns.
-
-  enum access {BY_ROWS, BY_COLUMNS};
 
   /// Set the matrix access pattern: xct rows or columns at each partial write,
-  /// and by rows or by columns.
+  /// and by rows if xby_rows, or by columns otherwise.
 
-  void set_access(unsigned xper_write_ct = 1, access xaccess = BY_ROWS);
+  void set_access(unsigned xper_write_ct = 1, bool xby_rows = true);
+
+  /// Is access by rows or by columns?
+
+  bool access_is_by_rows() const;
 
   /// The number of rows or columns written thus far.
 
@@ -84,16 +81,22 @@ class matrix_writer : public partial
 
   unsigned per_write_ct() const;
 
+  /// The number of matrix elements written at each iteration.
+
+  unsigned per_write_npoints() const;
+
  protected:
 
-  dataset  _dataset;       ///< The dataset used as the destination of the write.
   unsigned _max_write_ct;  ///< The max number of rows or columns to write at each iteration.
   unsigned _cur_write_ct;  ///< The number of rows or columns to write at this iteration.
   unsigned _accum_ct;      ///< The number of rows or columns written thus far.
-  access   _access;        ///< Are partial writes by rows or columns?
-  matrix   _mat;           ///< The dimensions of the matrix being written.
-  memory   _mem;           ///< The memory buffer.
-  hid_t    _type;          ///< Datatype transferred.
+  tuple    _size;          ///< The size of the matrix on disk after this iteration's write.
+  tuple    _max_size;      ///< The maximum size of the matrix on disk.
+  bool     _by_rows;       ///< Are partial writes by rows or columns?
+  matrix*  _mat;           ///< The matrix being written.
+  dataset* _dest;          ///< The dataset acting as the destination of each write.
+  memory*  _src;           ///< The memory buffer acting as the source of each write.
+
 };
 
 #endif
