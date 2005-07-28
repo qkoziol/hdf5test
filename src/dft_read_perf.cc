@@ -89,6 +89,8 @@ preorder_action()
   {
     pcontainer& src(dynamic_cast<pcontainer&>(current()));
 
+    _dest.attach(src.get_type());
+
     _dest.reserve(src);
 
     _tester.run_test(src, _dest);

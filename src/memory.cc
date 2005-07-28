@@ -152,11 +152,19 @@ reserve(pcontainer& xcon)
     H5Iinc_ref(_type);
   }
 
-  size_t size = H5Tget_size(_type);
+  size_t new_ub = H5Tget_size(_type)*npts;
 
-  _ub    = npts*size;
+  if (new_ub > _ub)
+  {
+    if (_mem == 0)
+    {
+      delete [] _mem;
+    }
 
-  _mem   = new char[_ub];
+    _ub    = new_ub;
+
+    _mem   = new char[_ub];
+  }
 
   // Since this hid is obtained from the test suite, in
   // accordance with the rules described in hdf5_handle.h,
@@ -347,37 +355,47 @@ attach(hid_t xtype)
 {
   // Preconditions:
 
-  assert(! is_attached());
   assert(H5Iget_type(xtype) == H5I_DATATYPE);
 
   // Body:
 
-  // A scalar space is probably not what is wanted, but it's the
-  // only thing that can be done with the information at hand.
-  // The space can be redefined later.
+  if (is_attached())
+  {
+    H5Idec_ref(_type);
 
-  hid_t sp = H5Screate(H5S_SCALAR);
+    _type = xtype;
 
-  _space.attach(sp);
+    H5Iinc_ref(_type);
+  }
+  else
+  {
+    // A scalar space is probably not what is wanted, but it's the
+    // only thing that can be done with the information at hand.
+    // The space can be redefined later.
 
-  // Decrement the dataspace reference count since sp goes out
-  // of scope at the end of this function.
+    hid_t sp = H5Screate(H5S_SCALAR);
 
-  H5Idec_ref(sp);
+    _space.attach(sp);
 
-  // Use the given type as the type in memory; increment the reference
-  // count since we're using the same hid.
+    // Decrement the dataspace reference count since sp goes out
+    // of scope at the end of this function.
 
-  _type = xtype;
+    H5Idec_ref(sp);
 
-  H5Iinc_ref(_type);
+    // Use the given type as the type in memory; increment the reference
+    // count since we're using the same hid.
 
-  // Allocate memory to hold a single copy of xtype - suitable for a
-  // scalar dataspace.
+    _type = xtype;
 
-  _ub = H5Tget_size(xtype);
+    H5Iinc_ref(_type);
 
-  _mem   = new char[_ub];
+    // Allocate memory to hold a single copy of xtype - suitable for a
+    // scalar dataspace.
+
+    _ub = H5Tget_size(xtype);
+
+    _mem = new char[_ub];
+  }
 
   // Postconditions:
 

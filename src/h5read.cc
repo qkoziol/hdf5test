@@ -134,6 +134,12 @@ main(int argc, char** argv)
 
     if (ds.is_attached())
     {
+      // Attach memory to same datatype as dataset.
+
+      mem.attach(ds.get_type());
+
+      // Allocate enough memory to read entire dataset.
+
       mem.reserve(ds);
 
       tester.run_test(ds, mem);
