@@ -66,6 +66,11 @@ class memory : public container, public handle
 
   bool is_attached() const;
 
+  /// Attach to a buffer of specified hdf5 type.  Dataspace is scalar but can be redefined
+  /// afterwards to be of a different extent or dimension.
+
+  void attach(hid_t xtype);
+
   /// Disconnect from and recycle underlying memory.
 
   void detach();
@@ -74,7 +79,7 @@ class memory : public container, public handle
   // Access interface:
 
 
-  /// True if this holder can be read.
+  /// True if this can be read.
 
   bool is_readable() const;
 

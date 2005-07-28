@@ -25,10 +25,13 @@ operator=(size_t x)
 
   // Body:
 
-  bytes   = x;
-  open    = x;
-  elapsed = x;
-  close   = x;
+  bytes      = x;
+  open_file  = x;
+  open       = x;
+  extend     = x;
+  elapsed    = x;
+  close      = x;
+  close_file = x;
 
   // Postconditions:
 

@@ -98,68 +98,6 @@ start()
 
   // Body:
 
-  // Select the first _cur_write_ct rows or columns of
-  // the dataset's dataspace as the write destination.
- 
-  hyperslab h(2);
-
-  _accum_ct = 0;
-  _cur_write_ct = _max_write_ct;
-
-  if (_by_rows)
-  {
-    _mat->select_rows(0, _cur_write_ct, h);
-  }
-  else
-  {
-    _mat->select_cols(0, _cur_write_ct, h);
-  }
-
-  _dest->get_space().select(h);
-
-  // Now make sure that the dataset's extent encompasses the first
-  // write.
-
-  if (_dest->is_chunked())
-  {
-    // Define the desired size of the matrix on disk after the upcoming
-    // write.
-
-    if (_by_rows)
-    {
-      _size[0] = _cur_write_ct;
-      _size[1] = _mat->col_ct();
-    }
-    else
-    {
-      _size[0] = _mat->row_ct();
-      _size[1] = _cur_write_ct;
-    }
-
-    // Ask HDF5 to make the dataset at least the desired size.
-
-    herr_t status = H5Dextend(_dest->hid(), &_size[0]);
-
-    assert(status >= 0);
-  }
-
-  // Reserve sufficient memory to hold the first _cur_write_ct
-  // rows or columns as the write source.  Make sure the entire
-  // memory space is selected.
-
-  _src->reserve(*_dest);
-
-  herr_t status = H5Sselect_all(_src->get_space().hid());
-
-  assert(status >= 0);
-
-  // Make sure the timer is in reset mode so we can time all the
-  // individual writes.  Make sure the time is zeroed.
-
-  _timer.put_mode(timer::RESET);
-
-  _timer.reset();
-
   // Write out a header.
 
   cout << "Writing "
@@ -189,11 +127,38 @@ start()
 	 << "columns   ";
   }
   cout << setw(20)
-       << "bytes written (kb)"
-       << setw(19)
-       << "elapsed time (ms)"
+       << "bytes written (kb)";
+  if (_dest->is_chunked())
+  {
+    cout << setw(25)
+	 << "select/extend time (ms)";
+  }
+  cout << setw(17)
+       << "write time (ms)"
        << setw(16)
        << "io rate (mb/s)\n";
+
+  // We haven't written any rows/cols yet.
+
+  _accum_ct = 0;
+
+  // Make sure the timer is in reset mode so we can time all the
+  // individual writes.  Make sure the time is zeroed.
+
+  _timer.put_mode(timer::RESET);
+
+  _timer.reset();
+
+  // Select the first _cur_write_ct rows or columns of
+  // the dataset's dataspace as the write destination.
+
+  _timer.start();
+ 
+  select_extend();
+
+  _timer.stop();
+
+  _perf.extend = _timer.elapsed();
 
   // Postconditions:
 
@@ -222,78 +187,13 @@ next()
 
   if (! is_done())
   {
-    // Determine the number of rows/columns to write next time.
+    _timer.start();
 
-    // Compute the minimum of the number of not-yet-written
-    // rows/columns and the standard number of rows/columns
-    // to be written.  Only on the last iteration, and only
-    // if the number of rows/columns is not evenly divisible
-    // by the standard row/column write count should the
-    // size of the selection change.
+    select_extend();
 
-    unsigned unwritten;
+    _timer.stop();
 
-    if (_by_rows)
-    {
-      unwritten = _mat->row_ct()-_accum_ct;
-    }
-    else
-    {
-      unwritten = _mat->col_ct()-_accum_ct;
-    }
-
-    _cur_write_ct = _max_write_ct;
-
-    if (_cur_write_ct > unwritten)
-    {
-      _cur_write_ct = unwritten;
-    }
-
-    // Select the next group of rows/columns in the dataset's dataspace.
-
-    hyperslab h(2);
-
-    if (_by_rows)
-    {
-      _mat->select_rows(_accum_ct, _cur_write_ct, h);
-    }
-    else
-    {
-      _mat->select_cols(_accum_ct, _cur_write_ct, h);
-    }
-
-    _dest->get_space().select(h);
-
-    _src->get_space().select(h.npoints());
-
-    // Now ensure that the dataset's extent encompasses the upcoming write.
-
-    if (_dest->is_chunked())
-    {
-      // Define the desired size of the matrix on disk after the upcoming
-      // write.
-
-      if (_by_rows)
-      {
-	_size[0] = _accum_ct + _cur_write_ct;
-      }
-      else
-      {
-	_size[1] = _accum_ct + _cur_write_ct;
-      }
-
-      // Ask HDF5 to extend the dataset's dataspace to the desired size.
-
-      herr_t status = H5Sset_extent_simple(_dest->get_space().hid(), 2, &_size[0], &_max_size[0]);
-
-      assert(status >= 0);
-
-      // Ask HDF5 to extend the dataset to at least the desired size.
-
-      status = H5Dextend(_dest->hid(), &_size[0]);
-
-      assert(status >= 0);
-    }
+    _perf.extend = _timer.elapsed();
   }
 
   // Postconditions:
@@ -368,49 +268,30 @@ do_partial_io()
 
   _timer.start();
 
-  herr_t status = H5Dwrite(_dest->hid(),
-			   _dest->get_type(),
-			   _src->get_space().hid(),
-			   _dest->get_space().hid(),
-			   H5P_DEFAULT,
-			   _src->mem());
+  herr_t err = H5Dwrite(_dest->hid(),
+			_dest->get_type(),
+			_src->get_space().hid(),
+			_dest->get_space().hid(),
+			H5P_DEFAULT,
+			_src->mem());
 
   _timer.stop();
 
-  if (status >= 0)
+  if (err >= 0)
   {
-    double kb      = H5Sget_select_npoints(_src->get_space().hid())*H5Tget_size(_dest->get_type())/((double)BYTES_PER_KB);
-    double elapsed = _timer.elapsed();
+    _perf.bytes   = H5Sget_select_npoints(_src->get_space().hid())*H5Tget_size(_dest->get_type());
 
-    cout << setw(11)
-	 << "succeeded "
-	 << setw(3)
-	 << _accum_ct
-	 << " to "
-	 << setw(3)
-	 << _accum_ct+_cur_write_ct-1
-	 << fixed << setprecision(3) << setw(18)
-	 << kb
-	 << "  "
-	 << fixed << setprecision(3) << setw(16)
-	 << elapsed*MILLI_PER_MICRO
-	 << setw(16)
-	 << kb/elapsed/((double)BYTES_PER_KB)
-	 << endl;
+    _perf.elapsed = _timer.elapsed();
 
     _accum_ct += _cur_write_ct;
+
+    _status = SUCCESS;
+
     result = true;
   }
   else
   {
-    cout << setw(11)
-	 << "failed   "
-	 << setw(3)
-	 << _accum_ct
-	 << " to "
-	 << setw(3)
-	 << _accum_ct+_cur_write_ct-1
-	 << endl;
+    _status = FAILURE;
 
     result = false;
   }
@@ -418,6 +299,8 @@ do_partial_io()
   // Postconditions:
 
   assert(result ? ct() == old_ct + _cur_write_ct : ct() == old_ct);
+  assert(status() != NOT_RUN);
+  assert(result ? status() == SUCCESS : status() == FAILURE);
 
   // Exit:
 
@@ -573,4 +456,140 @@ per_write_npoints() const
   // Exit:
 
   return result;
+}
+
+void
+matrix_writer::
+select_extend()
+{
+    // Determine the number of rows/columns to write next time.
+
+    // Compute the minimum of the number of not-yet-written
+    // rows/columns and the standard number of rows/columns
+    // to be written.  Only on the last iteration, and only
+    // if the number of rows/columns is not evenly divisible
+    // by the standard row/column write count should the
+    // size of the selection change.
+
+    unsigned unwritten;
+
+    if (_by_rows)
+    {
+      unwritten = _mat->row_ct()-_accum_ct;
+    }
+    else
+    {
+      unwritten = _mat->col_ct()-_accum_ct;
+    }
+
+    _cur_write_ct = _max_write_ct;
+
+    if (_cur_write_ct > unwritten)
+    {
+      _cur_write_ct = unwritten;
+    }
+
+    // Select the next group of rows/columns in the dataset's dataspace.
+
+    hyperslab h(2);
+
+    if (_by_rows)
+    {
+      _mat->select_rows(_accum_ct, _cur_write_ct, h);
+    }
+    else
+    {
+      _mat->select_cols(_accum_ct, _cur_write_ct, h);
+    }
+
+    _dest->get_space().select(h);
+
+    // Now ensure that the dataset's extent encompasses the upcoming write.
+
+    if (_dest->is_chunked())
+    {
+      // Define the desired size of the matrix on disk after the upcoming
+      // write.
+
+      if (_by_rows)
+      {
+	_size[0] = _accum_ct + _cur_write_ct;
+	_size[1] = _mat->col_ct();
+      }
+      else
+      {
+	_size[0] = _mat->row_ct();
+	_size[1] = _accum_ct + _cur_write_ct;
+      }
+
+      // Ask HDF5 to extend the dataset's dataspace to the desired size.
+
+      herr_t status = H5Sset_extent_simple(_dest->get_space().hid(), 2, &_size[0], &_max_size[0]);
+
+      assert(status >= 0);
+
+      // Ask HDF5 to extend the dataset to at least the desired size.
+
+      status = H5Dextend(_dest->hid(), &_size[0]);
+
+      assert(status >= 0);
+    }
+
+    // Make sure the memory buffer is big enough.
+
+    _src->reserve(*_dest);
+
+    _src->get_space().select(h.npoints());
+
+}
+
+void
+matrix_writer::
+write_results()
+{
+  // Preconditions:
+
+  assert(cout.good());
+
+  // Body:
+
+  if (status() == SUCCESS)
+  {
+    cout << setw(11)
+	 << "succeeded "
+	 << setw(3)
+	 << _accum_ct
+	 << " to "
+	 << setw(3)
+	 << _accum_ct-1
+	 << fixed << setprecision(3) << setw(18)
+	 << _perf.bytes/((double)BYTES_PER_KB)
+	 << "  ";
+    if (_dest->is_chunked())
+    {
+      cout << fixed << setprecision(3) << setw(20)
+	   << _perf.extend*MILLI_PER_MICRO
+	   << "     ";
+    }
+    cout << fixed << setprecision(3) << setw(14)
+	 << _perf.elapsed*MILLI_PER_MICRO
+	 << setw(16)
+	 << _perf.bytes/_perf.elapsed/((double)BYTES_PER_KB)/((double)BYTES_PER_KB)
+	 << endl;
+  }
+  else
+  {
+    cout << setw(11)
+	 << "failed   "
+	 << setw(3)
+	 << _accum_ct
+	 << " to "
+	 << setw(3)
+	 << _accum_ct-1
+	 << endl;
+  }
+
+  // Postconditions:
+
+  // Exit:
 }

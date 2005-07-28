@@ -93,15 +93,18 @@ invariant() const
 
   // Body:
 
-  // Skip calling ancestral invariants because they don't exist.
+
+  // Omit call to ancestral handle invariant, since there is none.
+
+  result = container::invariant();
 
   if (_mem == 0)
   {
-    result = (_ub == 0 && _type == H5I_INVALID_HID && !_space.is_attached());
+    result = result && (_ub == 0 && _type == H5I_INVALID_HID && !_space.is_attached());
   }
   else
   {
-    result = (_ub > 0 && H5Iget_type(_type) == H5I_DATATYPE && _space.is_attached());
+    result = result && (_ub > 0 && H5Iget_type(_type) == H5I_DATATYPE && _space.is_attached());
   }
 
   // Postconditions:
@@ -134,7 +137,22 @@ reserve(pcontainer& xcon)
 
   assert(npts >= 0);
 
-  size_t size = H5Tget_size(xcon.get_type());
+  // If memory is unattached, then this function will define the datatype.
+  // The only datatype available is xcon's, so we use that.  If the datatype
+  // is already defined, then we don't redefine it.
+
+  if (_type < 0)
+  {
+    _type  = xcon.get_type();
+
+    // In accordance with the rules described in hdf5_handle.h,
+    // we have to increment the reference count, since this is
+    // another copy of the same hid.
+
+    H5Iinc_ref(_type);
+  }
+
+  size_t size = H5Tget_size(_type);
 
   _ub    = npts*size;
 
@@ -149,6 +167,8 @@ reserve(pcontainer& xcon)
   hid_t sp = H5Screate_simple(1, &dim, &dim);
 
   // Incrementing the reference count to sp happens in this call.
+  // _space will be detached from any existing resource before
+  // being attached to sp, so resources will not be leaked.
 
   _space.attach(sp);
 
@@ -157,13 +177,6 @@ reserve(pcontainer& xcon)
 
   H5Idec_ref(sp);
 
-  _type  = xcon.get_type();
-
-  // In accordance with the rules described in hdf5_handle.h,
-  // we have to increment the reference count, since this is
-  // another copy of the same hid.
-
-  H5Iinc_ref(_type);
 
   // Postconditions:
 
@@ -326,4 +339,51 @@ operator<<(ostream& xos, const memory& xmem)
   // Exit:
 
   return xos;
+}
+
+void
+memory::
+attach(hid_t xtype)
+{
+  // Preconditions:
+
+  assert(! is_attached());
+  assert(H5Iget_type(xtype) == H5I_DATATYPE);
+
+  // Body:
+
+  // A scalar space is probably not what is wanted, but it's the
+  // only thing that can be done with the information at hand.
+  // The space can be redefined later.
+
+  hid_t sp = H5Screate(H5S_SCALAR);
+
+  _space.attach(sp);
+
+  // Decrement the dataspace reference count since sp goes out
+  // of scope at the end of this function.
+
+  H5Idec_ref(sp);
+
+  // Use the given type as the type in memory; increment the reference
+  // count since we're using the same hid.
+
+  _type = xtype;
+
+  H5Iinc_ref(_type);
+
+  // Allocate memory to hold a single copy of xtype - suitable for a
+  // scalar dataspace.
+
+  _ub = H5Tget_size(xtype);
+
+  _mem   = new char[_ub];
+
+  // Postconditions:
+
+  assert(is_attached());
+  assert(get_type() == xtype);
+  assert(invariant());
+
+  // Exit:
 }

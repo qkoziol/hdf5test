@@ -55,10 +55,14 @@ class partial : public test
 
   virtual bool is_done() const = 0;
 
-  /// Attempts a partil i/o operation.  Returns true if the attempt succeeded, false
+  /// Attempts a partial i/o operation.  Returns true if the attempt succeeded, false
   /// if it failed.
 
   virtual bool do_partial_io() = 0;
+
+  /// Write performance of partial i/o operation.
+
+  virtual void write_results() = 0;
 
 
   // Test interface:

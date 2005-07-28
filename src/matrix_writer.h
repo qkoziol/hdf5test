@@ -6,6 +6,7 @@
 #include "matrix.h"
 #include "memory.h"
 #include "partial.h"
+#include "perf_data.h"
 #include "tuple.h"
 
 /*! @class matrix_writer
@@ -63,6 +64,10 @@ class matrix_writer : public partial
 
   virtual bool do_partial_io();
 
+  /// Write results of partial i/o op to stdout.
+
+  virtual void write_results();
+
 
   /// Set the matrix access pattern: xct rows or columns at each partial write,
   /// and by rows if xby_rows, or by columns otherwise.
@@ -87,15 +92,23 @@ class matrix_writer : public partial
 
  protected:
 
-  unsigned _max_write_ct;  ///< The max number of rows or columns to write at each iteration.
-  unsigned _cur_write_ct;  ///< The number of rows or columns to write at this iteration.
-  unsigned _accum_ct;      ///< The number of rows or columns written thus far.
-  tuple    _size;          ///< The size of the matrix on disk after this iteration's write.
-  tuple    _max_size;      ///< The maximum size of the matrix on disk.
-  bool     _by_rows;       ///< Are partial writes by rows or columns?
-  matrix*  _mat;           ///< The matrix being written.
-  dataset* _dest;          ///< The dataset acting as the destination of each write.
-  memory*  _src;           ///< The memory buffer acting as the source of each write.
+  /// Select elements in source and destination dataspaces for current
+ /// write.  Extend dataset if nececssary.
+
+  void select_extend();
+
+  // Data members:
+
+  unsigned  _max_write_ct;  ///< The max number of rows or columns to write at each iteration.
+  unsigned  _cur_write_ct;  ///< The number of rows or columns to write at this iteration.
+  unsigned  _accum_ct;      ///< The number of rows or columns written thus far.
+  tuple     _size;          ///< The size of the matrix on disk after this iteration's write.
+  tuple     _max_size;      ///< The maximum size of the matrix on disk.
+  bool      _by_rows;       ///< Are partial writes by rows or columns?
+  matrix*   _mat;           ///< The matrix being written.
+  dataset*  _dest;          ///< The dataset acting as the destination of each write.
+  memory*   _src;           ///< The memory buffer acting as the source of each write.
+  perf_data _perf;          ///< The performance of each part of the test.
 
 };
 

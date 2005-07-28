@@ -11,10 +11,13 @@ class perf_data
 {
  public:
 
-  size_t  bytes;    ///< Number of bytes transferred in an i/o operation.
-  double  open;     ///< Time to open container in seconds.
-  double  elapsed;  ///< Time to perform i/o operation in seconds.
-  double  close;    ///< Time to close container in seconds.
+  size_t  bytes;      ///< Number of bytes transferred in an i/o operation.
+  double  open_file;  ///< Time to open the hdf5 file.
+  double  open;       ///< Time to open container in seconds.
+  double  extend;     ///< Time to extend a chunked dataset.
+  double  elapsed;    ///< Time to perform i/o operation in seconds.
+  double  close;      ///< Time to close container in seconds.
+  double  close_file; ///< Time to close the hdf5 file.
 
 
   // Some conveniences:
