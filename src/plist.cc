@@ -118,7 +118,6 @@ is_compact(hid_t xplist)
 }
 
 herr_t
-plist::
 write_property(hid_t xhid, const char* xname, void* xiter_data)
 {
   // Preconditions:

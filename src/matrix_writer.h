@@ -47,6 +47,8 @@ class matrix_writer : public partial
 
   bool run_test(matrix& xmat, memory& xsrc, dataset& xdest);
 
+  using partial::run_test;
+
 
   /// Initialize state of matrix_writer for first partial write.
 

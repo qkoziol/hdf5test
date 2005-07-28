@@ -1,23 +1,11 @@
-# Note on editing this file:
-#
-# You should provide a definition for HDFDIR, a
-# directory containing the bin/, doc/, include/,
-# and lib/ directories into which your version
-# of HDF5 is installed.  I've provided a number
-# of such definitions for various NCSA machines
-# and compilers, although most of them are my own
-# personal builds of hdf5 and not available to
-# others.  Make sure that there's only one definition
-# of HDF5DIR!
-#
-# This makefile uses the hdfc++ compiler wrapper
-# $(HDF5DIR)/bin/h5c++.  You can append compiler
-# options to those contained in h5c++ by defining
-# CXXFLAGS.  There is a mandatory CXXFLAG option for
-# aix's xlC compiler.  See the example for "copper"
-# below.
-#
 # Note on compiler options:
+#
+# Define CXX to be the h5c++ compiler wrapper in the
+# bin directory of the HDF5 installation you want to use.
+# You can append compiler options to those contained in
+# h5c++ # by defining CXXFLAGS.  There is a mandatory CXXFLAG
+# option for aix's xlC compiler.  See the example for
+# "copper" below.
 #
 # h5cc and h5c++ will append CFLAGS and CXXFLAGS
 # to the options they already impose.  So you may
@@ -26,6 +14,11 @@
 # the -O2 in h5c++ on my home machine because it's
 # way too confusing trying to follow optimized code
 # with gdb.
+#
+# If you need to link with some external library,
+# define the libraries and paths in the variable LIBS.
+#
+# Some examples:
 #
 # On lotus (my x86 linux development machine at home - John Blinka)
 #
@@ -44,7 +37,7 @@ CXXFLAGS=-g -pipe -Wall
 #
 # On copper, aix, xlC
 #
-#HDF5DIR=/u/ncsa/jblinka
+#HDF5DIR=/u/ncsa/jblinka/hdf5-1.6.4-aix
 # the following flag is mandatory (or can substitute rtti=all)
 #CXXFLAGS=-q rtti=dyna
 #
@@ -150,10 +143,10 @@ BIN  = $(bin_sources:.cc=)
 	rm -f $@.$$$$
 
 %.o : %.cc
-	$(CXX) -c $(CXXFLAGS) -prefix=$(HDF5DIR) $< -o $@
+	$(CXX) -c $(CXXFLAGS) $< -o $@
 
 % : %.cc
-	$(CXX) -o $@ $(CXXFLAGS) -prefix=$(HDF5DIR) $< -g $(OBJ)
+	$(CXX) -o $@ $(CXXFLAGS) $< -g $(OBJ) $(LIBS)
 
 obj: $(OBJ)
 $(BIN) : $(OBJ)

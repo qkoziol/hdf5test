@@ -222,7 +222,10 @@ class plist : public hdf5_handle
 
   /// Writes individual property.  Called by write().
 
-  static herr_t write_property(hid_t xhid, const char* xname, void* xiter_data);
 };
+extern "C"
+{
+  herr_t write_property(hid_t xhid, const char* xname, void* xiter_data);
+}
 
 #endif

@@ -1,7 +1,7 @@
 #ifndef PERF_DATA_H
 #define PERF_DATA_H
 
-#include "std_cstddef.h"
+#include <stddef.h>
 
 /*! @class perf_data
     @brief Just a struct to hold standard performance data.

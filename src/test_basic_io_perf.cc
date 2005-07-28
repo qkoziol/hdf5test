@@ -12,6 +12,7 @@
 #include "memory.h"
 #include "scalar.h"
 #include "tuple.h"
+#include <unistd.h>
 
 string&
 test_name()

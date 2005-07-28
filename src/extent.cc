@@ -77,8 +77,7 @@ invariant() const
 
   // Body:
 
-  result = d() >= 0;
-  result = result && max_size().d() == d();
+  result = max_size().d() == d();
   result = result && size().d() == d();
 
   // Postconditions:

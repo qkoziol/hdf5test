@@ -75,8 +75,7 @@ invariant() const
   result = hdf5_handle::invariant();
   if (result && is_attached())
   {
-    result = (d() >= 0);
-    result = result && (_ext.d() == d());
+    result = (_ext.d() == d());
   }
 
   // Postconditions:

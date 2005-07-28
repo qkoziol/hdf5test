@@ -227,7 +227,7 @@ plus(const struct timeval& xa, const struct timeval& xb, struct timeval& xresult
     // Then max+min is positive and greater than SUSECONDS_T_MAX.
     // Overflow occurs in naive addition.
 
-    int nsecs = SUSECONDS_T_MAX / MILLION;
+    long nsecs = SUSECONDS_T_MAX / MILLION;
 
     xresult.tv_sec  = xa.tv_sec + xb.tv_sec + nsecs;
     xresult.tv_usec = (max - nsecs * MILLION) + min;
@@ -239,7 +239,7 @@ plus(const struct timeval& xa, const struct timeval& xb, struct timeval& xresult
     // Then max+min is negative and less than SUSECONDS_T_MIN.
     // Underflow occurs in naive addition.
 
-    int nsecs = SUSECONDS_T_MAX / MILLION;
+    long nsecs = SUSECONDS_T_MAX / MILLION;
 
     xresult.tv_sec   = xa.tv_sec + xb.tv_sec - nsecs;
     xresult.tv_usec = (min + nsecs * MILLION) + max;
@@ -296,7 +296,7 @@ minus(const struct timeval& xa, const struct timeval& xb, struct timeval& xresul
     // xa.tv_usec-x.tv_usec is greater than SUSECONDS_T_MAX;
     // overflow occurs in naive subtraction.
 
-    int nsecs = SUSECONDS_T_MAX / MILLION;
+    long nsecs = SUSECONDS_T_MAX / MILLION;
 
     xresult.tv_sec  = xa.tv_sec - xb.tv_sec + nsecs;
     xresult.tv_usec = (xa.tv_usec - nsecs * MILLION) - xb.tv_usec;
@@ -306,7 +306,7 @@ minus(const struct timeval& xa, const struct timeval& xb, struct timeval& xresul
     // xa.tv_usec-x.tv_usec is less than SUSECONDS_T_MIN;
     // underflow occurs in naive subtraction.
 
-    int nsecs = SUSECONDS_T_MAX / MILLION;
+    long nsecs = SUSECONDS_T_MAX / MILLION;
 
     xresult.tv_sec  = xa.tv_sec - xb.tv_sec - nsecs;
     xresult.tv_usec = (xa.tv_usec + nsecs * MILLION) - xb.tv_usec;

@@ -391,7 +391,7 @@ run_test(matrix& xmat, memory& xsrc, dataset& xdest)
   _src  = &xsrc;
   _dest = &xdest;
 
-  result = partial::run_test();
+  result = run_test();
 
   _mat  = 0;
   _src  = 0;
