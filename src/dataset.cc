@@ -545,9 +545,9 @@ operator<<(ostream& xos, const dataset& xds)
 
   // Body:
 
-  xos << "dataspace = ("
+  xos << "dataspace = {"
       << xds.get_space()
-      << ')';
+      << '}';
 
   if (xds.is_chunked())
   {
@@ -555,13 +555,12 @@ operator<<(ostream& xos, const dataset& xds)
 
     xds.get_chunk_size(chunk);
 
-    xos << " chunk size = ("
-	<< chunk
-	<< ')';
+    xos << " chunk size = "
+	<< chunk;
   }
   else if (xds.is_external())
   {
-    xos << " external, file sizes = (";
+    xos << " external, file sizes = ";
     {
       hid_t plist = H5Dget_create_plist(xds.hid());
 
@@ -574,8 +573,7 @@ operator<<(ostream& xos, const dataset& xds)
 	H5Pget_external(plist, i, 0, 0, 0, &size[i]);
       }
 
-      xos << size
-	  << ')';
+      xos << size;
 
       H5Pclose(plist);
     }
@@ -611,7 +609,7 @@ dataset(hid_t xhid)
 
   _space.attach(space);
 
-  H5Sclose(space);
+  H5Idec_ref(space);
 
 
   // Postconditions:

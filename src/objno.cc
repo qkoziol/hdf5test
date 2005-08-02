@@ -197,7 +197,7 @@ operator<<(ostream& xos, const objno& xobj)
 
   // Body:
 
-  xos << '('
+  xos << '{'
 
 #if H5_VERS_MINOR==6
 
@@ -212,7 +212,7 @@ operator<<(ostream& xos, const objno& xobj)
 #endif
       << ", "
       << xobj.idx
-      << ')';
+      << '}';
 
   // Postconditions:
 

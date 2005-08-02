@@ -24,16 +24,16 @@ hyperslab(unsigned xdim)
   // Body:
 
   _block_size.reserve(xdim);
-  _origin.reserve(xdim);
+  _start.reserve(xdim);
   _stride.reserve(xdim);
   _ct.reserve(xdim);
 
   if (xdim > 0)
   {
-    _block_size[0] = 1;
-    _ct[0]         = 1;
-    _origin[0]     = 0;
-    _stride[0]     = 1;
+    _block_size = 1;
+    _ct         = 1;
+    _start      = 0;
+    _stride     = 1;
   }
 
   // Postconditions:
@@ -42,17 +42,17 @@ hyperslab(unsigned xdim)
   assert(d() == xdim);
   assert(d() > 0 ? block_size()[0] == 1 : true);
   assert(d() > 0 ? ct()[0] == 1 : true);
-  assert(d() > 0 ? origin()[0] == 0 : true);
+  assert(d() > 0 ? start()[0] == 0 : true);
   assert(d() > 0 ? stride()[0] == 1 : true);
 
   // Exit:
 }
 
 hyperslab::
-hyperslab(const tuple& xblock_size,
-	  const tuple& xorigin,
+hyperslab(const tuple& xstart,
 	  const tuple& xstride,
-	  const tuple& xct)
+	  const tuple& xct, 
+	  const tuple& xblock_size)
 {
   not_implemented;
 }
@@ -104,8 +104,8 @@ invariant() const
 
   // Body:
 
-  result = (_block_size.d() == _origin.d());
-  result = result && (_origin.d() == _stride.d());
+  result = (_block_size.d() == _start.d());
+  result = result && (_start.d() == _stride.d());
   result = result && (_stride.d() == _ct.d());
 
   // Postconditions:
@@ -124,14 +124,15 @@ operator<<(ostream& xos, const hyperslab& xhyperslab)
 
   // Body:
 
-  xos << "block size: "
-      << xhyperslab._block_size
-      << " origin: "
-      << xhyperslab._origin
+  xos
+      << "start: "
+      << xhyperslab._start
       << " stride: "
       << xhyperslab._stride
       << " ct: "
-      << xhyperslab._ct;
+      << xhyperslab._ct
+      << " block size: "
+      << xhyperslab._block_size;
 
   // Postconditions:
 
@@ -176,7 +177,7 @@ block_size()
 
 tuple&
 hyperslab::
-origin()
+start()
 {
   // Preconditions:
 
@@ -188,12 +189,12 @@ origin()
 
   // Exit:
 
-  return _origin;
+  return _start;
 }
 
 const tuple&
 hyperslab::
-origin() const
+start() const
 {
   // Preconditions:
 
@@ -205,7 +206,7 @@ origin() const
 
   // Exit:
 
-  return _origin;
+  return _start;
 }
 
 tuple&

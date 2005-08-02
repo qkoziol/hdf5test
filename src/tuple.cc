@@ -432,13 +432,25 @@ operator<<(ostream& xos, const tuple& xtuple)
 
   // Body:
 
+  xos << '{';
+
   for (unsigned i = 0; i < xtuple._d; ++i)
   {
-    xos << *(xtuple._mem+i);
+    hsize_t out = *(xtuple._mem+i);
+
+    if (out == H5S_UNLIMITED)
+    {
+      xos << "H5S_UNLIMITED";
+    }
+    else
+    {
+      xos << out;
+    }
 
     if (i < xtuple._d-1)
       xos << ", ";
   }
+  xos << '}';
 
   // Postconditions:
 

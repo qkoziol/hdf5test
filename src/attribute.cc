@@ -255,9 +255,9 @@ operator<<(ostream& xos, const attribute& xattr)
 
   // Body:
 
-  xos << "dataspace = ("
+  xos << "dataspace = {"
       << xattr.get_space()
-      << ')';
+      << '}';
 
   // Postconditions:
 

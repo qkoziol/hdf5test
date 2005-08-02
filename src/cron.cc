@@ -372,11 +372,11 @@ operator<<(ostream& xos, const cron& xcron)
 
   // Body:
 
-  xos << '('
+  xos << '{'
       << xcron.tv_sec
       << ','
       << xcron.tv_usec
-      << ')';
+      << '}';
 
   // Postconditions:
 

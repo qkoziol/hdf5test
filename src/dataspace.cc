@@ -135,7 +135,7 @@ select(const hyperslab& xsubset, H5S_seloper_t xop)
 
   herr_t status = H5Sselect_hyperslab(_hid,
 		                      xop,
-		                      &xsubset.origin()[0],
+		                      &xsubset.start()[0],
 		                      &xsubset.stride()[0],
 		                      &xsubset.ct()[0],
 		                      &xsubset.block_size()[0]);
@@ -305,9 +305,9 @@ operator<<(ostream& xos, const dataspace& xspace)
 
   if (d > 0)
   {
-    xos << " extent = ("
+    xos << " extent = {"
 	<< xspace.get_extent()
-	<< ')';
+	<< '}';
   }
 
   // Postconditions:

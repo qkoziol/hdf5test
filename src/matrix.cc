@@ -101,9 +101,11 @@ operator<<(ostream& xos, const matrix& xmatrix)
 
   // Body:
 
-  xos << xmatrix._row_ct
+  xos << '{'
+      << xmatrix._row_ct
       << ", "
-      << xmatrix._col_ct;
+      << xmatrix._col_ct
+      << '}';
 
   // Postconditions:
 
@@ -219,11 +221,11 @@ select(hyperslab& xresult) const
 
   // Body:
 
-  xresult.origin()        = 0;
+  xresult.start()         = 0;
   xresult.stride()        = 1;
   xresult.ct()            = 1;
-  xresult.block_size()[0] = _row_ct;
-  xresult.block_size()[1] = _col_ct;
+  xresult.block_size()[0] = _col_ct;
+  xresult.block_size()[1] = _row_ct;
 
   // Postconditions:
 
@@ -241,12 +243,7 @@ select_row(unsigned xrow, hyperslab& xresult) const
 
   // Body:
 
-  xresult.origin()[0]     = xrow;
-  xresult.origin()[1]     = 0;
-  xresult.stride()        = 1;
-  xresult.ct()            = 1;
-  xresult.block_size()[0] = 1;
-  xresult.block_size()[1] = _col_ct;
+  select_rows(xrow, 1, xresult);
 
   // Postconditions:
 
@@ -266,8 +263,8 @@ select_rows(unsigned xfirst, unsigned xct, hyperslab& xresult) const
 
   // Body:
 
-  xresult.origin()[0]     = xfirst;
-  xresult.origin()[1]     = 0;
+  xresult.start()[0]      = xfirst;
+  xresult.start()[1]      = 0;
   xresult.stride()        = 1;
   xresult.ct()            = 1;
   xresult.block_size()[0] = xct;
@@ -289,12 +286,7 @@ select_col(unsigned xcol, hyperslab& xresult) const
 
   // Body:
 
-  xresult.origin()[0]     = 0;
-  xresult.origin()[1]     = xcol;
-  xresult.stride()        = 1;
-  xresult.ct()            = 1;
-  xresult.block_size()[0] = _row_ct;
-  xresult.block_size()[1] = 1;
+  select_cols(xcol, 1, xresult);
 
   // Postconditions:
 
@@ -313,9 +305,9 @@ select_cols(unsigned xfirst, unsigned xct, hyperslab& xresult) const
   assert(xresult.d() == 2);
 
   // Body:
-
-  xresult.origin()[0]     = 0;
-  xresult.origin()[1]     = xfirst;
+ 
+  xresult.start()[0]      = 0;
+  xresult.start()[1]      = xfirst;
   xresult.stride()        = 1;
   xresult.ct()            = 1;
   xresult.block_size()[0] = _row_ct;
@@ -336,8 +328,8 @@ get_extent(extent& xresult) const
 
   // Body:
 
-  xresult.size()[0] = row_ct();
-  xresult.size()[1] = col_ct();
+  xresult.size()[0]     = row_ct();
+  xresult.size()[1]     = col_ct();
   xresult.max_size()[0] = row_ct();
   xresult.max_size()[1] = col_ct();
 

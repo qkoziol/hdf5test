@@ -108,9 +108,9 @@ start()
   else
     cout << " columns";
 
-  cout << " of ("
+  cout << " of "
        << *_mat
-       << ") matrix at a time.\n"
+       << " matrix at a time.\n"
        << *_dest
        << '\n'
        << setw(11)
@@ -390,6 +390,16 @@ run_test(matrix& xmat, memory& xsrc, dataset& xdest)
   _mat  = &xmat;
   _src  = &xsrc;
   _dest = &xdest;
+  if (_by_rows)
+  {
+    _max_size[0] = H5S_UNLIMITED;
+    _max_size[1] = xmat.col_ct();
+  }
+  else
+  {
+    _max_size[0] = xmat.row_ct();
+    _max_size[1] = H5S_UNLIMITED;
+  }
 
   result = run_test();
 
@@ -462,84 +472,91 @@ void
 matrix_writer::
 select_extend()
 {
-    // Determine the number of rows/columns to write next time.
+  // Preconditions:
 
-    // Compute the minimum of the number of not-yet-written
-    // rows/columns and the standard number of rows/columns
-    // to be written.  Only on the last iteration, and only
-    // if the number of rows/columns is not evenly divisible
-    // by the standard row/column write count should the
-    // size of the selection change.
+  // Body:
 
-    unsigned unwritten;
+  // Determine the number of rows/columns to write next time.
+
+  // Compute the minimum of the number of not-yet-written
+  // rows/columns and the standard number of rows/columns
+  // to be written.  Only on the last iteration, and only
+  // if the number of rows/columns is not evenly divisible
+  // by the standard row/column write count should the
+  // size of the selection change.
+
+  unsigned unwritten;
+
+  if (_by_rows)
+  {
+    unwritten = _mat->row_ct()-_accum_ct;
+  }
+  else
+  {
+    unwritten = _mat->col_ct()-_accum_ct;
+  }
+
+  _cur_write_ct = _max_write_ct;
+
+  if (_cur_write_ct > unwritten)
+  {
+    _cur_write_ct = unwritten;
+  }
+
+
+  // Now ensure that the dataset's extent encompasses the upcoming write.
+
+  if (_dest->is_chunked())
+  {
+    // Define the desired size of the matrix on disk after the upcoming
+    // write.
 
     if (_by_rows)
     {
-      unwritten = _mat->row_ct()-_accum_ct;
+      _size[0] = _accum_ct + _cur_write_ct;
+      _size[1] = _mat->col_ct();
     }
     else
     {
-      unwritten = _mat->col_ct()-_accum_ct;
+      _size[0] = _mat->row_ct();
+      _size[1] = _accum_ct + _cur_write_ct;
     }
 
-    _cur_write_ct = _max_write_ct;
+    // Ask HDF5 to extend the dataset's dataspace to the desired size.
 
-    if (_cur_write_ct > unwritten)
-    {
-      _cur_write_ct = unwritten;
-    }
+    herr_t status = H5Sset_extent_simple(_dest->get_space().hid(), 2, &_size[0], &_max_size[0]);
 
-    // Select the next group of rows/columns in the dataset's dataspace.
+    assert(status >= 0);
 
-    hyperslab h(2);
+    status = H5Dextend(_dest->hid(), &_size[0]);
 
-    if (_by_rows)
-    {
-      _mat->select_rows(_accum_ct, _cur_write_ct, h);
-    }
-    else
-    {
-      _mat->select_cols(_accum_ct, _cur_write_ct, h);
-    }
+    assert(status >= 0);
+  }
 
-    _dest->get_space().select(h);
+  // Select the next group of rows/columns in the dataset's dataspace.
 
-    // Now ensure that the dataset's extent encompasses the upcoming write.
+  hyperslab h(2);
 
-    if (_dest->is_chunked())
-    {
-      // Define the desired size of the matrix on disk after the upcoming
-      // write.
+  if (_by_rows)
+  {
+    _mat->select_rows(_accum_ct, _cur_write_ct, h);
+  }
+  else
+  {
+    _mat->select_cols(_accum_ct, _cur_write_ct, h);
+  }
 
-      if (_by_rows)
-      {
-	_size[0] = _accum_ct + _cur_write_ct;
-	_size[1] = _mat->col_ct();
-      }
-      else
-      {
-	_size[0] = _mat->row_ct();
-	_size[1] = _accum_ct + _cur_write_ct;
-      }
+  _dest->get_space().select(h);
 
-      // Ask HDF5 to extend the dataset's dataspace to the desired size.
+  // Make sure the memory buffer is big enough.
 
-      herr_t status = H5Sset_extent_simple(_dest->get_space().hid(), 2, &_size[0], &_max_size[0]);
+  _src->reserve(*_dest);
 
-      assert(status >= 0);
+  _src->get_space().select(h.npoints());
 
-      // Ask HDF5 to extend the dataset to at least the desired size.
+  // Postconditions:
 
-      status = H5Dextend(_dest->hid(), &_size[0]);
-
-      assert(status >= 0);
-    }
-
-    // Make sure the memory buffer is big enough.
-
-    _src->reserve(*_dest);
-
-    _src->get_space().select(h.npoints());
+  // Exit:
 
 }
 
@@ -558,10 +575,10 @@ write_results()
     cout << setw(11)
 	 << "succeeded "
 	 << setw(3)
-	 << _accum_ct
+	 << _accum_ct-_cur_write_ct+1
 	 << " to "
 	 << setw(3)
-	 << _accum_ct-1
+	 << _accum_ct
 	 << fixed << setprecision(3) << setw(18)
 	 << _perf.bytes/((double)BYTES_PER_KB)
 	 << "  ";

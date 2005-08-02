@@ -28,8 +28,7 @@ compact_test(hdf5_file& xfile, matrix_writer& xtest)
 
   extent e(2);
 
-  e.max_size()[0] = e.size()[0] = mat.row_ct();
-  e.max_size()[1] = e.size()[1] = mat.col_ct();
+  mat.get_extent(e);
 
   assert(H5Pset_layout(create_plist, H5D_COMPACT) >= 0);
 
@@ -100,8 +99,7 @@ contiguous_test(hdf5_file& xfile, matrix_writer& xtest)
 
   extent e(2);
 
-  e.max_size()[0] = e.size()[0] = mat.row_ct();
-  e.max_size()[1] = e.size()[1] = mat.col_ct();
+  mat.get_extent(e);
 
   hid_t file_space = H5Screate_simple(2, &e.size()[0], &e.max_size()[0]);
 
@@ -169,8 +167,7 @@ datatype_test(hdf5_file& xfile, matrix_writer& xtest)
 
   extent e(2);
 
-  e.max_size()[0] = e.size()[0] = mat.row_ct();
-  e.max_size()[1] = e.size()[1] = mat.col_ct();
+  mat.get_extent(e);
 
   hid_t file_space = H5Screate_simple(2, &e.size()[0], &e.max_size()[0]);
 
@@ -285,6 +282,13 @@ do_test(const string& xname, extent& xchunk, matrix& xmat, int xct, bool xby_row
 
   // Make the file space.
 
+  {
+    cout << "creating a chunked dataset with space size = "
+	 << xchunk.size()
+	 << " and max size = "
+	 << xchunk.max_size()
+	 << endl;
+  }
   hid_t file_space = H5Screate_simple(2, &xchunk.size()[0], &xchunk.max_size()[0]);
 
   assert(file_space >= 0);

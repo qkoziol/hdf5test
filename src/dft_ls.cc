@@ -104,9 +104,9 @@ preorder_action()
 
 	dset->get_chunk_size(chunk);
 
-	cout << "chunked ("
+	cout << "chunked {"
 	     << chunk
-	     << ')';
+	     << '}';
       }
       if (dset->is_external())
 	cout << "external";

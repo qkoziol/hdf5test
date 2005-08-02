@@ -338,9 +338,9 @@ operator<<(ostream& xos, const memory& xmem)
 
   // Body:
 
-  xos << "dataspace = ("
+  xos << "dataspace = {"
       << xmem.get_space()
-      << ')';
+      << '}';
 
   // Postconditions:
 

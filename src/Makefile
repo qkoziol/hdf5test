@@ -31,7 +31,7 @@
 #
 # serial, gcc-3.3.5:
 #
-HDF5DIR=/usr/local/hdf5/serial
+HDF5DIR=/usr/local/hdf5-1.7.50
 # the following flags are optional:
 CXXFLAGS=-g -pipe -Wall
 #
@@ -130,7 +130,8 @@ test_sources =	test_access_patterns.cc \
 		test_timer.cc
 
 bin_sources =	h5dft_read.cc \
-		h5read.cc
+		h5read.cc \
+		h5write_matrix.cc
 
 OBJ  = $(lib_sources:.cc=.o)
 TEST = $(test_sources:.cc=)
