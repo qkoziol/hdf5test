@@ -4,17 +4,12 @@
 #include "matrix_writer.h"
 #include "memory.h"
 #include "temp_file.h"
-/*
-  What do we want this to do?
-  1)  write a matrix of specified size to an HDF5 file
-  2)  specify by rows or by columns
-  3)  specify how many rows/columns at a time
-  4)  specify chunk size
+#include <unistd.h>
 
-  How?
-
-  How about a class to deal with options or configuration?
- */
+/*!
+  @file h5write_matrix.cc Writes a matrix of H5T_NATIVE_INTs to a dataset
+                          and reports on the performance.
+*/
 
 /*! @class config
     @brief A class defining the parameters of a matrix write test.
@@ -161,15 +156,17 @@ process_command_line(int argc, char** argv)
   }
   else
   {
+    result = true;  // until proven otherwise.
+
     // Define the indices of the various options.  A value of -1 indicates
     // option not present or not yet found.
 
-    int dash_h   = -1;
-    int dash_m   = -1;
-    int dash_c   = -1;
-    int dash_row = -1;
-    int dash_col = -1;
-    int dash_t   = -1;
+    int  dash_h   = -1;
+    int  dash_m   = -1;
+    int  dash_c   = -1;
+    int  dash_row = -1;
+    int  dash_col = -1;
+    int  dash_t   = -1;
 
     filename = argv[argc-2];
     ds_name = argv[argc-1];
@@ -179,7 +176,6 @@ process_command_line(int argc, char** argv)
       if (dash_h == -1 && strncmp(argv[i], "-h", 2) == 0)
       {
 	dash_h = i;
-	usage();
 	++i;
       }
       else if (dash_m == -1 && strncmp(argv[i], "-m", 2) == 0)
@@ -225,40 +221,56 @@ process_command_line(int argc, char** argv)
 	}
 	i += 2;
       }
-    }
-
-    // Define the extent.  In general, the extent is just the size of the matrix
-    // and has fixed max dimensions.  But for chunked datasets, we define the
-    // size to be 0, the max size unlimited in the direction of dataset extension,
-    // and the max size to be the size of a row or column, whichever is appropriate
-    // in the other direction.  "matrix_writer" will extend the chunked dataset
-    // appropriately as it runs the test.
-
-    if (type != CHUNKED)
-    {
-      mat.get_extent(ext);
-    }
-    else
-    {
-      if (by_rows)
+      else if (*argv[i] == '-')
       {
-	ext.size()[0]     = 0;
-	ext.size()[1]     = mat.col_ct();
-	ext.max_size()[0] = H5S_UNLIMITED;
-	ext.max_size()[1] = mat.col_ct();
+	// Unknown flag.
+
+	result = false;
+	++i;
+      }
+    }
+
+    if (dash_h != -1 && result)
+    {
+      usage();
+    }
+    if (result)
+    {
+      // Command line args make sense so far.
+
+      // Define the extent.  In general, the extent is just the size of the matrix
+      // and has fixed max dimensions.  But for chunked datasets, we define the
+      // size to be 0, the max size unlimited in the direction of dataset extension,
+      // and the max size to be the size of a row or column, whichever is appropriate
+      // in the other direction.  "matrix_writer" will extend the chunked dataset
+      // appropriately as it runs the test.
+
+      if (type != CHUNKED)
+      {
+	mat.get_extent(ext);
       }
       else
       {
-	ext.size()[0]     = mat.row_ct();
-	ext.size()[1]     = 0;
-	ext.max_size()[0] = mat.row_ct();
-	ext.max_size()[1] = H5S_UNLIMITED;
+	if (by_rows)
+	{
+	  ext.size()[0]     = 0;
+	  ext.size()[1]     = mat.col_ct();
+	  ext.max_size()[0] = H5S_UNLIMITED;
+	  ext.max_size()[1] = mat.col_ct();
+	}
+	else
+	{
+	  ext.size()[0]     = mat.row_ct();
+	  ext.size()[1]     = 0;
+	  ext.max_size()[0] = mat.row_ct();
+	  ext.max_size()[1] = H5S_UNLIMITED;
+	}
       }
+
+      // Is the configuration valid?  If not, write diagnostic messages to cerr.
+
+      result = invariant(true);
     }
-
-    // Is the configuration valid?  If not, write diagnostic messages to cerr.
-
-    result = invariant(true);
   }
 
   // Postconditions:
@@ -293,21 +305,6 @@ main(int argc, char** argv)
   else
   {
     // Commmand line is ok.  Try to run the test.
-
-    /*
-      Set result = 1;
-      Make a dataspace.
-      Make a dataset creation property list.
-      If chunked, specify the chunk size.
-      If chunked, contiguous, or compact, specify the layout.
-      If external, specify external.
-      Open the file if possible, clobbering the contents.  If not, create a new file.
-      Create the dataset.
-      Make the memory buffer.
-      Use matrix_writer to run the test.
-      Close resources.
-      Set result = 0
-     */
 
     // Set result to an error condition, and reset it to no error if all steps
     // execute correctly.
@@ -391,6 +388,13 @@ main(int argc, char** argv)
     {
       result = 1;
     }
+  }
+
+  // Clean up external file if it exists.
+
+  if (cmdline.type == config::EXTERNAL)
+  {
+    unlink(cmdline.ds_name.c_str());
   }
 
   // Postconditions:
