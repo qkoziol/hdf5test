@@ -289,8 +289,8 @@ attach(hid_t xhid)
   // Exit:
 }
 
-ostream&
-operator<<(ostream& xos, const dataspace& xspace)
+std::ostream&
+operator<<(std::ostream& xos, const dataspace& xspace)
 {
   // Preconditions:
 

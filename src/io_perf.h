@@ -4,7 +4,7 @@
 class memory;
 class pcontainer;
 #include "perf_data.h"
-#include "std_iostream.h"
+#include <ostream>
 #include "test.h"
 
 /*! @class io_perf

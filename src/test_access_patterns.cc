@@ -18,7 +18,8 @@ int
 main()
 {
   {
-    cerr << "\t`test_access_patterns' is currently broken." << endl;
+    std::cerr << "\t`test_access_patterns' is currently broken."
+	      << std::endl;
     exit(0);
   }
 

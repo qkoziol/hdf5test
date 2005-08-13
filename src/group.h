@@ -2,7 +2,7 @@
 #define GROUP_H
 
 #include "persistent.h"
-#include "std_string.h"
+#include <string>
 
 /*! @class group
     @brief A handle to an HDF5 group.
@@ -40,7 +40,7 @@ class group : public persistent
 
   /// Attempt to attach handle to existing hdf5 group.
 
-  bool open(hid_t xhost, const string& xname = "/");
+  bool open(hid_t xhost, const std::string& xname = "/");
 
 };
 

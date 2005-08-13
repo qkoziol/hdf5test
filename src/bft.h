@@ -1,7 +1,7 @@
 #ifndef BFT_H
 #define BFT_H
 
-#include "std_queue.h"
+#include <queue>
 #include "traverser.h"
 
 /*! @class bft
@@ -90,8 +90,8 @@ class bft : public traverser
 
   // Data:
 
-  node         _current;  ///< The node currently being visited.
-  queue<node>  _pending;  ///< The queue of nodes encountered but not yet visited.
+  node              _current;  ///< The node currently being visited.
+  std::queue<node>  _pending;  ///< The queue of nodes encountered but not yet visited.
 };
 
 #endif

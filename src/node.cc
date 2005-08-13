@@ -55,8 +55,8 @@ operator!=(const node& xother) const
   return result;
 }
 
-ostream&
-operator<<(ostream& xos, const node& xnode)
+std::ostream&
+operator<<(std::ostream& xos, const node& xnode)
 {
   // Preconditions:
 

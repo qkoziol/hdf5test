@@ -1,5 +1,37 @@
 #include "cron.h"
 #include "contract.h"
+#include <sys/types.h>
+
+// ISSUE:
+// The serial timer depends on gettimeofday() for its notion
+// of time.  gettimeofday() in turn, returns its notion of
+// time in a struct timeval.  On all systems, a struct timeval
+// contains two counters: tv_sec, which counts the number of
+// seconds, and tv_usec, which counts the number of microseconds.
+// Each of these counters is some kind of integer.  This code has
+// been tested on linux (both 32 and 64 bit), AIX, FreeBSD, Solaris.
+// In all of these cases, tv_sec and tv_usec are defined to be the
+// same kind of integer, and they are either both ints or both
+// longs.  FreeBSD and Solaris defines both to be longs.  Linux and
+// AIX "hide" the types behind at least one additional layer of
+// type definitions.  They define tv_sec to be a time_t, and tv_usec
+// tv_usec to be a suseconds_t.  AIX in turn defines both a time_t and
+// a suseconds_t to be ints.  Linux defines them both to be longs.
+// So, in the end, both fields are either ints or longs on all systems
+// tested.  Whether this conclusion is more general is unknown.
+
+// The types matter because in this class we do integer arithmetic on the
+// microsecond field.  The microsecond counter can overflow or underflow,
+// and these conditions cause additional arithmetic to occur on the
+// second counter.  To detect overflow or underflow, we have to know the
+// max and min values that can be represented by the microsecond counter
+// type.  And these max and min values depend on the integer type that
+// represents them.
+
+// The types and max/min values need to be detected at configure time.
+// I don't know whether the gnu configuration and build system does this
+// or whether such detection needs to be written for this project.
+// It hasn't been written, and is left as an exercise for the installer.
 
 #include "config.h"
 
@@ -17,7 +49,7 @@ make_proper(struct timeval& x)
 
   if (x.tv_usec >= MILLION || x.tv_usec <= -MILLION)
   {
-    int n = x.tv_usec/MILLION;
+    tv_usec_t n = x.tv_usec/MILLION;
 
     x.tv_sec += n;
 
@@ -209,7 +241,7 @@ plus(const struct timeval& xa, const struct timeval& xb, struct timeval& xresult
   // Addition is complicated by the fact that we can get
   // overflow: it's not just a case of adding some ints.
 
-  suseconds_t max, min;
+  tv_usec_t max, min;
 
   if (xa.tv_usec > xb.tv_usec)
   {
@@ -222,24 +254,24 @@ plus(const struct timeval& xa, const struct timeval& xb, struct timeval& xresult
     min = xa.tv_usec;
   }
 
-  if (max >= 0 && min > SUSECONDS_T_MAX-max)
+  if (max >= 0 && min > TV_USEC_T_MAX-max)
   {
-    // Then max+min is positive and greater than SUSECONDS_T_MAX.
+    // Then max+min is positive and greater than TV_USEC_T_MAX.
     // Overflow occurs in naive addition.
 
-    long nsecs = SUSECONDS_T_MAX / MILLION;
+    tv_usec_t nsecs = TV_USEC_T_MAX / MILLION;
 
     xresult.tv_sec  = xa.tv_sec + xb.tv_sec + nsecs;
     xresult.tv_usec = (max - nsecs * MILLION) + min;
 
     assert(xresult.tv_usec > 0);
   }
-  else if (min < 0 && max < SUSECONDS_T_MIN-min)
+  else if (min < 0 && max < TV_USEC_T_MIN-min)
   {
-    // Then max+min is negative and less than SUSECONDS_T_MIN.
+    // Then max+min is negative and less than TV_USEC_T_MIN.
     // Underflow occurs in naive addition.
 
-    long nsecs = SUSECONDS_T_MAX / MILLION;
+    tv_usec_t nsecs = TV_USEC_T_MAX / MILLION;
 
     xresult.tv_sec   = xa.tv_sec + xb.tv_sec - nsecs;
     xresult.tv_usec = (min + nsecs * MILLION) + max;
@@ -291,22 +323,22 @@ minus(const struct timeval& xa, const struct timeval& xb, struct timeval& xresul
   // Subtraction is complicated by the fact that we can get
   // overflow: it's not just a case of subtracting some ints.
 
-  if (xa.tv_usec >= 0 && xb.tv_usec < xa.tv_usec-SUSECONDS_T_MAX)
+  if (xa.tv_usec >= 0 && xb.tv_usec < xa.tv_usec-TV_USEC_T_MAX)
   {
-    // xa.tv_usec-x.tv_usec is greater than SUSECONDS_T_MAX;
+    // xa.tv_usec-x.tv_usec is greater than TV_USEC_T_MAX;
     // overflow occurs in naive subtraction.
 
-    long nsecs = SUSECONDS_T_MAX / MILLION;
+    tv_usec_t nsecs = TV_USEC_T_MAX / MILLION;
 
     xresult.tv_sec  = xa.tv_sec - xb.tv_sec + nsecs;
     xresult.tv_usec = (xa.tv_usec - nsecs * MILLION) - xb.tv_usec;
   }
-  else if (xb.tv_usec > 0 && xa.tv_usec < SUSECONDS_T_MIN+xb.tv_usec)
+  else if (xb.tv_usec > 0 && xa.tv_usec < TV_USEC_T_MIN+xb.tv_usec)
   {
-    // xa.tv_usec-x.tv_usec is less than SUSECONDS_T_MIN;
+    // xa.tv_usec-x.tv_usec is less than TV_USEC_T_MIN;
     // underflow occurs in naive subtraction.
 
-    long nsecs = SUSECONDS_T_MAX / MILLION;
+    tv_usec_t nsecs = TV_USEC_T_MAX / MILLION;
 
     xresult.tv_sec  = xa.tv_sec - xb.tv_sec - nsecs;
     xresult.tv_usec = (xa.tv_usec + nsecs * MILLION) - xb.tv_usec;
@@ -363,8 +395,8 @@ operator double() const
   return result;
 }
 
-ostream&
-operator<<(ostream& xos, const cron& xcron)
+std::ostream&
+operator<<(std::ostream& xos, const cron& xcron)
 {
   // Preconditions:
 

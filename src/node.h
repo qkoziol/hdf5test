@@ -2,7 +2,7 @@
 #define NODE_H
 
 #include "hdf5.h"
-#include "std_iostream.h"
+#include <ostream>
 
 /*! @class node
     @brief A node in the directed graph of HDF5 objects, with references
@@ -18,7 +18,7 @@ class node
 
   /// Write xnode to xos.
 
-  friend ostream& operator<<(ostream& xos, const node& xnode);
+  friend std::ostream& operator<<(std::ostream& xos, const node& xnode);
 
  public:
 

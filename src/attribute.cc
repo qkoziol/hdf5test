@@ -1,7 +1,7 @@
 #include "attribute.h"
 #include "contract.h"
 
-const string
+const std::string
 attribute::
 _type_name = "attribute";
 
@@ -69,7 +69,7 @@ operator=(const attribute& xother)
 
 bool
 attribute::
-open(hid_t xloc, const string& xname)
+open(hid_t xloc, const std::string& xname)
 {
   bool result;
 
@@ -98,11 +98,11 @@ open(hid_t xloc, const string& xname)
     // name.  Then xname minus the last segment should be the name of a dataset, group,
     // or datatype, and xloc should be a group or file id.
 
-    string::size_type size  = xname.size();
-    string::size_type slash = xname.find_last_of('/');
+    std::string::size_type size  = xname.size();
+    std::string::size_type slash = xname.find_last_of('/');
 
-    string attr_name(xname, slash+1, size-slash-1);
-    string host_name(xname, 0, slash+1);
+    std::string attr_name(xname, slash+1, size-slash-1);
+    std::string host_name(xname, 0, slash+1);
 
     // Assume attribute host is a dataset and try opening it.
 
@@ -207,7 +207,7 @@ is_readable() const
   return result;
 }
 
-const string&
+const std::string&
 attribute::
 type_name() const
 {
@@ -246,8 +246,8 @@ attach(hid_t xhid)
   // Exit:
 }
 
-ostream&
-operator<<(ostream& xos, const attribute& xattr)
+std::ostream&
+operator<<(std::ostream& xos, const attribute& xattr)
 {
   // Preconditions:
 

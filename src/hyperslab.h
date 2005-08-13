@@ -2,7 +2,7 @@
 #define HYPERSLAB_H
 
 class extent;
-#include "std_iostream.h"
+#include <ostream>
 #include "tuple.h"
 
 /*! @class hyperslab
@@ -26,7 +26,7 @@ class extent;
 class hyperslab
 {
 
-  friend ostream& operator<<(ostream& xos, const hyperslab& xhyperslab);
+  friend std::ostream& operator<<(std::ostream& xos, const hyperslab& xhyperslab);
 
  public:
 

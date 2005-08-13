@@ -3,9 +3,9 @@
 
 #include "dataspace.h"
 #include "hdf5_file.h"
-#include "std_string.h"
+#include <string>
 
-const string
+const std::string
 dataset::
 _type_name = "dataset";
 
@@ -96,7 +96,7 @@ operator=(const dataset& xother)
 
 bool
 dataset::
-open(hid_t xhost, const string& xname)
+open(hid_t xhost, const std::string& xname)
 {
   bool result;
 
@@ -269,12 +269,12 @@ is_compact() const
 
 bool
 dataset::
-create(const hdf5_file& xfile,
-       hid_t            xhost,
-       const string&    xname,
-       hid_t            xtype,
-       hid_t            xspace,
-       hid_t            xcreate_plist)
+create(const hdf5_file&   xfile,
+       hid_t              xhost,
+       const std::string& xname,
+       hid_t              xtype,
+       hid_t              xspace,
+       hid_t              xcreate_plist)
 {
   bool result;
 
@@ -315,12 +315,12 @@ create(const hdf5_file& xfile,
 
 bool
 dataset::
-create(const hdf5_file& xfile,
-       const string&    xgroup,
-       const string&    xname,
-       hid_t            xtype,
-       hid_t            xspace,
-       hid_t            xcreate_plist)
+create(const hdf5_file&   xfile,
+       const std::string& xgroup,
+       const std::string& xname,
+       hid_t              xtype,
+       hid_t              xspace,
+       hid_t              xcreate_plist)
 {
   // Preconditions:
 
@@ -342,11 +342,11 @@ create(const hdf5_file& xfile,
 
 bool
 dataset::
-create(const hdf5_file& xfile,
-       const string&    xname,
-       hid_t            xtype,
-       const tuple&     xchunk_size,
-       hid_t            xcreate_plist)
+create(const hdf5_file&   xfile,
+       const std::string& xname,
+       hid_t              xtype,
+       const tuple&       xchunk_size,
+       hid_t              xcreate_plist)
 {
   bool result;
 
@@ -477,7 +477,7 @@ is_readable() const
   return result;
 }
 
-const string&
+const std::string&
 dataset::
 type_name() const
 {
@@ -536,8 +536,8 @@ get_chunk_size(tuple& xresult) const
   // Exit:
 }
 
-ostream&
-operator<<(ostream& xos, const dataset& xds)
+std::ostream&
+operator<<(std::ostream& xos, const dataset& xds)
 {
   // Preconditions:
 

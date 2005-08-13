@@ -5,9 +5,9 @@
 #include "config.h"
 #include "dataset.h"
 #include "dft_namelen.h"
+#include <iomanip>
+#include <ostream>
 #include "pcontainer.h"
-#include "std_iomanip.h"
-#include "std_iostream.h"
 
 dft_read_perf::
 dft_read_perf()
@@ -100,28 +100,28 @@ preorder_action()
     else
       ++_failure_ct;
 
-    cout << setw(_longest+2)
-	 << left
-	 << name(true)
-	 << setw(11)
-	 << left
-	 << src.type_name();
+    std::cout << std::setw(_longest+2)
+	      << std::left
+	      << name(true)
+	      << std::setw(11)
+	      << std::left
+	      << src.type_name();
 
     if (_tester.status() == test::SUCCESS)
     {
       double kb      = _tester.bytes()/((double)BYTES_PER_KB);
       double elapsed = _tester.elapsed();
 
-      cout << setw(13) << left
-	   << " succeeded"
-	   << setw(15) << right << fixed << setprecision(3)
-	   << kb
-	   << setw(19) << right << fixed << setprecision(3)
-	   << elapsed*BYTES_PER_KB
-	   << "         "
-	   << setw(13) << right << fixed << setprecision(3)
-	   << kb/elapsed/((double)BYTES_PER_KB)
-	   << "     ";
+      std::cout << std::setw(13) << std::left
+		<< " succeeded"
+		<< std::setw(15) << std::right << std::fixed << std::setprecision(3)
+		<< kb
+		<< std::setw(19) << std::right << std::fixed << std::setprecision(3)
+		<< elapsed*BYTES_PER_KB
+		<< "         "
+		<< std::setw(13) << std::right << std::fixed << std::setprecision(3)
+		<< kb/elapsed/((double)BYTES_PER_KB)
+		<< "     ";
 
       if (_verbose)
       {
@@ -129,22 +129,22 @@ preorder_action()
 
 	if (ds != 0)
 	{
-	  cout << *ds;
+	  std::cout << *ds;
 	}
 	else
 	{
 	  attribute* attr = dynamic_cast<attribute*>(&src);
 
-	  cout << *attr;
+	  std::cout << *attr;
 	}
       }
-      cout << '\n';
+      std::cout << '\n';
     }
     else
     {
-      cout << setw(13)
-	   << left
-	   << " failed\n";
+      std::cout << std::setw(13)
+		<< std::left
+		<< " failed\n";
     }
 
     _dest.detach();
@@ -203,23 +203,23 @@ reset()
 
   // Print a header
 
-  cout << setw(_longest+2) << setfill(' ') << left
-       << "container name"
-       << setw(11)
-       << "  type   "
-       << setw(13) << left
-       << "test status"
-       << setw(15)
-       << "  bytes read (kb)  "
-       << setw(25)
-       << "      read time (ms) "
-       << setw(16) << left
-       << "  io rate (mb/s)";
+  std::cout << std::setw(_longest+2) << std::setfill(' ') << std::left
+	    << "container name"
+	    << std::setw(11)
+	    << "  type   "
+	    << std::setw(13) << std::left
+	    << "test status"
+	    << std::setw(15)
+	    << "  bytes read (kb)  "
+	    << std::setw(25)
+	    << "      read time (ms) "
+	    << std::setw(16) << std::left
+	    << "  io rate (mb/s)";
   if (_verbose)
   {
-    cout << "  persistent container characteristics";
+    std::cout << "  persistent container characteristics";
   }
-  cout << endl;
+  std::cout << std::endl;
 
   // Postconditions:
 

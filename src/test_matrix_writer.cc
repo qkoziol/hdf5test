@@ -1,7 +1,8 @@
+
+#include <cassert>
+#include <cstdlib>
 #include "matrix_writer.h"
 #include "plist.h"
-#include "std_cassert.h"
-#include "std_cstdlib.h"
 #include "temp_file.h"
 #include "timer.h"
 
@@ -228,11 +229,11 @@ class chunk_test
   /// specified chunk size.  Writes a matrix of ints to it, xct rows at a
   /// time if xby_rows, and xct columns at a time if !xby_rows.
 
-  bool do_test(const string& xname,
-	       extent&       xchunk,
-	       matrix&       xmat,
-	       int           xct,
-	       bool          xby_rows);
+  bool do_test(const std::string& xname,
+	       extent&            xchunk,
+	       matrix&            xmat,
+	       int                xct,
+	       bool               xby_rows);
 
  protected:
 
@@ -259,7 +260,7 @@ chunk_test() : _file("test_chunks.h5")
 
 bool
 chunk_test::
-do_test(const string& xname, extent& xchunk, matrix& xmat, int xct, bool xby_rows)
+do_test(const std::string& xname, extent& xchunk, matrix& xmat, int xct, bool xby_rows)
 {
   bool result;
 
@@ -283,11 +284,11 @@ do_test(const string& xname, extent& xchunk, matrix& xmat, int xct, bool xby_row
   // Make the file space.
 
   {
-    cout << "creating a chunked dataset with space size = "
-	 << xchunk.size()
-	 << " and max size = "
-	 << xchunk.max_size()
-	 << endl;
+    std::cout << "creating a chunked dataset with space size = "
+	      << xchunk.size()
+	      << " and max size = "
+	      << xchunk.max_size()
+	      << std::endl;
   }
   hid_t file_space = H5Screate_simple(2, &xchunk.size()[0], &xchunk.max_size()[0]);
 
@@ -330,10 +331,10 @@ do_test(const string& xname, extent& xchunk, matrix& xmat, int xct, bool xby_row
 
   t.stop();
 
-  cout << "Time to close dataset, dataspace, and dataset create plist is "
-       << t.elapsed()*1000.0
-       << " (ms)."
-       << endl;
+  std::cout << "Time to close dataset, dataspace, and dataset create plist is "
+	    << t.elapsed()*1000.0
+	    << " (ms)."
+	    << std::endl;
 
   // Postconditions:
 
@@ -392,10 +393,10 @@ main()
 
   t.stop();
 
-  cout << "Time to close hdf5 file is "
-       << t.elapsed()*1000.0
-       << " (ms)."
-       << endl;
+  std::cout << "Time to close hdf5 file is "
+	    << t.elapsed()*1000.0
+	    << " (ms)."
+	    << std::endl;
 
   t.start();
 
@@ -403,10 +404,10 @@ main()
 
   t.stop();
 
-  cout << "Time to flush filesystem buffers is "
-       << t.elapsed()*1000.0
-       << " (ms)."
-       << endl;
+  std::cout << "Time to flush filesystem buffers is "
+	    << t.elapsed()*1000.0
+	    << " (ms)."
+	    << std::endl;
   // TODO:
   // Things to try:
   // 1)  different datatypes on either end

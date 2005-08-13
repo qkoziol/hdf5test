@@ -2,6 +2,7 @@
 #define TEMP_FILE_H
 
 #include "hdf5_file.h"
+#include <string>
 
 class temp_file : public hdf5_file
 {
@@ -16,7 +17,7 @@ class temp_file : public hdf5_file
 
   /// Default constructor.  Creates a new HDF5 file.
 
- temp_file(const string& xname, hid_t xcreation_plist = H5P_DEFAULT, hid_t xaccess_plist = H5P_DEFAULT);
+ temp_file(const std::string& xname, hid_t xcreation_plist = H5P_DEFAULT, hid_t xaccess_plist = H5P_DEFAULT);
 
   /// Destructor.
 
@@ -36,7 +37,7 @@ class temp_file : public hdf5_file
 
  protected:
 
-  string _name; ///< File name.
+  std::string _name; ///< File name.
 
 };
 

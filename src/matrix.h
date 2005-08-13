@@ -3,7 +3,7 @@
 
 #include "extent.h"
 #include "hyperslab.h"
-#include "std_iostream.h"
+#include <ostream>
 
 /*! @class matrix
     @brief A 2-d matrix in C (row major) storage order.
@@ -14,7 +14,7 @@ class matrix
 
   /// Append a matrix to an ostream.
 
-  friend ostream& operator<<(ostream& xos, const matrix& xmatrix);
+  friend std::ostream& operator<<(std::ostream& xos, const matrix& xmatrix);
 
  public:
 

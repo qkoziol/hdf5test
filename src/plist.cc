@@ -122,6 +122,8 @@ write_property(hid_t xhid, const char* xname, void* xiter_data)
 {
   // Preconditions:
 
+  assert(xname != 0);
+
   // Body:
 
   size_t size;
@@ -131,13 +133,13 @@ write_property(hid_t xhid, const char* xname, void* xiter_data)
   // So, how do we know what sort of thing this value is?
   assert(H5Pget(xhid, xname, &value) >= 0);
 
-  cout << "id = "
-       << xhid
-       << " size = "
-       << size
-       << " name = "
-       << xname
-       << endl;
+  std::cout << "id = "
+	    << xhid
+	    << " size = "
+	    << size
+	    << " name = "
+	    << xname
+	    << std::endl;
 
   // Postconditions:
 
@@ -152,7 +154,7 @@ write(hid_t xhid)
 {
   // Preconditions:
 
-  assert(cout.good());
+  assert(std::cout.good());
   assert(H5Pget_class(xhid) != H5P_NO_CLASS);
 
   // Body:

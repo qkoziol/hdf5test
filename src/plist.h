@@ -139,12 +139,12 @@
  */
 
 #include "hdf5_handle.h"
-#include "std_iostream.h"
+#include <iostream>
 
 class plist : public hdf5_handle
 {
 
-  friend ostream& operator<<(ostream& xos, const plist& xlist);
+  friend std::ostream& operator<<(std::ostream& xos, const plist& xlist);
 
  public:
 

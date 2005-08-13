@@ -84,34 +84,34 @@ preorder_action()
     {
       // current node is an attribute.
 
-      cout << "\tfound an attribute named `"
-	   << name(true)
-	   << "'\n";
+      std::cout << "\tfound an attribute named `"
+		<< name(true)
+		<< "'\n";
     }
     else
     {
       // current node is a dataset.
 
-    cout << "\tfound a ";
+      std::cout << "\tfound a ";
 
       dataset* dset = dynamic_cast<dataset*>(&current_node);
 
       if (dset->is_contiguous())
-	cout << "contiguous";
+	std::cout << "contiguous";
       if (dset->is_chunked())
       {
 	tuple chunk(dset->get_space().d());
 
 	dset->get_chunk_size(chunk);
 
-	cout << "chunked {"
-	     << chunk
-	     << '}';
+	std::cout << "chunked {"
+		  << chunk
+		  << '}';
       }
       if (dset->is_external())
-	cout << "external";
+	std::cout << "external";
       if (dset->is_compact())
-	cout << "compact";
+	std::cout << "compact";
 
       /*
 	hid_t cpl = H5Dget_create_plist(dset->hid());
@@ -120,11 +120,11 @@ preorder_action()
 
 	H5Pclose(cpl);
       */
-    cout << " dataset named `"
-	 << name(true)
-	 << "' with extent "
-	 << dset->get_space().get_extent()
-	 << '\n';
+      std::cout << " dataset named `"
+		<< name(true)
+		<< "' with extent "
+		<< dset->get_space().get_extent()
+		<< '\n';
     }
 
 

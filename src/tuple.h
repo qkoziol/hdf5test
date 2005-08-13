@@ -2,7 +2,7 @@
 #define TUPLE_H
 
 #include "hdf5.h"
-#include "std_iostream.h"
+#include <iostream>
 
 /*! @class tuple
     @brief An n-tuple of hsize_ts, useful for describing extents, hyperslabs, and selections.
@@ -13,7 +13,7 @@ class tuple
 
   /// Append tuple to ostream.
 
-  friend ostream& operator<<(ostream& xos, const tuple& xtuple);
+  friend std::ostream& operator<<(std::ostream& xos, const tuple& xtuple);
 
  public:
 

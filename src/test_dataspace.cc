@@ -1,5 +1,5 @@
 #include "dataspace.h"
-#include "std_iostream.h"
+#include <iostream>
 #include "tuple.h"
 
 int
@@ -13,11 +13,11 @@ main()
 
   dataspace space(size, max_size);
 
-  cout << "\tdimension = "
-       << space.d()
-       << "\n\tnumber of points = "
-       << space.get_extent().npoints()
-       << "\n\textent: "
-       << space.get_extent()
-       << endl;
+  std::cout << "\tdimension = "
+	    << space.d()
+	    << "\n\tnumber of points = "
+	    << space.get_extent().npoints()
+	    << "\n\textent: "
+	    << space.get_extent()
+	    << std::endl;
 }

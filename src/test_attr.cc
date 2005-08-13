@@ -1,7 +1,7 @@
 #include "attribute.h"
+#include <cassert>
 #include "hdf5.h"
-#include "std_cassert.h"
-#include "std_iostream.h"
+#include <ostream>
 
 int
 main()
@@ -22,10 +22,10 @@ main()
 
     assert(attr.is_attached());
 
-    cout << "\tSucceeded in opening attribute `/string'.\n";
+    std::cout << "\tSucceeded in opening attribute `/string'.\n";
   }
   else
   {
-    cerr << "\t`file5.h5' doesn't exist.  Can't run test.\n";
+    std::cerr << "\t`file5.h5' doesn't exist.  Can't run test.\n";
   }
 }

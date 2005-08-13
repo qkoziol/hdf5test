@@ -27,7 +27,7 @@ class attribute : public pcontainer
 {
   /// Writes attribute characteristics to an ostream.
 
-  friend ostream& operator<<(ostream& xos, const attribute& xattr);
+  friend std::ostream& operator<<(std::ostream& xos, const attribute& xattr);
 
  public:
 
@@ -79,7 +79,7 @@ class attribute : public pcontainer
   /// and its host as an HDF5 link.  Or, like H5Aopen_name(), xloc is the
   /// name of the attribute and xloc is the hid of its host.
 
-  bool open(hid_t xloc, const string& xname);
+  bool open(hid_t xloc, const std::string& xname);
 
 
   // Access interface:
@@ -91,13 +91,13 @@ class attribute : public pcontainer
 
   /// Type of container is "attribute".
 
-  const string& type_name() const;
+  const std::string& type_name() const;
 
 
  protected:
 
 
-  static const string _type_name; ///< "attribute".
+  static const std::string _type_name; ///< "attribute".
 
 };
 

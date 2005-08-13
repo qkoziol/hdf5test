@@ -1,7 +1,7 @@
 #ifndef CRON_H
 #define CRON_H
 
-#include "std_iostream.h"
+#include <ostream>
 #ifndef H5_HAVE_PARALLEL
 #include <sys/time.h>
 #endif
@@ -14,7 +14,7 @@
 
 class cron : public timeval
 {
-  friend ostream& operator<<(ostream& xos, const cron& xcron);
+  friend std::ostream& operator<<(std::ostream& xos, const cron& xcron);
 
  public:
 

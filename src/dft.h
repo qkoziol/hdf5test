@@ -1,7 +1,7 @@
 #ifndef DFT_H
 #define DFT_H
 
-#include "std_stack.h"
+#include <stack>
 #include "traverser.h"
 
 /*! @class dft
@@ -184,7 +184,7 @@ class dft : public traverser
   // Data:
 
 
-  stack<node>  _current;  ///< Top is current node being visited in traversal.
+  std::stack<node>  _current;  ///< Top is current node being visited in traversal.
 };
 
 #endif

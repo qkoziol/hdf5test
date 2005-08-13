@@ -1,5 +1,6 @@
 #include "contract.h"
 #include "dataset.h"
+#include "datatype.h"
 #include "matrix.h"
 #include "matrix_writer.h"
 #include "memory.h"
@@ -8,11 +9,11 @@
 
 /*!
   @file h5write_matrix.cc Writes a matrix of H5T_NATIVE_INTs to a dataset
-                          and reports on the performance.
+  and reports on the performance.
 */
 
 /*! @class config
-    @brief A class defining the parameters of a matrix write test.
+  @brief A class defining the parameters of a matrix write test.
 */
 
 class config
@@ -21,18 +22,24 @@ class config
 
   enum storage {CHUNKED, COMPACT, CONTIGUOUS, EXTERNAL};
 
-  matrix    mat;      ///< The matrix to be written.
-  extent    ext;      ///< The extent of the destination dataset.
-  tuple     chunk;    ///< Chunk size of the destination dataset.
-  bool      by_rows;  ///< True if writing by rows, false if writing by columns.
-  unsigned  ct;       ///< The number of rows/columns to write at a time.
-  string    filename; ///< The name of the hdf5 file containing the destination dataset.
-  string    ds_name;  ///< The name of the destination dataset.
-  storage   type;     ///< How the dataset is stored.
+  matrix       mat;      ///< The matrix to be written.
+  extent       ext;      ///< The extent of the destination dataset.
+  tuple        chunk;    ///< Chunk size of the destination dataset.
+  bool         by_rows;  ///< True if writing by rows, false if writing by columns.
+  unsigned     ct;       ///< The number of rows/columns to write at a time.
+  std::string  filename; ///< The name of the hdf5 file containing the destination dataset.
+  std::string  ds_name;  ///< The name of the destination dataset.
+  storage      type;     ///< How the dataset is stored.
+  hid_t        mt;       ///< Datatype in memory.
+  hid_t        ft;       ///< Datatype in file.
 
   /// Default constructor.
 
   config();
+
+  /// Destructor.
+
+  ~config();
 
   /// Class invariant.  Should always be true when called.  Prints violations to cerr
   /// if xwarn is true.
@@ -53,7 +60,9 @@ config() :
   ct(1),
   filename("h5write_matrix.h5"),
   ds_name("matrix"),
-  type(CONTIGUOUS)
+  type(CONTIGUOUS),
+  mt(H5I_INVALID_HID),
+  ft(H5I_INVALID_HID)
 {
   // Preconditions:
 
@@ -63,7 +72,7 @@ config() :
     Establish a sane, if uninteresting default configuration: a 1x1
     unchunked matrix written by rows (formally, but indistinguishable in
     this case from writing by columns).
-   */
+  */
 
   ext.size() = ext.max_size() = 1;
   chunk = 0;
@@ -94,21 +103,96 @@ invariant(bool xwarn) const
 
   // Body:
 
-  result = (mat.row_ct() > 0);
-  if (!result && xwarn)
+  result = true; // unless proven otherwise.
+
+  if (!(mat.row_ct() > 0))
   {
-    cerr << "rows == 0";
+    result = false;
+    if (xwarn)
+    {
+      std::cerr << "fatal: matrix has zero rows.\n";
+    }
   }
-  result = result && (ext.d() == 2);
-  result = result && (ext.max_size()[0] >= mat.col_ct());
-  result = result && (ext.max_size()[0] == H5S_UNLIMITED ? chunk[0] > 0 : true);
-  result = (mat.col_ct() > 0);
-  result = result && (ext.max_size()[1] >= mat.row_ct());
-  result = result && (ext.max_size()[1] == H5S_UNLIMITED ? chunk[1] > 0 : true);
-  result = result && (ct > 0);
-  result = result && (by_rows ? ct <= mat.row_ct() : ct <= mat.col_ct());
-  result = result && (!filename.empty());
-  result = result && (!ds_name.empty());
+  if (!(ext.d() == 2))
+  {
+    result = false;
+    if (xwarn)
+    {
+      std::cerr << "fatal: extent does not have dimension 2.\n";
+    }
+  }
+  if (!(ext.max_size()[0] >= mat.row_ct()))
+  {
+    result = false;
+    if (xwarn)
+    {
+      std::cerr << "fatal: extent has fewer rows than matrix.\n";
+    }
+  }
+  if (!(ext.max_size()[0] == H5S_UNLIMITED ? chunk[0] > 0 : true))
+  {
+    result = false;
+    if (xwarn)
+    {
+      std::cerr << "fatal: extent has unlimited column length but zero column chunk size.\n";
+    }
+  }
+  if (!(mat.col_ct() > 0))
+  {
+    result = false;
+    if (xwarn)
+    {
+      std::cerr << "fatal: matrix has zero columns.\n";
+    }
+  }
+  if (!(ext.max_size()[1] >= mat.col_ct()))
+  {
+    result = false;
+    if (xwarn)
+    {
+      std::cerr << "fatal: extent has fewer columns than matrix.\n";
+    }
+  }
+  if (!(ext.max_size()[1] == H5S_UNLIMITED ? chunk[1] > 0 : true))
+  {
+    result = false;
+    if (xwarn)
+    {
+      std::cerr << "fatal: extent has unlimited row length but zero row chunk size.\n";
+    }
+  }
+  if (!(ct > 0))
+  {
+    result = false;
+    if (xwarn)
+    {
+      std::cerr << "fatal: can't write or fewer rows/cols at a time.\n";
+    }
+  }
+  if (!(by_rows ? ct <= mat.row_ct() : ct <= mat.col_ct()))
+  {
+    result = false;
+    if (xwarn)
+    {
+      std::cerr << "fatal: can't write more rows/cols at a time than exist in matrix.\n";
+    }
+  }
+  if (!(!filename.empty()))
+  {
+    result = false;
+    if (xwarn)
+    {
+      std::cerr << "fatal: file name cannot be empty.\n";
+    }
+  }
+  if (ds_name.empty())
+  {
+    result = false;
+    if (xwarn)
+    {
+      std::cerr << "fatal: dataset name cannot be empty.\n";
+    }
+  }
 
   // Postconditions:
 
@@ -124,14 +208,16 @@ usage()
 
   // Body:
 
-  cerr << "usage: h5write_matrix [OPTIONS] HDF5_file dataset\n"
-       << "   OPTIONS\n"
-       << "      -h            Print this message.\n"
-       << "      -m   row col  Define matrix dimensions.\n"
-       << "      -c   row col  Define chunk size.  Implies chunked dataset.\n"
-       << "      -row n        Write n rows at a time.\n"
-       << "      -col n        Write n columns at a time.\n"
-       << "      -t   c|e      Force compact or external storage.  Default is contiguous.\n";
+  std::cerr << "usage: h5write_matrix [OPTIONS] HDF5_file dataset\n"
+	    << "   OPTIONS\n"
+	    << "      -h                  Print this message.\n"
+	    << "      -m   row col        Define matrix dimensions.\n"
+	    << "      -c   row col        Define chunk size.  Implies chunked dataset.\n"
+	    << "      -row n              Write n rows at a time.\n"
+	    << "      -col n              Write n columns at a time.\n"
+	    << "      -t   c|e            Force compact or external storage.  Default is contiguous.\n"
+	    << "      -mt  name[,name...] Defines memory datatype.  `name' is an HDF5 predefined type name.\n"
+	    << "      -ft  name[,name...] Defines file datatype.  `name' is an HDF5 predefined type name.\n";
 
   // Postconditions:
 
@@ -167,6 +253,8 @@ process_command_line(int argc, char** argv)
     int  dash_row = -1;
     int  dash_col = -1;
     int  dash_t   = -1;
+    int  dash_mt  = -1;
+    int  dash_ft  = -1;
 
     filename = argv[argc-2];
     ds_name = argv[argc-1];
@@ -177,6 +265,32 @@ process_command_line(int argc, char** argv)
       {
 	dash_h = i;
 	++i;
+      }
+      else if (dash_mt == -1 && strncmp(argv[i], "-mt", 3) == 0)
+      {
+	dash_mt  = i;
+	mt = datatype::create(argv[i+1]);
+	if (mt < 0)
+	{
+	  std::cerr << "-mt argument `"
+		    << argv[i+1]
+		    << "' is bad.\n";
+	  result = false;
+	}
+	i += 2;
+      }
+      else if (dash_ft == -1 && strncmp(argv[i], "-ft", 3) == 0)
+      {
+	dash_ft  = i;
+	ft = datatype::create(argv[i+1]);
+	if (ft < 0)
+	{
+	  std::cerr << "-ft argument `"
+		    << argv[i+1]
+		    << "' is bad.\n";
+	  result = false;
+	}
+	i += 2;
       }
       else if (dash_m == -1 && strncmp(argv[i], "-m", 2) == 0)
       {
@@ -282,6 +396,46 @@ process_command_line(int argc, char** argv)
   return result;
 }
 
+config::
+~config()
+{
+  // Preconditions:
+
+  // Body:
+
+  // ISSUE:
+  // The datatypes might be compound datatypes, but
+  // they also may be immutable predefined datatypes.
+  // If they are immutable, we can't close them.  But
+  // I don't know any way to determine whether a given
+  // datatype is mutable or immutable.  So, instead,
+  // we just try to close the datatype, which will succeed
+  // for the compound mutable types, and will fail for
+  // the immutable predefined types.  Since we suppress
+  // the error messages, no harm is done.
+
+  if (mt >= 0)
+  {
+    H5E_BEGIN_TRY
+    {
+      H5Tclose(mt);
+    }
+    H5E_END_TRY;
+  }
+  if (ft >= 0)
+  {
+    H5E_BEGIN_TRY
+    {
+      H5Tclose(ft);
+    }
+    H5E_END_TRY;
+  }
+
+  // Postconditions:
+
+  // Exit:
+}
+
 int
 main(int argc, char** argv)
 {
@@ -358,7 +512,12 @@ main(int argc, char** argv)
 
     dataset ds;
 
-    hid_t ds_hid = H5Dcreate(file.hid(), cmdline.ds_name.c_str(), H5T_NATIVE_INT, file_space, create_plist);
+    if (cmdline.ft < 0)
+    {
+      cmdline.ft = H5T_NATIVE_INT;  // default file datatype if not specified on command line.
+    }
+
+    hid_t ds_hid = H5Dcreate(file.hid(), cmdline.ds_name.c_str(), cmdline.ft, file_space, create_plist);
 
     assert(ds_hid >= 0);
 
@@ -372,7 +531,12 @@ main(int argc, char** argv)
     // Now make a memory buffer.  "matrix_writer" will size it dynamically to be big
     // enough for whatever writing it does.  An empty buffer is good enough for now.
 
-    memory mem;
+    if (cmdline.mt < 0)
+    {
+      cmdline.mt = H5T_NATIVE_INT; // default memory datatype if not specified on command line.
+    }
+
+    memory mem(cmdline.mt);
 
     // At last.  Make a tester and run the test.
 

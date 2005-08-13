@@ -287,8 +287,8 @@ operator==(const extent& xother) const
   return result;
 }
 
-ostream&
-operator<<(ostream& xos, const extent& xextent)
+std::ostream&
+operator<<(std::ostream& xos, const extent& xextent)
 {
   // Preconditions:
 

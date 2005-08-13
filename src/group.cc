@@ -51,7 +51,7 @@ invariant() const
 
 bool
 group::
-open(hid_t xhost, const string& xname)
+open(hid_t xhost, const std::string& xname)
 {
   bool result;
 

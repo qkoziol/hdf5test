@@ -24,6 +24,30 @@ memory()
 }
 
 memory::
+memory(hid_t xtype)
+{
+  // Preconditions:
+
+  assert(H5Iget_type(xtype) == H5I_DATATYPE);
+
+  // Body:
+
+  _mem   = 0;
+  _ub    = 0;
+  _type  = H5I_INVALID_HID;
+
+  attach(xtype);
+
+  // Postconditions:
+
+  assert(is_attached());
+  assert(get_type() == xtype);
+  assert(invariant());
+
+  // Exit:
+}
+
+memory::
 memory(const memory& xother)
 {
   // Preconditions:
@@ -329,8 +353,8 @@ detach()
   // Exit:
 }
 
-ostream&
-operator<<(ostream& xos, const memory& xmem)
+std::ostream&
+operator<<(std::ostream& xos, const memory& xmem)
 {
   // Preconditions:
 

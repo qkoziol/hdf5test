@@ -1,7 +1,7 @@
 #ifndef CONTRACT_H
 #define CONTRACT_H
 
-#include "std_cassert.h"
+#include <cassert>
 
 extern bool feature_is_implemented;
 

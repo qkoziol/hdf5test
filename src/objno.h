@@ -2,7 +2,7 @@
 #define OB_NO_H
 
 #include "hdf5.h"
-#include "std_iostream.h"
+#include <ostream>
 
 /*! @class objno
     @brief HDF5 objects within the same file are uniquely identified by a pair
@@ -17,7 +17,7 @@ class objno
 
   /// Write an objno to xos.
 
-  friend ostream& operator<<(ostream& xos, const objno& xobj);
+  friend std::ostream& operator<<(std::ostream& xos, const objno& xobj);
 
  public:
 

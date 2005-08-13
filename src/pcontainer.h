@@ -3,7 +3,7 @@
 
 #include "container.h"
 #include "persistent.h"
-#include "std_string.h"
+#include <string>
 
 /*! @class pcontainer
     @brief Persistent containers, i.e., HDF5 datasets and attributes.
@@ -48,7 +48,7 @@ class pcontainer : public persistent, public container
 
   /// Description of type of container.
 
-  virtual const string& type_name() const = 0;
+  virtual const std::string& type_name() const = 0;
 
 
   // hdf5_handle interface:

@@ -1,23 +1,23 @@
 #include "config.h"
 #include "contract.h"
+#include <cstring>
 #include "dataset.h"
 #include "hdf5.h"
 #include "io_perf.h"
+#include <iomanip>
+#include <iostream>
 #include "memory.h"
-#include "std_cstring.h"
-#include "std_iostream.h"
-#include "std_iomanip.h"
-#include "std_sstream.h"
+#include <sstream>
 #include "timer.h"
 
 /*!
   @file h5read.cc Runs a read test on every dataset named on the command
-                  line.  Reports bytes read, elapsed time to open, read,
-		  and close the dataset, and the transfer rate.
+  line.  Reports bytes read, elapsed time to open, read,
+  and close the dataset, and the transfer rate.
 */
 
 /*! @class config
-    @brief A class defining the parameters of a read test.
+  @brief A class defining the parameters of a read test.
 */
 
 class config
@@ -52,7 +52,7 @@ config() :
 
   /*
     Establish a default configuration.
-   */
+  */
 
   // Postconditions:
 
@@ -88,10 +88,10 @@ usage()
 
   // Body:
 
-  cerr << "usage: h5read [OPTIONS] HDF5_file dataset [datasets...]\n"
-       << "   OPTIONS\n"
-       << "      -h  Print this message.\n"
-       << "      -v  Verbose output.\n";
+  std::cerr << "usage: h5read [OPTIONS] HDF5_file dataset [datasets...]\n"
+	    << "   OPTIONS\n"
+	    << "      -h  Print this message.\n"
+	    << "      -v  Verbose output.\n";
 
   // Postconditions:
 
@@ -183,6 +183,8 @@ main(int argc, char** argv)
 
   // Body:
 
+  result = 0; // i.e., no errors - this may change as we progress.
+
   config cmdline;
 
   if (! cmdline.process_command_line(argc, argv))
@@ -206,9 +208,9 @@ main(int argc, char** argv)
 
     if (file < 0)
     {
-      cerr << "Unable to open file `"
-	   << argv[cmdline.filename_index]
-	   << "'.\n";
+      std::cerr << "Unable to open file `"
+		<< argv[cmdline.filename_index]
+		<< "'.\n";
       result = 1;
     }
     else
@@ -227,40 +229,40 @@ main(int argc, char** argv)
 
       // Print a header
 
-      cout << "Read performance for datasets in "
-	   << argv[cmdline.filename_index]
-	   << ":\n"
-	   << setw(max_name_len+2) << setfill(' ') << left
-	   << "dataset name"
-	   << setw(13) << left
-	   << "  status"
-	   << setw(17) << left
-	   << "  bytes read (kb)"
-	   << setw(16) << left
-	   << "  open time (ms)"
-	   << setw(16) << left
-	   << " read time (ms)"
-	   << setw(17) << left
-	   << " close time (ms)"
-	   << setw(14) << left
-	   << "  io rate (mb/s)";
+      std::cout << "Read performance for datasets in "
+		<< argv[cmdline.filename_index]
+		<< ":\n"
+		<< std::setw(max_name_len+2) << std::setfill(' ') << std::left
+		<< "dataset name"
+		<< std::setw(13) << std::left
+		<< "  status"
+		<< std::setw(17) << std::left
+		<< "  bytes read (kb)"
+		<< std::setw(16) << std::left
+		<< "  open time (ms)"
+		<< std::setw(16) << std::left
+		<< " read time (ms)"
+		<< std::setw(17) << std::left
+		<< " close time (ms)"
+		<< std::setw(14) << std::left
+		<< "  io rate (mb/s)";
       if (cmdline.is_verbose)
       {
-	cout << "  dataset characteristics";
+	std::cout << "  dataset characteristics";
       }
-      cout << '\n';
+      std::cout << '\n';
 
       dataset ds;
       io_perf tester;
       memory  mem;
       timer   close;
       timer   open;
-      string  ds_char;
+      std::string  ds_char;
 
       for (int i = cmdline.filename_index+1; i < argc; ++i)
       {
-	cout << setw(max_name_len+2) << left
-	     << argv[i];
+	std::cout << std::setw(max_name_len+2) << std::left
+		  << argv[i];
 
 	open.start();
 	ds.open(file, argv[i]);
@@ -289,7 +291,7 @@ main(int argc, char** argv)
 	    // As a bit of a hack I guess we can write dataset characteristics to
 	    // a string before closing, then write the string.
 
-	    ostringstream output;
+	    std::ostringstream output;
 
 	    output << ds;
 
@@ -305,35 +307,35 @@ main(int argc, char** argv)
 	    double kb      = tester.bytes()/((double)BYTES_PER_KB);
 	    double elapsed = tester.elapsed();
 
-	    cout << setw(13) << left
-		 << "succeeded"
-		 << setw(15) << right << fixed << setprecision(3)
-		 << kb
-		 << setw(15) << right << fixed << setprecision(3)
-		 << open.elapsed()*BYTES_PER_KB
-		 << setw(16) << right << fixed << setprecision(3)
-		 << elapsed*BYTES_PER_KB
-		 << setw(16) << right << fixed << setprecision(3)
-		 << close.elapsed()*BYTES_PER_KB
-		 << setw(16) << right << fixed << setprecision(3)
-		 << kb/elapsed/((double)BYTES_PER_KB);
+	    std::cout << std::setw(13) << std::left
+		      << "succeeded"
+		      << std::setw(15) << std::right << std::fixed << std::setprecision(3)
+		      << kb
+		      << std::setw(15) << std::right << std::fixed << std::setprecision(3)
+		      << open.elapsed()*BYTES_PER_KB
+		      << std::setw(16) << std::right << std::fixed << std::setprecision(3)
+		      << elapsed*BYTES_PER_KB
+		      << std::setw(16) << std::right << std::fixed << std::setprecision(3)
+		      << close.elapsed()*BYTES_PER_KB
+		      << std::setw(16) << std::right << std::fixed << std::setprecision(3)
+		      << kb/elapsed/((double)BYTES_PER_KB);
 	    if (cmdline.is_verbose)
 	    {
-	      cout << "     "
-		   << ds_char;
+	      std::cout << "     "
+			<< ds_char;
 	    }
-	    cout << '\n';
+	    std::cout << '\n';
 
 	  }
 	  else
 	  {
-	    cout << setw(13) << left
-		 << "failed\n";
+	    std::cout << std::setw(13) << std::left
+		      << "failed\n";
 	  }
 	}
 	else
 	{ 
-	  cout << "open failed\n";
+	  std::cout << "open failed\n";
 	}
       }
 
@@ -345,3 +347,4 @@ main(int argc, char** argv)
 
   return result;
 }
+

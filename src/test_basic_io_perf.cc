@@ -14,7 +14,7 @@
 #include "tuple.h"
 #include <unistd.h>
 
-string&
+std::string&
 test_name()
 {
   // Strips off all characters starting with the last . in
@@ -22,7 +22,7 @@ test_name()
   // Useful for generating an HDF5 file name specific to this
   // test driver.
 
-  string* result = new string(__FILE__);
+  std::string* result = new std::string(__FILE__);
   result->erase(result->find_last_of("."), result->size());
   return *result;
 }
@@ -53,17 +53,17 @@ do_read_write_tests(io_perf& xio_t, pcontainer& xcon)
     double mb      = xio_t.bytes()/((double)(BYTES_PER_KB*BYTES_PER_KB));
     double elapsed = xio_t.elapsed();
 
-    cout << "\tWrite test succeeded.  "
-	 << mb
-	 << " mb transferred in "
-	 << elapsed
-	 << " seconds = "
-	 << mb/elapsed
-	 << " mb/s.\n";
+    std::cout << "\tWrite test succeeded.  "
+	      << mb
+	      << " mb transferred in "
+	      << elapsed
+	      << " seconds = "
+	      << mb/elapsed
+	      << " mb/s.\n";
   }
   else
   {
-    cout << "\tWrite test failed.\n";
+    std::cout << "\tWrite test failed.\n";
   }
 
   // Read back what we just wrote and report
@@ -76,17 +76,17 @@ do_read_write_tests(io_perf& xio_t, pcontainer& xcon)
     double mb      = xio_t.bytes()/((double)(BYTES_PER_KB*BYTES_PER_KB));
     double elapsed = xio_t.elapsed();
 
-    cout << "\tRead test succeeded.  "
-	 << mb
-	 << " mb transferred in "
-	 << elapsed
-	 << " seconds = "
-	 << mb/elapsed
-	 << " mb/s.\n";
+    std::cout << "\tRead test succeeded.  "
+	      << mb
+	      << " mb transferred in "
+	      << elapsed
+	      << " seconds = "
+	      << mb/elapsed
+	      << " mb/s.\n";
   }
   else
   {
-    cout << "\tRead test failed.\n";
+    std::cout << "\tRead test failed.\n";
   }
 }
 
@@ -139,7 +139,7 @@ make_test_objects()
 
     hid_t plist = H5Pcreate(H5P_DATASET_CREATE);
 
-    string name = test_name() + "_external.h5";
+    std::string name = test_name() + "_external.h5";
     assert(H5Pset_external(plist, name.c_str(), 0, 4096) >= 0);
 
     assert(e.create(f, root.hid(), "external", H5T_NATIVE_INT, s.hid(), plist));
@@ -181,9 +181,9 @@ main()
 
     // Test contiguous io.
 
-    cout << "Contiguous dataset test: "
-         << cg
-         << endl;
+    std::cout << "Contiguous dataset test: "
+	      << cg
+	      << std::endl;
 
     do_read_write_tests(io_t, cg);
 
@@ -214,9 +214,9 @@ main()
 
     // Test chunked io.
 
-    cout << "Chunked dataset test: "
-         << ch
-         << endl;
+    std::cout << "Chunked dataset test: "
+	      << ch
+	      << std::endl;
 
     do_read_write_tests(io_t, ch);
 
@@ -234,9 +234,9 @@ main()
 
     // Test compact io.
 
-    cout << "Compact dataset test: "
-         << c
-         << endl;
+    std::cout << "Compact dataset test: "
+	      << c
+	      << std::endl;
 
     do_read_write_tests(io_t, c);
 
@@ -254,9 +254,9 @@ main()
 
     // Test external io.
 
-    cout << "External dataset test: "
-         << e
-         << endl;
+    std::cout << "External dataset test: "
+	      << e
+	      << std::endl;
 
     do_read_write_tests(io_t, e);
 
@@ -269,7 +269,7 @@ main()
 
   // And delete external dataset file.
 
-  string name = test_name() + "_external.h5";
+  std::string name = test_name() + "_external.h5";
 
   unlink(name.c_str());
 }

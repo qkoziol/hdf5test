@@ -53,7 +53,7 @@ invariant() const
 
 bool
 hdf5_file::
-open(const string& xname, access xacc)
+open(const std::string& xname, access xacc)
 {
   bool result;
 
@@ -109,7 +109,7 @@ open(const string& xname, access xacc)
 
 bool
 hdf5_file::
-create(const string& xname)
+create(const std::string& xname)
 {
   bool result;
 
@@ -146,7 +146,7 @@ create(const string& xname)
 
 bool
 hdf5_file::
-exists(const string& xname)
+exists(const std::string& xname)
 {
   bool result;
 
@@ -174,7 +174,7 @@ exists(const string& xname)
 
 bool
 hdf5_file::
-is_readable(const string& xname)
+is_readable(const std::string& xname)
 {
   bool result;
 
@@ -229,7 +229,7 @@ is_readable(const string& xname)
 
 bool
 hdf5_file::
-is_writable(const string& xname)
+is_writable(const std::string& xname)
 {
   bool result;
 
@@ -284,7 +284,7 @@ is_writable(const string& xname)
 
 bool
 hdf5_file::
-can_create(const string& xname)
+can_create(const std::string& xname)
 {
   bool result;
 
@@ -309,7 +309,7 @@ can_create(const string& xname)
 
 bool
 hdf5_file::
-is_hdf5(const string& xname)
+is_hdf5(const std::string& xname)
 {
   bool result;
 

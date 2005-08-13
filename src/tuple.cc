@@ -425,8 +425,8 @@ operator<(const tuple& xother) const
   return result;
 }
 
-ostream&
-operator<<(ostream& xos, const tuple& xtuple)
+std::ostream&
+operator<<(std::ostream& xos, const tuple& xtuple)
 {
   // Preconditions:
 

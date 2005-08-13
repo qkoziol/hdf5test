@@ -4,9 +4,9 @@
 class dataset_creation;
 class group;
 class hdf5_file;
+#include <ostream>
 #include "pcontainer.h"
-#include "std_iostream.h"
-#include "std_string.h"
+#include <string>
 class tuple;
 
 /*! @class dataset
@@ -29,7 +29,7 @@ class dataset : public pcontainer
 {
   /// Writes dataset characteristics to an ostream.
 
-  friend ostream& operator<<(ostream& xos, const dataset& xds);
+  friend std::ostream& operator<<(std::ostream& xos, const dataset& xds);
 
  public:
 
@@ -73,7 +73,7 @@ class dataset : public pcontainer
   /// Open an existing dataset identified by xname associated with a
   /// file or group identified by xhost.
 
-  bool open(hid_t xhost, const string& xname);
+  bool open(hid_t xhost, const std::string& xname);
 
   /// Create a new dataset attached to xhid.
 
@@ -82,32 +82,32 @@ class dataset : public pcontainer
   /// Create a new dataset identified by xname associated with a
   /// file or group identified by xhost in xfile.
 
-  bool create(const hdf5_file& xfile,
-	      hid_t            xhost,
-	      const string&    xname,
-	      hid_t            xtype,
-	      hid_t            xspace,
-	      hid_t            xcreate_plist = H5P_DEFAULT);
+  bool create(const hdf5_file&      xfile,
+	      hid_t                 xhost,
+	      const std::string&    xname,
+	      hid_t                 xtype,
+	      hid_t                 xspace,
+	      hid_t                 xcreate_plist = H5P_DEFAULT);
 
   /// Create a new dataset identified by xname in group xgroup
   /// in file xfile.
 
-  bool create(const hdf5_file& xfile,
-	      const string&    xgroup,
-	      const string&    xname,
-	      hid_t            xtype,
-	      hid_t            xspace,
-	      hid_t            xcreate_plist = H5P_DEFAULT);
+  bool create(const hdf5_file&   xfile,
+	      const std::string& xgroup,
+	      const std::string& xname,
+	      hid_t              xtype,
+	      hid_t              xspace,
+	      hid_t              xcreate_plist = H5P_DEFAULT);
 
   /// Create a new chunked dataset with indicated chunk size.
   /// The chunk_size will be added to whatever creation_plist
   /// is supplied.
 
-  bool create(const hdf5_file& xfile,
-	      const string&    xname,
-	      hid_t            xtype,
-	      const tuple&     xchunk_size,
-	      hid_t            xcreate_plist = H5P_DEFAULT);
+  bool create(const hdf5_file&   xfile,
+	      const std::string& xname,
+	      hid_t              xtype,
+	      const tuple&       xchunk_size,
+	      hid_t              xcreate_plist = H5P_DEFAULT);
 
 
   // Dataset type interface:
@@ -144,12 +144,12 @@ class dataset : public pcontainer
 
   /// Type of container is "dataset".
 
-  const string& type_name() const;
+  const std::string& type_name() const;
 
 
  protected:
 
 
- static const string _type_name; ///< "dataset".
+ static const std::string _type_name; ///< "dataset".
 };
 #endif

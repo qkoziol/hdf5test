@@ -2,7 +2,7 @@
 #define PERSISTENT_H
 
 #include "hdf5_handle.h"
-#include "std_string.h"
+#include <string>
 
 /*! @class persistent
     @brief Objects with an open() operation.
@@ -50,7 +50,7 @@ class persistent : public hdf5_handle
   /// an HDF5 file, group, dataset, or datatype.  The return value indicates
   /// success or failure.
 
-  virtual bool open(hid_t xhost, const string& xname) = 0;
+  virtual bool open(hid_t xhost, const std::string& xname) = 0;
 
  protected:
 

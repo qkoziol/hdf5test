@@ -1,7 +1,7 @@
 #ifndef TEST_H
 #define TEST_H
 
-#include "std_iostream.h"
+#include <ostream>
 #include "timer.h"
 
 /*! @class test

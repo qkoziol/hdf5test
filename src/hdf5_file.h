@@ -2,7 +2,7 @@
 #define HDF5_FILE_H
 
 #include "hdf5_handle.h"
-#include "std_string.h"
+#include <string>
 
 /*! @class hdf5_file
     @brief A handle to an HDF5 file.
@@ -65,11 +65,11 @@ class hdf5_file : public hdf5_handle
 
   /// Attempt to open a file.  Returns true on success, false otherwise.
 
-  bool open(const string& xname, access xacc = RDONLY);
+  bool open(const std::string& xname, access xacc = RDONLY);
 
   /// Attempt to create a new file.  Returns true on success, false otherwise.
 
-  bool create(const string& xname);
+  bool create(const std::string& xname);
 
   /// Delete an hdf5 file.  Returns true on success, false otherwise.
 
@@ -85,23 +85,23 @@ class hdf5_file : public hdf5_handle
 
   /// Does file xname exist?
 
-  static bool exists(const string& xname);
+  static bool exists(const std::string& xname);
 
   /// Does file xname exist and can we read it?
 
-  static bool is_readable(const string& xname);
+  static bool is_readable(const std::string& xname);
 
   /// Is file xname readable and an HDF5 file?
 
-  static bool is_hdf5(const string& xname);
+  static bool is_hdf5(const std::string& xname);
 
   /// Does file xname exist and can we write to it?
 
-  static bool is_writable(const string& xname);
+  static bool is_writable(const std::string& xname);
 
   /// Can we create (or truncate) a file named xname?
 
-  static bool can_create(const string& xname);
+  static bool can_create(const std::string& xname);
 
 
   /// Access control interface:

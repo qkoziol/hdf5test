@@ -2,8 +2,8 @@
 #define ARRAY_OF_H
 
 #include "contract.h"
-#include "std_cstddef.h"
-#include "std_ostream.h"
+#include <cstddef>
+#include <ostream>
 
 /*! @class array_of
     @brief A contiguous resizable array of any C++ type.
@@ -334,8 +334,8 @@ reserve(size_t xub)
 }
 
 template<class t>
-ostream&
-operator<<(ostream& xos, const array_of<t>& x)
+std::ostream&
+operator<<(std::ostream& xos, const array_of<t>& x)
 {
   xos << x(0);
 

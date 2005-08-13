@@ -1,21 +1,21 @@
 
 #include "contract.h"
+#include <cstring>
 #include "dft_read_perf.h"
 #include "dft_namelen.h"
 #include "hdf5.h"
-#include "std_cstring.h"
-#include "std_iostream.h"
+#include <iostream>
 
 /*!
   @file h5dft_read.cc Runs a read test on every dataset in an HDF5 file
-                      (plus every attribute with the -a option).  Reports
-                      bytes read (in kb, where 1 kb = 1e3 bytes), elapsed
-                      time to read the data, and the transfer rate (in
-                      mb/s, where 1 mb = 1e6 bytes).
+  (plus every attribute with the -a option).  Reports
+  bytes read (in kb, where 1 kb = 1e3 bytes), elapsed
+  time to read the data, and the transfer rate (in
+  mb/s, where 1 mb = 1e6 bytes).
 */
 
 /*! @class config
-    @brief A class defining the parameters of a read test.
+  @brief A class defining the parameters of a read test.
 */
 
 class config
@@ -52,7 +52,7 @@ config() :
 
   /*
     Establish a default configuration.
-   */
+  */
 
   // Postconditions:
 
@@ -85,11 +85,11 @@ invariant() const
 void
 usage()
 {
-  cerr << "usage: h5dft_read [OPTIONS] HDF5_file [HDF5_file...]\n"
-       << "   OPTIONS\n"
-       << "      -h  Print this message.\n"
-       << "      -a  Include attributes in performance report.\n"
-       << "      -v  Verbose output.  Include dataspace and storage characteristics in output.\n";
+  std::cerr << "usage: h5dft_read [OPTIONS] HDF5_file [HDF5_file...]\n"
+	    << "   OPTIONS\n"
+	    << "      -h  Print this message.\n"
+	    << "      -a  Include attributes in performance report.\n"
+	    << "      -v  Verbose output.  Include dataspace and storage characteristics in output.\n";
 }
 
 bool
@@ -129,14 +129,14 @@ process_command_line(int argc, char** argv)
   //    Any additional args come after the 2nd mandatory arg.  All such args
   //    are interpreted as possible hdf5 files.
 
+  result = true; // until proven otherwise
+
   if (argc < 2)
   {
     result = false;
   }
   else
   {
-    result = true; // until proven otherwise
-
     // Define the indices of the various options.  A value of -1 indicates
     // option not present or not yet found.
 
@@ -187,7 +187,7 @@ process_command_line(int argc, char** argv)
     }
   }
 
-    // Postconditions:
+  // Postconditions:
 
   assert(result ? invariant() : true);
 
@@ -206,6 +206,8 @@ main(int argc, char** argv)
   assert(argv != 0);
 
   // Body:
+
+  result = 0; // for now; will change if errors are encountered
 
   config cmdline;
 
@@ -238,9 +240,9 @@ main(int argc, char** argv)
       {
 	// Something's wrong with the file.  Skip it.
 
-	cerr << "Failed to open `"
-	     << argv[i]
-	     << "'.  Skipping it.\n";
+	std::cerr << "Failed to open `"
+		  << argv[i]
+		  << "'.  Skipping it.\n";
 	++result;
       }
       else
@@ -248,9 +250,9 @@ main(int argc, char** argv)
 	// The file appears to be a legitimate HDF5 file.  Measure
 	// rates of reading datasets and attributes and report results.
 
-	cout << "Objects encountered in a depth first traversal of `"
-	     << argv[i]
-	     << "':\n";
+	std::cout << "Objects encountered in a depth first traversal of `"
+		  << argv[i]
+		  << "':\n";
 
 	hid_t root = H5Gopen(file, "/");
 
@@ -271,13 +273,13 @@ main(int argc, char** argv)
 
 	tester.traverse(root, cmdline.filter);
 
-	cout << "Summary for `"
-	     << argv[i]
-	     << "': "
-	     << tester.success_ct()
-	     << " tests succeeded and "
-	     << tester.failure_ct()
-	     << " tests failed.\n\n";
+	std::cout << "Summary for `"
+		  << argv[i]
+		  << "': "
+		  << tester.success_ct()
+		  << " tests succeeded and "
+		  << tester.failure_ct()
+		  << " tests failed.\n\n";
 
 	H5Gclose(root);
 	H5Fclose(file);

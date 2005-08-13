@@ -2,7 +2,7 @@
 #define TIMER_H
 
 #include "cron.h"
-#include "std_iostream.h"
+#include <ostream>
 #ifndef H5_HAVE_PARALLEL
 #include <sys/time.h>
 #endif

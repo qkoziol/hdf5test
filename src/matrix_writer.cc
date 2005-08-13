@@ -2,9 +2,9 @@
 #include "matrix_writer.h"
 
 #include "config.h"
+#include <iomanip>
 #include "matrix.h"
-#include "std_iomanip.h"
-#include "std_iostream.h"
+#include <ostream>
 
 #define MILLI_PER_MICRO ((double)1000)
 
@@ -100,43 +100,43 @@ start()
 
   // Write out a header.
 
-  cout << "Writing "
-       << _max_write_ct;
+  std::cout << "Writing "
+	    << _max_write_ct;
 
   if (_by_rows)
-    cout << " rows";
+    std::cout << " rows";
   else
-    cout << " columns";
+    std::cout << " columns";
 
-  cout << " of "
-       << *_mat
-       << " matrix at a time.\n"
-       << *_dest
-       << '\n'
-       << setw(11)
-       << "status   ";
+  std::cout << " of "
+	    << *_mat
+	    << " matrix at a time.\n"
+	    << *_dest
+	    << '\n'
+	    << std::setw(11)
+	    << "status   ";
 
   if (_by_rows)
   {
-    cout << setw(12)
-	 << "rows    ";
+    std::cout << std::setw(12)
+	      << "rows    ";
   }
   else
   {
-    cout << setw(12)
-	 << "columns   ";
+    std::cout << std::setw(12)
+	      << "columns   ";
   }
-  cout << setw(20)
-       << "bytes written (kb)";
+  std::cout << std::setw(20)
+	    << "bytes written (kb)";
   if (_dest->is_chunked())
   {
-    cout << setw(25)
-	 << "select/extend time (ms)";
+    std::cout << std::setw(25)
+	      << "select/extend time (ms)";
   }
-  cout << setw(17)
-       << "write time (ms)"
-       << setw(16)
-       << "io rate (mb/s)\n";
+  std::cout << std::setw(17)
+	    << "write time (ms)"
+	    << std::setw(16)
+	    << "io rate (mb/s)\n";
 
   // We haven't written any rows/cols yet.
 
@@ -566,44 +566,44 @@ write_results()
 {
   // Preconditions:
 
-  assert(cout.good());
+  assert(std::cout.good());
 
   // Body:
 
   if (status() == SUCCESS)
   {
-    cout << setw(11)
-	 << "succeeded "
-	 << setw(3)
-	 << _accum_ct-_cur_write_ct+1
-	 << " to "
-	 << setw(3)
-	 << _accum_ct
-	 << fixed << setprecision(3) << setw(18)
-	 << _perf.bytes/((double)BYTES_PER_KB)
-	 << "  ";
+    std::cout << std::setw(11)
+	      << "succeeded "
+	      << std::setw(3)
+	      << _accum_ct-_cur_write_ct+1
+	      << " to "
+	      << std::setw(3)
+	      << _accum_ct
+	      << std::fixed << std::setprecision(3) << std::setw(18)
+	      << _perf.bytes/((double)BYTES_PER_KB)
+	      << "  ";
     if (_dest->is_chunked())
     {
-      cout << fixed << setprecision(3) << setw(20)
-	   << _perf.extend*MILLI_PER_MICRO
-	   << "     ";
+      std::cout << std::fixed << std::setprecision(3) << std::setw(20)
+		<< _perf.extend*MILLI_PER_MICRO
+		<< "     ";
     }
-    cout << fixed << setprecision(3) << setw(14)
-	 << _perf.elapsed*MILLI_PER_MICRO
-	 << setw(16)
-	 << _perf.bytes/_perf.elapsed/((double)BYTES_PER_KB)/((double)BYTES_PER_KB)
-	 << endl;
+    std::cout << std::fixed << std::setprecision(3) << std::setw(14)
+	      << _perf.elapsed*MILLI_PER_MICRO
+	      << std::setw(16)
+	      << _perf.bytes/_perf.elapsed/((double)BYTES_PER_KB)/((double)BYTES_PER_KB)
+	      << std::endl;
   }
   else
   {
-    cout << setw(11)
-	 << "failed   "
-	 << setw(3)
-	 << _accum_ct
-	 << " to "
-	 << setw(3)
-	 << _accum_ct-1
-	 << endl;
+    std::cout << std::setw(11)
+	      << "failed   "
+	      << std::setw(3)
+	      << _accum_ct
+	      << " to "
+	      << std::setw(3)
+	      << _accum_ct-1
+	      << std::endl;
   }
 
   // Postconditions:

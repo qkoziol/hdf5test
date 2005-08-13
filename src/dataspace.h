@@ -5,8 +5,8 @@
 #include "extent.h"
 #include "hdf5_handle.h"
 class hyperslab;
+#include <iostream>
 class matrix;
-#include "std_iostream.h"
 
 /*! @class dataspace
     @brief A handle to a "simple" HDF5 dataspace.
@@ -24,7 +24,7 @@ class matrix;
 
 class dataspace : public hdf5_handle
 {
-  friend ostream& operator<<(ostream& xos, const dataspace& xspace);
+  friend std::ostream& operator<<(std::ostream& xos, const dataspace& xspace);
 
  public:
 

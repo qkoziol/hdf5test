@@ -78,21 +78,21 @@ visit_action()
   {
     const pcontainer& current_node(dynamic_cast<const pcontainer&>(current()));
 
-    cout << "\tfound a";
+    std::cout << "\tfound a";
 
     if (dynamic_cast<const attribute*>(&current_node) != 0)
     {
       // Kinda klugey, but this test decides whether we eventually
       // print "found a dataset" or "found an attribute".
 
-      cout << 'n';
+      std::cout << 'n';
     }
 
-    cout << ' '
-	 << current_node.type_name()
-	 << " named `"
-	 << name(true)
-	 << "'\n";
+    std::cout << ' '
+	      << current_node.type_name()
+	      << " named `"
+	      << name(true)
+	      << "'\n";
      
   }
 

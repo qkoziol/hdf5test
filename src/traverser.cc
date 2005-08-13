@@ -6,7 +6,7 @@
 #include "datatype.h"
 #include "group.h"
 #include "hdf5.h"
-#include "std_iostream.h"
+#include <ostream>
 
 traverser::
 traverser()

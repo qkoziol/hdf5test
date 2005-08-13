@@ -115,8 +115,8 @@ invariant() const
   return result;
 }
 
-ostream&
-operator<<(ostream& xos, const hyperslab& xhyperslab)
+std::ostream&
+operator<<(std::ostream& xos, const hyperslab& xhyperslab)
 {
   // Preconditions:
 
@@ -124,8 +124,7 @@ operator<<(ostream& xos, const hyperslab& xhyperslab)
 
   // Body:
 
-  xos
-      << "start: "
+  xos << "start: "
       << xhyperslab._start
       << " stride: "
       << xhyperslab._stride

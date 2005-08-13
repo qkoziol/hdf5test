@@ -188,8 +188,8 @@ objno(const hid_t xhid)
   // Exit:
 }
 
-ostream&
-operator<<(ostream& xos, const objno& xobj)
+std::ostream&
+operator<<(std::ostream& xos, const objno& xobj)
 {
   // Preconditions:
 

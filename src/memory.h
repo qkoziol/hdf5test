@@ -1,11 +1,11 @@
 #ifndef MEMORY_H
 #define MEMORY_H
 
+#include <cstdlib>
 #include "extent.h"
 #include "handle.h"
+#include <ostream>
 #include "pcontainer.h"
-#include "std_cstdlib.h"
-#include "std_iostream.h"
 
 /*! @class memory
     @brief A non-persistent container whose members are stored in memory, not on disk.
@@ -15,7 +15,7 @@ class memory : public container, public handle
 {
   /// Writes memory characteristics to an ostream.
 
-  friend ostream& operator<<(ostream& xos, const memory& xmem);
+  friend std::ostream& operator<<(std::ostream& xos, const memory& xmem);
 
  public:
 
@@ -26,6 +26,11 @@ class memory : public container, public handle
   /// Default constructor.
 
   memory();
+
+  /// Create and attach to a scalar buffer of HDF5 type `xtype'.  Dataspace can
+  /// be redefined later to be of a different extent or dimension.
+
+  memory(hid_t xtype);
 
   /// Destructor.
 

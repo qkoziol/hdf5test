@@ -123,6 +123,7 @@ test_sources =	test_access_patterns.cc \
 		test_basic_io_perf.cc \
 		test_bft_ls.cc \
 		test_dataspace.cc \
+		test_datatype.cc \
 		test_dft_ls.cc \
 		test_dft_read_perf.cc \
 		test_matrix.cc \

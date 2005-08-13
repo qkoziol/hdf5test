@@ -92,8 +92,8 @@ operator==(const matrix& xother) const
   return result;
 }
 
-ostream&
-operator<<(ostream& xos, const matrix& xmatrix)
+std::ostream&
+operator<<(std::ostream& xos, const matrix& xmatrix)
 {
   // Preconditions:
 
