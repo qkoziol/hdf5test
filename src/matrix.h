@@ -1,6 +1,7 @@
 #ifndef MATRIX_H
 #define MATRIX_H
 
+class dataset;
 #include "extent.h"
 #include "hyperslab.h"
 #include <ostream>
@@ -25,6 +26,10 @@ class matrix
   /// Default constructor.  Makes a C matrix with zero columns and zero rows.
 
   matrix();
+
+  /// Make a matrix whose row and column sizes match the size of a 2-d HDF5 dataset.
+
+  matrix(const dataset& x2d);
 
   /// Copy constructor.
 
@@ -53,6 +58,10 @@ class matrix
   /// Change existing matrix to new dimensions.
 
   void reserve(unsigned xrow, unsigned xcol);
+
+  /// Change existing matrix to dimensions of 2-d dataset.
+
+  void reserve(const dataset& xdset);
 
   /// Change number of rows.
 

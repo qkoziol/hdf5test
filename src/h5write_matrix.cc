@@ -8,8 +8,9 @@
 #include <unistd.h>
 
 /*!
-  @file h5write_matrix.cc Writes a matrix of H5T_NATIVE_INTs to a dataset
-  and reports on the performance.
+  @file h5write_matrix.cc writes a matrix of some datatype to a dataset
+  and reports on the performance.  The datatype is H5T_NATIVE_INTs by
+  default, but may be some other user defined datatype.
 */
 
 /*! @class config
@@ -22,16 +23,17 @@ class config
 
   enum storage {CHUNKED, COMPACT, CONTIGUOUS, EXTERNAL};
 
-  matrix       mat;      ///< The matrix to be written.
-  extent       ext;      ///< The extent of the destination dataset.
-  tuple        chunk;    ///< Chunk size of the destination dataset.
-  bool         by_rows;  ///< True if writing by rows, false if writing by columns.
-  unsigned     ct;       ///< The number of rows/columns to write at a time.
-  std::string  filename; ///< The name of the hdf5 file containing the destination dataset.
-  std::string  ds_name;  ///< The name of the destination dataset.
-  storage      type;     ///< How the dataset is stored.
-  hid_t        mt;       ///< Datatype in memory.
-  hid_t        ft;       ///< Datatype in file.
+  matrix       mat;       ///< The matrix to be written.
+  extent       ext;       ///< The extent of the destination dataset.
+  tuple        chunk;     ///< Chunk size of the destination dataset.
+  bool         by_rows;   ///< True if writing by rows, false if writing by columns.
+  unsigned     ct;        ///< The number of rows/columns to write at a time.
+  std::string  file_name; ///< The name of the hdf5 file containing the destination dataset.
+  std::string  ds_name;   ///< The name of the destination dataset.
+  storage      type;      ///< How the dataset is stored.
+  hid_t        mt;        ///< Datatype in memory.
+  hid_t        ft;        ///< Datatype in file.
+  bool         rm;        ///< Delete file before exit?
 
   /// Default constructor.
 
@@ -58,11 +60,12 @@ config() :
   chunk(2),
   by_rows(true),
   ct(1),
-  filename("h5write_matrix.h5"),
+  file_name("matrix.h5"),
   ds_name("matrix"),
   type(CONTIGUOUS),
   mt(H5I_INVALID_HID),
-  ft(H5I_INVALID_HID)
+  ft(H5I_INVALID_HID),
+  rm(false)
 {
   // Preconditions:
 
@@ -177,7 +180,7 @@ invariant(bool xwarn) const
       std::cerr << "fatal: can't write more rows/cols at a time than exist in matrix.\n";
     }
   }
-  if (!(!filename.empty()))
+  if (!(!file_name.empty()))
   {
     result = false;
     if (xwarn)
@@ -208,7 +211,7 @@ usage()
 
   // Body:
 
-  std::cerr << "usage: h5write_matrix [OPTIONS] HDF5_file dataset\n"
+  std::cerr << "usage: h5write_matrix [OPTIONS] HDF5_file_name dataset_name\n"
 	    << "   OPTIONS\n"
 	    << "      -h                  Print this message.\n"
 	    << "      -m   row col        Define matrix dimensions.\n"
@@ -217,7 +220,10 @@ usage()
 	    << "      -col n              Write n columns at a time.\n"
 	    << "      -t   c|e            Force compact or external storage.  Default is contiguous.\n"
 	    << "      -mt  name[,name...] Defines memory datatype.  `name' is an HDF5 predefined type name.\n"
-	    << "      -ft  name[,name...] Defines file datatype.  `name' is an HDF5 predefined type name.\n";
+	    << "      -ft  name[,name...] Defines file datatype.  `name' is an HDF5 predefined type name.\n"
+	    << "      -rm                 Delete HDF5 file before exiting.\n"
+	    << "      -f   file_name      Use `file_name' instead of default matrix.h5.\n"
+	    << "      -d   dataset_name   Use `dataset_name' instead of default `matrix'.\n";
 
   // Postconditions:
 
@@ -236,155 +242,171 @@ process_command_line(int argc, char** argv)
 
   // Body:
 
-  if (argc < 3)
+  result = true;  // until proven otherwise.
+
+  // Define the indices of the various options.  A value of -1 indicates
+  // option not present or not yet found.
+
+  int  dash_h   = -1;
+  int  dash_m   = -1;
+  int  dash_c   = -1;
+  int  dash_row = -1;
+  int  dash_col = -1;
+  int  dash_t   = -1;
+  int  dash_mt  = -1;
+  int  dash_ft  = -1;
+  int  dash_rm  = -1;
+  int  dash_f   = -1;
+  int  dash_d   = -1;
+
+  // ERROR:
+  // In various places within this loop, I assume that the existence of command line
+  // argument i implies that there also exist valid command line arguments i+1, i+2,...
+  // Should deal with possible errors due to nonexistent or invalid args.
+
+  for (int i = 1; i < argc;)
   {
-    result = false;
-  }
-  else
-  {
-    result = true;  // until proven otherwise.
-
-    // Define the indices of the various options.  A value of -1 indicates
-    // option not present or not yet found.
-
-    int  dash_h   = -1;
-    int  dash_m   = -1;
-    int  dash_c   = -1;
-    int  dash_row = -1;
-    int  dash_col = -1;
-    int  dash_t   = -1;
-    int  dash_mt  = -1;
-    int  dash_ft  = -1;
-
-    filename = argv[argc-2];
-    ds_name = argv[argc-1];
-
-    for (int i = 1; i < argc-2;)
+    if (dash_h == -1 && strncmp(argv[i], "-h", 2) == 0)
     {
-      if (dash_h == -1 && strncmp(argv[i], "-h", 2) == 0)
+      dash_h = i;
+      ++i;
+    }
+    else if (dash_mt == -1 && strncmp(argv[i], "-mt", 3) == 0)
+    {
+      dash_mt  = i;
+      mt = datatype::create(argv[i+1]);
+      if (mt < 0)
       {
-	dash_h = i;
-	++i;
-      }
-      else if (dash_mt == -1 && strncmp(argv[i], "-mt", 3) == 0)
-      {
-	dash_mt  = i;
-	mt = datatype::create(argv[i+1]);
-	if (mt < 0)
-	{
-	  std::cerr << "-mt argument `"
-		    << argv[i+1]
-		    << "' is bad.\n";
-	  result = false;
-	}
-	i += 2;
-      }
-      else if (dash_ft == -1 && strncmp(argv[i], "-ft", 3) == 0)
-      {
-	dash_ft  = i;
-	ft = datatype::create(argv[i+1]);
-	if (ft < 0)
-	{
-	  std::cerr << "-ft argument `"
-		    << argv[i+1]
-		    << "' is bad.\n";
-	  result = false;
-	}
-	i += 2;
-      }
-      else if (dash_m == -1 && strncmp(argv[i], "-m", 2) == 0)
-      {
-	dash_m = i;
-	mat.put_row(atol(argv[i+1]));
-	mat.put_col(atol(argv[i+2]));
-	i += 3;
-      }
-      else if (dash_row == -1 && strncmp(argv[i], "-row", 4) == 0)
-      {
-	dash_row = i;
-	by_rows  = true;
-	ct       = atol(argv[i+1]);
-	i += 2;
-      }
-      else if (dash_col == -1 && strncmp(argv[i], "-col", 4) == 0)
-      {
-	dash_col = i;
-	by_rows  = false;
-	ct       = atol(argv[i+1]);
-	i += 2;
-      }
-      else if (dash_c == -1 && strncmp(argv[i], "-c", 2) == 0)
-      {
-	dash_c   = i;
-	type     = CHUNKED;
-	chunk[0] = atol(argv[i+1]);
-	chunk[1] = atol(argv[i+2]);
-	i += 3;
-      }
-      else if (dash_t == -1 && strncmp(argv[i], "-t", 2) == 0)
-      {
-	dash_t   = i;
-
-	if (*argv[i+1] == 'c')
-	{
-	  type = COMPACT;
-	}
-	else
-	{
-	  type = EXTERNAL;
-	}
-	i += 2;
-      }
-      else if (*argv[i] == '-')
-      {
-	// Unknown flag.
-
+	std::cerr << "-mt argument `"
+		  << argv[i+1]
+		  << "' is bad.\n";
 	result = false;
-	++i;
       }
+      i += 2;
     }
-
-    if (dash_h != -1 && result)
+    else if (dash_ft == -1 && strncmp(argv[i], "-ft", 3) == 0)
     {
-      usage();
-    }
-    if (result)
-    {
-      // Command line args make sense so far.
-
-      // Define the extent.  In general, the extent is just the size of the matrix
-      // and has fixed max dimensions.  But for chunked datasets, we define the
-      // size to be 0, the max size unlimited in the direction of dataset extension,
-      // and the max size to be the size of a row or column, whichever is appropriate
-      // in the other direction.  "matrix_writer" will extend the chunked dataset
-      // appropriately as it runs the test.
-
-      if (type != CHUNKED)
+      dash_ft  = i;
+      ft = datatype::create(argv[i+1]);
+      if (ft < 0)
       {
-	mat.get_extent(ext);
+	std::cerr << "-ft argument `"
+		  << argv[i+1]
+		  << "' is bad.\n";
+	result = false;
+      }
+      i += 2;
+    }
+    else if (dash_m == -1 && strncmp(argv[i], "-m", 2) == 0)
+    {
+      dash_m = i;
+      mat.put_row(atol(argv[i+1]));
+      mat.put_col(atol(argv[i+2]));
+      i += 3;
+    }
+    else if (dash_row == -1 && strncmp(argv[i], "-row", 4) == 0)
+    {
+      dash_row = i;
+      by_rows  = true;
+      ct       = atol(argv[i+1]);
+      i += 2;
+    }
+    else if (dash_col == -1 && strncmp(argv[i], "-col", 4) == 0)
+    {
+      dash_col = i;
+      by_rows  = false;
+      ct       = atol(argv[i+1]);
+      i += 2;
+    }
+    else if (dash_c == -1 && strncmp(argv[i], "-c", 2) == 0)
+    {
+      dash_c   = i;
+      type     = CHUNKED;
+      chunk[0] = atol(argv[i+1]);
+      chunk[1] = atol(argv[i+2]);
+      i += 3;
+    }
+    else if (dash_t == -1 && strncmp(argv[i], "-t", 2) == 0)
+    {
+      dash_t   = i;
+
+      if (*argv[i+1] == 'c')
+      {
+	type = COMPACT;
       }
       else
       {
-	if (by_rows)
-	{
-	  ext.size()[0]     = 0;
-	  ext.size()[1]     = mat.col_ct();
-	  ext.max_size()[0] = H5S_UNLIMITED;
-	  ext.max_size()[1] = mat.col_ct();
-	}
-	else
-	{
-	  ext.size()[0]     = mat.row_ct();
-	  ext.size()[1]     = 0;
-	  ext.max_size()[0] = mat.row_ct();
-	  ext.max_size()[1] = H5S_UNLIMITED;
-	}
+	type = EXTERNAL;
       }
-
-      // Is the configuration valid?  If not, write diagnostic messages to cerr.
-
-      result = invariant(true);
+      i += 2;
     }
+    else if (dash_rm == -1 && strncmp(argv[i], "-rm", 3) == 0)
+    {
+      dash_rm = i;
+      rm      = true;
+      ++i;
+    }
+    else if (dash_f == -1 && strncmp(argv[i], "-f", 2) == 0)
+    {
+      dash_f = i;
+      file_name = argv[i+1];
+      i += 2;
+    }
+    else if (dash_d == -1 && strncmp(argv[i], "-d", 2) == 0)
+    {
+      dash_d = i;
+      ds_name = argv[i+1];
+      i += 2;
+    }
+    else if (*argv[i] == '-')
+    {
+      // Unknown flag.
+
+      result = false;
+      ++i;
+    }
+  }
+
+  if (dash_h != -1 && result)
+  {
+    usage();
+  }
+  if (result)
+  {
+    // Command line args make sense so far.
+
+    // Define the extent.  In general, the extent is just the size of the matrix
+    // and has fixed max dimensions.  But for chunked datasets, we define the
+    // size to be 0, the max size unlimited in the direction of dataset extension,
+    // and the max size to be the size of a row or column, whichever is appropriate
+    // in the other direction.  "matrix_writer" will extend the chunked dataset
+    // appropriately as it runs the test.
+
+    if (type != CHUNKED)
+    {
+      mat.get_extent(ext);
+    }
+    else
+    {
+      if (by_rows)
+      {
+	ext.size()[0]     = 0;
+	ext.size()[1]     = mat.col_ct();
+	ext.max_size()[0] = H5S_UNLIMITED;
+	ext.max_size()[1] = mat.col_ct();
+      }
+      else
+      {
+	ext.size()[0]     = mat.row_ct();
+	ext.size()[1]     = 0;
+	ext.max_size()[0] = mat.row_ct();
+	ext.max_size()[1] = H5S_UNLIMITED;
+      }
+    }
+
+    // Is the configuration valid?  If not, write diagnostic messages to cerr.
+
+    result = invariant(true);
   }
 
   // Postconditions:
@@ -467,7 +489,18 @@ main(int argc, char** argv)
 
     // We'll use a temp_file for this test; it'll be deleted automatically.
 
-    temp_file file(cmdline.filename.c_str());
+    hdf5_file* file;
+
+    if (cmdline.rm == true)
+    {
+      file = new temp_file(cmdline.file_name);
+    }
+    else
+    {
+      file = new hdf5_file();
+
+      file->create(cmdline.file_name);
+    }
 
     // Make a dataset creation property list to specify dataset storage properties.
 
@@ -517,7 +550,7 @@ main(int argc, char** argv)
       cmdline.ft = H5T_NATIVE_INT;  // default file datatype if not specified on command line.
     }
 
-    hid_t ds_hid = H5Dcreate(file.hid(), cmdline.ds_name.c_str(), cmdline.ft, file_space, create_plist);
+    hid_t ds_hid = H5Dcreate(file->hid(), cmdline.ds_name.c_str(), cmdline.ft, file_space, create_plist);
 
     assert(ds_hid >= 0);
 
@@ -552,14 +585,17 @@ main(int argc, char** argv)
     {
       result = 1;
     }
+
+    // Clean up.
+
+    delete file;
+
+    if (cmdline.type == config::EXTERNAL)
+    {
+      unlink(cmdline.ds_name.c_str());
+    }
   }
 
-  // Clean up external file if it exists.
-
-  if (cmdline.type == config::EXTERNAL)
-  {
-    unlink(cmdline.ds_name.c_str());
-  }
 
   // Postconditions:
 

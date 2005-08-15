@@ -1,6 +1,8 @@
 #include "matrix.h"
 #include "contract.h"
 
+#include "dataset.h"
+
 matrix::
 matrix(unsigned xrow, unsigned xcol)
 {
@@ -16,6 +18,28 @@ matrix(unsigned xrow, unsigned xcol)
   assert(invariant());
   assert(row_ct() == xrow);
   assert(col_ct() == xcol);
+
+  // Exit:
+}
+
+matrix::
+matrix(const dataset& x2d)
+{
+  // Preconditions:
+
+  assert(x2d.is_attached());
+  assert(x2d.get_space().get_extent().d() == 2);
+
+  // Body:
+
+  _row_ct = x2d.get_space().get_extent().size()[0];
+  _col_ct = x2d.get_space().get_extent().size()[1];
+
+  // Postconditions:
+
+  assert(invariant());
+  assert(row_ct() == x2d.get_space().get_extent().size()[0]);
+  assert(col_ct() == x2d.get_space().get_extent().size()[1]);
 
   // Exit:
 }

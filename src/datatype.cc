@@ -1104,8 +1104,6 @@ create(int xct, char** xmembers)
       }
     }
 
-    delete [] id;
-
     if (status)
     {
       result = create(xct, id);

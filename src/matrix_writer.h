@@ -45,6 +45,8 @@ class matrix_writer : public partial
   // Partial i/o interface:
 
 
+  /// Write a matrix from memory into an HDF5 dataset.
+
   bool run_test(matrix& xmat, memory& xsrc, dataset& xdest);
 
   using partial::run_test;

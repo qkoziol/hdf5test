@@ -101,6 +101,7 @@ lib_sources =	attribute.cc \
 		hyperslab.cc \
 		io_perf.cc \
 		matrix.cc \
+		matrix_reader.cc \
 		matrix_writer.cc \
 		memory.cc \
 		node.cc \
@@ -132,6 +133,7 @@ test_sources =	test_access_patterns.cc \
 
 bin_sources =	h5dft_read.cc \
 		h5read.cc \
+		h5read_matrix.cc \
 		h5write_matrix.cc
 
 OBJ  = $(lib_sources:.cc=.o)
