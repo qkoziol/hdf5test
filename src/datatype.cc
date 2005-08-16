@@ -1220,6 +1220,7 @@ create(hid_t xcompound, int xct, char** xmembers)
 
   // Body:
 
+
   // Figure out how members the subset will have.
 
   int nmembers = H5Tget_nmembers(xcompound);
@@ -1238,23 +1239,72 @@ create(hid_t xcompound, int xct, char** xmembers)
 
   if (nsubset > 0)
   {
-    unsigned* indices = new unsigned[nsubset];
-    int       n       = 0;
+    // Maybe the character strings in xmembers consist of nothing
+    // but digits.  In that case we interpret them as indices of
+    // a compound type.  Deal with this case here.
 
-    for (int i = 0; i < niters; ++i)
+    bool chars_are_digits = true;
+
+    // Look at all the characters; as soon as we find a non-digit
+    // we know that we can't interpret xmembers as indices.
+
+    for (int i = 0; (i < niters) && chars_are_digits; ++i)
     {
-      int index = H5Tget_member_index(xcompound, xmembers[i]);
+      size_t nchars = strlen(xmembers[i]);
 
-      if (index >= 0)
+      for (size_t j = 0; (j < nchars) && chars_are_digits; ++j)
       {
-	indices[n] = index;
-	++n;
+	if (! isdigit(xmembers[i][j]))
+	{
+	  chars_are_digits = false;
+	}
       }
     }
 
-    result = create(xcompound, n, indices);
+    if (chars_are_digits)
+    {
+      // xmembers contains indices of compound type members
 
-    delete [] indices;
+      unsigned* indices = new unsigned[nsubset];
+      int       n       = 0;
+
+      for (int i = 0; i < niters; ++i)
+      {
+	int index = atoi(xmembers[i]);
+
+	if (index >= 0 && index < nmembers)
+	{
+	  indices[n] = index;
+	  ++n;
+	}
+      }
+
+      result = create(xcompound, n, indices);
+
+      delete [] indices;
+    }
+    else
+    {
+      // xmembers contains names of predefined types
+
+      unsigned* indices = new unsigned[nsubset];
+      int       n       = 0;
+
+      for (int i = 0; i < niters; ++i)
+      {
+	int index = H5Tget_member_index(xcompound, xmembers[i]);
+
+	if (index >= 0)
+	{
+	  indices[n] = index;
+	  ++n;
+	}
+      }
+
+      result = create(xcompound, n, indices);
+
+      delete [] indices;
+    }
   }
   else
   {
@@ -1279,7 +1329,6 @@ create(char* xname_list)
   // Preconditions:
 
   // Body:
-
 
   if (xname_list == 0)
   {
@@ -1346,3 +1395,82 @@ create(char* xname_list)
 
   return result;
 }
+
+hid_t
+datatype::
+create(hid_t xcompound, char* xname_list)
+{
+  hid_t result;
+
+  // Preconditions:
+
+  assert(H5Iget_type(xcompound) == H5I_DATATYPE);
+
+  // Body:
+
+  if (xname_list == 0)
+  {
+    result = H5I_INVALID_HID;
+  }
+  else
+  {
+    size_t larg = strlen(xname_list);
+
+    // Substitute '\0' for ',' in xname_list so it looks like
+    // a sequence of standard C strings.
+
+    size_t name_ct = 1;  // number of type names in xarg or arg
+
+    for (size_t i = 0; xname_list[i] != '\0'; ++i)
+    {
+	if (xname_list[i] == ',')
+      {
+	xname_list[i] = '\0';
+	++name_ct;
+      }
+    }
+
+    // Make an "argv" array of pointers to the first characters
+    // of each name in the "xname_list" array.
+
+    char** argv = new char*[name_ct];
+
+    {
+      size_t i, j, k;
+
+      for (i = j = k = 0; i <= larg; ++i)
+      {
+	if (xname_list[i] == '\0')
+	{
+	  argv[j] = xname_list+k;
+	  ++j;
+	  k = i+1;
+	}
+      }
+    }
+
+    result = create(xcompound, name_ct, argv);
+
+    delete [] argv;
+
+    // Restore xname_list by making all '\0's commas except the last
+    // one.
+
+    for (size_t i = 0; i < larg; ++i)
+    {
+      if (xname_list[i] == '\0')
+      {
+	xname_list[i] = ',';
+      }
+    }
+  }
+
+  // Postconditions:
+
+  assert(result >= 0 ? H5Iget_type(result) == H5I_DATATYPE : true);
+
+  // Exit:
+
+  return result;
+}
+

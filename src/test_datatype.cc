@@ -249,6 +249,14 @@ test_compound()
 
   assert(H5Tequal(cmpd5, cmpd1) > 0);
 
+  // A subset of cmpd1.
+
+  char subset_name[] = "0,2";
+
+  hid_t cmpd6 = datatype::create(cmpd1, subset_name);
+  assert(cmpd6 >= 0);
+  assert(H5Tget_nmembers(cmpd6) == 2);
+
   // Now let's see if we can attach a datatype by all the techniques available.
   // And we'll check to make sure that we duplicate cmpd1 with each technique.
 
@@ -304,6 +312,7 @@ test_compound()
   H5Tclose(cmpd3);
   H5Tclose(cmpd4);
   H5Tclose(cmpd5);
+  H5Tclose(cmpd6);
 
   return true; // just a placebo so compiler doesn't complain about not returning a value
 }

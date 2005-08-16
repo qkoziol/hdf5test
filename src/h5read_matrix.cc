@@ -25,7 +25,7 @@ class config
   unsigned     ct;        ///< The number of rows/columns to read at a time.
   std::string  file_name; ///< The name of the hdf5 file containing the source dataset.
   std::string  ds_name;   ///< The name of the source dataset.
-  hid_t        mt;        ///< Datatype in memory.
+  char*        mt;        ///< A description of the datatype in memory.
 
   /// Default constructor.
 
@@ -51,7 +51,7 @@ config() :
   ct(1),
   file_name("matrix.h5"),
   ds_name("matrix"),
-  mt(H5I_INVALID_HID)
+  mt(0)
 {
   // Preconditions:
 
@@ -170,14 +170,7 @@ process_command_line(int argc, char** argv)
     else if (dash_mt == -1 && strncmp(argv[i], "-mt", 3) == 0)
     {
       dash_mt  = i;
-      mt = datatype::create(argv[i+1]);
-      if (mt < 0)
-      {
-	std::cerr << "-mt argument `"
-		  << argv[i+1]
-		  << "' is bad.\n";
-	result = false;
-      }
+      mt = argv[i+1];
       i += 2;
     }
     else if (dash_row == -1 && strncmp(argv[i], "-row", 4) == 0)
@@ -243,26 +236,6 @@ config::
   // Preconditions:
 
   // Body:
-
-  // ISSUE:
-  // The datatypes might be compound datatypes, but
-  // they also may be immutable predefined datatypes.
-  // If they are immutable, we can't close them.  But
-  // I don't know any way to determine whether a given
-  // datatype is mutable or immutable.  So, instead,
-  // we just try to close the datatype, which will succeed
-  // for the compound mutable types, and will fail for
-  // the immutable predefined types.  Since we suppress
-  // the error messages, no harm is done.
-
-  if (mt >= 0)
-  {
-    H5E_BEGIN_TRY
-    {
-      H5Tclose(mt);
-    }
-    H5E_END_TRY;
-  }
 
   // Postconditions:
 
@@ -350,12 +323,22 @@ main(int argc, char** argv)
 	  // Now make a memory buffer.  "matrix_reader" will size it dynamically to be big
 	  // enough for whatever writing it does.  An empty buffer is good enough for now.
 
-	  if (cmdline.mt < 0)
+	  hid_t mem_type;
+
+	  if (cmdline.mt == 0)
 	  {
-	    cmdline.mt = H5T_NATIVE_INT; // default memory datatype if not specified on command line.
+	    mem_type = H5T_NATIVE_INT; // default memory datatype if not specified on command line.
+	  }
+	  else
+	  {
+	    hid_t file_type = H5Dget_type(ds.hid());
+
+	    mem_type = datatype::create(file_type, cmdline.mt);
+
+	    H5Tclose(file_type);
 	  }
 
-	  memory mem(cmdline.mt);
+	  memory mem(mem_type);
 
 	  // At last.  Make a tester and run the test.
 
@@ -366,6 +349,11 @@ main(int argc, char** argv)
 	  if (test.run_test(mat, ds, mem))
 	  {
 	    result = 0;
+	  }
+
+	  if (mem_type != H5T_NATIVE_INT)
+	  {
+	    H5Tclose(mem_type);
 	  }
 	}
       }

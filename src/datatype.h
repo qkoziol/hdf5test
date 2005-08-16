@@ -158,6 +158,12 @@ class datatype : public persistent
   /// indicates failure.
 
   static hid_t create(hid_t xcompound, int xct, char** xmembers);
+
+  /// Constructs a compound type, whose members are a subset of xcompound.  The subset is indicated
+  /// by the list of member names in xmembers.  Returns the associated HDF5 hid.  A return value < 0
+  /// indicates failure.
+
+  static hid_t create(hid_t xcompound, char* xname_list);
 };
 
 #endif
