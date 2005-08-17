@@ -126,8 +126,8 @@ write_property(hid_t xhid, const char* xname, void* xiter_data)
 
   // Body:
 
-  size_t size;
-  char value[1024];
+  size_t size = 0;  // doesn't need initialization, but compiler gets upset otherwise.
+  char   value[1024]; // ISSUE: How big should value be?  This is just a guess.
 
   assert(H5Pget_size(xhid, xname, &size) >= 0);
   // So, how do we know what sort of thing this value is?

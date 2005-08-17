@@ -249,11 +249,9 @@ test_compound()
 
   assert(H5Tequal(cmpd5, cmpd1) > 0);
 
-  // A subset of cmpd1.
+  char indices[] = "0,2";
 
-  char subset_name[] = "0,2";
-
-  hid_t cmpd6 = datatype::create(cmpd1, subset_name);
+  hid_t cmpd6 = datatype::create(cmpd1, indices);
   assert(cmpd6 >= 0);
   assert(H5Tget_nmembers(cmpd6) == 2);
 

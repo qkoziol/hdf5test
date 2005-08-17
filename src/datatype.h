@@ -164,6 +164,10 @@ class datatype : public persistent
   /// indicates failure.
 
   static hid_t create(hid_t xcompound, char* xname_list);
+
+  /// Returns true if xname_list contains non-negative digits separated by commas.
+
+  static bool names_are_indices(char* xname_list);
 };
 
 #endif

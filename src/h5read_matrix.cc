@@ -327,15 +327,30 @@ main(int argc, char** argv)
 
 	  if (cmdline.mt == 0)
 	  {
-	    mem_type = H5T_NATIVE_INT; // default memory datatype if not specified on command line.
+	    // memory type not specified on command line; set it to default.
+
+	    mem_type = H5T_NATIVE_INT;
 	  }
 	  else
 	  {
-	    hid_t file_type = H5Dget_type(ds.hid());
+	    // something was specified on command line; parse it and create appropriate datatype.
 
-	    mem_type = datatype::create(file_type, cmdline.mt);
+	    if (datatype::names_are_indices(cmdline.mt))
+	    {
+	      // command line specifies subset of file type.
 
-	    H5Tclose(file_type);
+	      hid_t file_type = H5Dget_type(ds.hid());
+
+	      mem_type = datatype::create(file_type, cmdline.mt);
+
+	      H5Tclose(file_type);
+	    }
+	    else
+	    {
+	      // command line specifies a type; will try to convert to it from file type.
+
+	      mem_type = datatype::create(cmdline.mt);
+	    }
 	  }
 
 	  memory mem(mem_type);
@@ -366,4 +381,3 @@ main(int argc, char** argv)
 
   return result;
 }
-

@@ -1239,83 +1239,37 @@ create(hid_t xcompound, int xct, char** xmembers)
 
   if (nsubset > 0)
   {
-    // Maybe the character strings in xmembers consist of nothing
-    // but digits.  In that case we interpret them as indices of
-    // a compound type.  Deal with this case here.
+    // There's at least one member in the subset and
+    // xmembers contains names of predefined types.
 
-    bool chars_are_digits = true;
+    unsigned* indices = new unsigned[nsubset];
+    int       n       = 0;
 
-    // Look at all the characters; as soon as we find a non-digit
-    // we know that we can't interpret xmembers as indices.
-
-    for (int i = 0; (i < niters) && chars_are_digits; ++i)
+    for (int i = 0; i < niters; ++i)
     {
-      size_t nchars = strlen(xmembers[i]);
+      int index = H5Tget_member_index(xcompound, xmembers[i]);
 
-      for (size_t j = 0; (j < nchars) && chars_are_digits; ++j)
+      if (index >= 0)
       {
-	if (! isdigit(xmembers[i][j]))
-	{
-	  chars_are_digits = false;
-	}
+	indices[n] = index;
+	++n;
       }
     }
 
-    if (chars_are_digits)
-    {
-      // xmembers contains indices of compound type members
+    result = create(xcompound, n, indices);
 
-      unsigned* indices = new unsigned[nsubset];
-      int       n       = 0;
-
-      for (int i = 0; i < niters; ++i)
-      {
-	int index = atoi(xmembers[i]);
-
-	if (index >= 0 && index < nmembers)
-	{
-	  indices[n] = index;
-	  ++n;
-	}
-      }
-
-      result = create(xcompound, n, indices);
-
-      delete [] indices;
-    }
-    else
-    {
-      // xmembers contains names of predefined types
-
-      unsigned* indices = new unsigned[nsubset];
-      int       n       = 0;
-
-      for (int i = 0; i < niters; ++i)
-      {
-	int index = H5Tget_member_index(xcompound, xmembers[i]);
-
-	if (index >= 0)
-	{
-	  indices[n] = index;
-	  ++n;
-	}
-      }
-
-      result = create(xcompound, n, indices);
-
-      delete [] indices;
-    }
+    delete [] indices;
   }
   else
   {
     result = H5I_INVALID_HID;
   }
 
-  // Postconditions:
+    // Postconditions:
 
-  assert(result >= 0 ? H5Iget_type(result) == H5I_DATATYPE : true);
+    assert(result >= 0 ? H5Iget_type(result) == H5I_DATATYPE : true);
 
-  // Exit:
+    // Exit:
 
   return result;
 }
@@ -1474,3 +1428,39 @@ create(hid_t xcompound, char* xname_list)
   return result;
 }
 
+bool
+datatype::
+names_are_indices(char* xname_list)
+{
+  bool result;
+
+  // Preconditions:
+
+  // Body:
+
+  if (xname_list == 0)
+  {
+    result = false;
+  }
+  else
+  {
+    // Look at all the characters; as soon as we find a non-digit
+    // we know that we can't interpret xmembers as indices.
+
+    result = true;
+
+    for (; (*xname_list != '\0') && result; ++xname_list)
+    {
+      if (! isdigit(*xname_list) && (*xname_list != ','))
+      {
+	result = false;
+      }
+    }
+  }
+
+  // Postconditions:
+
+  // Exit:
+
+  return result;
+}
