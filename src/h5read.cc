@@ -237,7 +237,7 @@ main(int argc, char** argv)
 		<< std::setw(13) << std::left
 		<< "  status"
 		<< std::setw(17) << std::left
-		<< "  bytes read (kb)"
+		<< "  bytes read (kB)"
 		<< std::setw(16) << std::left
 		<< "  open time (ms)"
 		<< std::setw(16) << std::left
@@ -245,7 +245,7 @@ main(int argc, char** argv)
 		<< std::setw(17) << std::left
 		<< " close time (ms)"
 		<< std::setw(14) << std::left
-		<< "  io rate (mb/s)";
+		<< "  io rate (mB/s)";
       if (cmdline.is_verbose)
       {
 	std::cout << "  dataset characteristics";
@@ -304,13 +304,13 @@ main(int argc, char** argv)
 
 	  if (tester.status() == test::SUCCESS)
 	  {
-	    double kb      = tester.bytes()/((double)BYTES_PER_KB);
+	    double kB      = tester.bytes()/((double)BYTES_PER_KB);
 	    double elapsed = tester.elapsed();
 
 	    std::cout << std::setw(13) << std::left
 		      << "succeeded"
 		      << std::setw(15) << std::right << std::fixed << std::setprecision(3)
-		      << kb
+		      << kB
 		      << std::setw(15) << std::right << std::fixed << std::setprecision(3)
 		      << open.elapsed()*BYTES_PER_KB
 		      << std::setw(16) << std::right << std::fixed << std::setprecision(3)
@@ -318,7 +318,7 @@ main(int argc, char** argv)
 		      << std::setw(16) << std::right << std::fixed << std::setprecision(3)
 		      << close.elapsed()*BYTES_PER_KB
 		      << std::setw(16) << std::right << std::fixed << std::setprecision(3)
-		      << kb/elapsed/((double)BYTES_PER_KB);
+		      << kB/elapsed/((double)BYTES_PER_KB);
 	    if (cmdline.is_verbose)
 	    {
 	      std::cout << "     "

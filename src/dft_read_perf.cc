@@ -109,18 +109,18 @@ preorder_action()
 
     if (_tester.status() == test::SUCCESS)
     {
-      double kb      = _tester.bytes()/((double)BYTES_PER_KB);
+      double kB      = _tester.bytes()/((double)BYTES_PER_KB);
       double elapsed = _tester.elapsed();
 
       std::cout << std::setw(13) << std::left
 		<< " succeeded"
 		<< std::setw(15) << std::right << std::fixed << std::setprecision(3)
-		<< kb
+		<< kB
 		<< std::setw(19) << std::right << std::fixed << std::setprecision(3)
 		<< elapsed*BYTES_PER_KB
 		<< "         "
 		<< std::setw(13) << std::right << std::fixed << std::setprecision(3)
-		<< kb/elapsed/((double)BYTES_PER_KB)
+		<< kB/elapsed/((double)BYTES_PER_KB)
 		<< "     ";
 
       if (_verbose)
@@ -210,11 +210,11 @@ reset()
 	    << std::setw(13) << std::left
 	    << "test status"
 	    << std::setw(15)
-	    << "  bytes read (kb)  "
+	    << "  bytes read (kB)  "
 	    << std::setw(25)
 	    << "      read time (ms) "
 	    << std::setw(16) << std::left
-	    << "  io rate (mb/s)";
+	    << "  io rate (mB/s)";
   if (_verbose)
   {
     std::cout << "  persistent container characteristics";

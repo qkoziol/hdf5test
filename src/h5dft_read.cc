@@ -9,9 +9,9 @@
 /*!
   @file h5dft_read.cc Runs a read test on every dataset in an HDF5 file
   (plus every attribute with the -a option).  Reports
-  bytes read (in kb, where 1 kb = 1e3 bytes), elapsed
+  bytes read (in kB, where 1 kB = BYTES_PER_KB bytes), elapsed
   time to read the data, and the transfer rate (in
-  mb/s, where 1 mb = 1e6 bytes).
+  mB/s, where 1 mB = BYTES_PER_KB^2 bytes).
 */
 
 /*! @class config

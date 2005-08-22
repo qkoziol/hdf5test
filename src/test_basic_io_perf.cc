@@ -50,16 +50,16 @@ do_read_write_tests(io_perf& xio_t, pcontainer& xcon)
 
   if (xio_t.status() == test::SUCCESS)
   {
-    double mb      = xio_t.bytes()/((double)(BYTES_PER_KB*BYTES_PER_KB));
+    double mB      = xio_t.bytes()/((double)(BYTES_PER_KB*BYTES_PER_KB));
     double elapsed = xio_t.elapsed();
 
     std::cout << "\tWrite test succeeded.  "
-	      << mb
-	      << " mb transferred in "
+	      << mB
+	      << " mB transferred in "
 	      << elapsed
 	      << " seconds = "
-	      << mb/elapsed
-	      << " mb/s.\n";
+	      << mB/elapsed
+	      << " mB/s.\n";
   }
   else
   {
@@ -73,16 +73,16 @@ do_read_write_tests(io_perf& xio_t, pcontainer& xcon)
 
   if (xio_t.status() == test::SUCCESS)
   {
-    double mb      = xio_t.bytes()/((double)(BYTES_PER_KB*BYTES_PER_KB));
+    double mB      = xio_t.bytes()/((double)(BYTES_PER_KB*BYTES_PER_KB));
     double elapsed = xio_t.elapsed();
 
     std::cout << "\tRead test succeeded.  "
-	      << mb
-	      << " mb transferred in "
+	      << mB
+	      << " mB transferred in "
 	      << elapsed
 	      << " seconds = "
-	      << mb/elapsed
-	      << " mb/s.\n";
+	      << mB/elapsed
+	      << " mB/s.\n";
   }
   else
   {

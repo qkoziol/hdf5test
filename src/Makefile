@@ -101,6 +101,7 @@ lib_sources =	attribute.cc \
 		hyperslab.cc \
 		io_perf.cc \
 		matrix.cc \
+		matrix_io.cc \
 		matrix_reader.cc \
 		matrix_writer.cc \
 		memory.cc \
